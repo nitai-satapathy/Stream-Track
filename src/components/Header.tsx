@@ -34,7 +34,6 @@ interface HeaderProps {
   setWatchedShows?: (shows: Movie[]) => void;
   watchedMovies?: Movie[];
   watchedShows?: Movie[];
-  user?: any;
 }
 
 export function Header(props: HeaderProps) {
@@ -45,8 +44,8 @@ export function Header(props: HeaderProps) {
     setWatchedShows,
     watchedMovies,
     watchedShows,
-    user,
   } = props;
+  const { user, logout } = useAuth();
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
   // Bulk Add Dialog State
@@ -55,7 +54,6 @@ export function Header(props: HeaderProps) {
   const [bulkStatus, setBulkStatus] = React.useState<string | null>(null);
   const [bulkLoading, setBulkLoading] = React.useState(false);
   const router = useRouter();
-  const { logout } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
