@@ -4,7 +4,7 @@ import * as React from "react";
 import { Header } from "@/components/Header";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
-import type { Movie } from "@/lib/types";
+import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserLists, updateUserLists } from "@/lib/firestore";
 
@@ -12,7 +12,7 @@ type ListType = "watchlist" | "watching" | "watched";
 
 export default function WatchingPage() {
   const { user } = useAuth();
-  const [selectedMovieId, setSelectedMovieId] = React.useState<number | null>(null);
+  const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
   const [watching, setWatching] = React.useState<Movie[]>([]);
   const [watched, setWatched] = React.useState<Movie[]>([]);
@@ -40,12 +40,12 @@ export default function WatchingPage() {
     loadLists();
   }, [user]);
 
-  const handleMovieClick = (id: number) => {
-    setSelectedMovieId(id);
+  const handleMovieClick = (id: number, media_type: MediaType) => {
+    setSelectedItem({ id, media_type });
   };
 
   const handleCloseModal = () => {
-    setSelectedMovieId(null);
+    setSelectedItem(null);
   };
 
   const watchingMovies = watching.filter(movie => movie.media_type === 'movie' || (!movie.media_type && movie.title));
@@ -154,8 +154,9 @@ export default function WatchingPage() {
         )}
       </main>
       <MovieModal
-        movieId={selectedMovieId}
-        isOpen={!!selectedMovieId}
+        movieId={selectedItem?.id ?? null}
+        mediaType={selectedItem?.media_type ?? null}
+        isOpen={!!selectedItem}
         onClose={handleCloseModal}
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}

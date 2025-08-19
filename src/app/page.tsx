@@ -10,7 +10,7 @@ import {
   fetchUpcomingMovies,
   searchMulti,
 } from "@/lib/tmdb";
-import type { Movie } from "@/lib/types";
+import type { Movie, MediaType } from "@/lib/types";
 import { getRecommendations } from "@/ai/flows/recommendation-flow";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserLists, updateUserLists } from "@/lib/firestore";
@@ -19,9 +19,7 @@ type ListType = "watchlist" | "watching" | "watched";
 
 export default function Home() {
   const { user } = useAuth();
-  const [selectedMovieId, setSelectedMovieId] = React.useState<number | null>(
-    null
-  );
+  const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
   const [watching, setWatching] = React.useState<Movie[]>([]);
   const [watched, setWatched] = React.useState<Movie[]>([]);
@@ -89,12 +87,12 @@ export default function Home() {
   }, [watched, watching]);
 
 
-  const handleMovieClick = (id: number) => {
-    setSelectedMovieId(id);
+  const handleMovieClick = (id: number, media_type: MediaType) => {
+    setSelectedItem({ id, media_type });
   };
 
   const handleCloseModal = () => {
-    setSelectedMovieId(null);
+    setSelectedItem(null);
   };
 
   const isMovieInList = (movieId: number, list: ListType) => {
@@ -198,8 +196,9 @@ export default function Home() {
         />
       </main>
       <MovieModal
-        movieId={selectedMovieId}
-        isOpen={!!selectedMovieId}
+        movieId={selectedItem?.id ?? null}
+        mediaType={selectedItem?.media_type ?? null}
+        isOpen={!!selectedItem}
         onClose={handleCloseModal}
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
