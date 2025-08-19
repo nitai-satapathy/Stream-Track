@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Search, Tv, Eye, Check, Loader2, LogOut, Menu } from "lucide-react";
+import { Search, Tv, Eye, Check, Loader2, LogOut, Menu, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import logoUrl from "@/public/icons/logo.svg";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,13 +27,35 @@ interface UserLists {
 }
 
 interface HeaderProps {
-    lists: UserLists;
-    onListUpdate: (movie: Movie, list: ListType) => Promise<void>;
+  lists: UserLists;
+  onListUpdate: (movie: Movie, list: ListType) => Promise<void>;
+  onBulkAdd?: (added: {movies: Movie[], shows: Movie[], notFound: string[]}) => void;
+  setWatchedMovies?: (movies: Movie[]) => void;
+  setWatchedShows?: (shows: Movie[]) => void;
+  watchedMovies?: Movie[];
+  watchedShows?: Movie[];
+  user?: any;
 }
 
-export function Header({ lists, onListUpdate }: HeaderProps) {
+export function Header(props: HeaderProps) {
+  const {
+    lists,
+    onListUpdate,
+    setWatchedMovies,
+    setWatchedShows,
+    watchedMovies,
+    watchedShows,
+    user,
+  } = props;
+  const safeWatchedMovies = watchedMovies || [];
+  const safeWatchedShows = watchedShows || [];
+  // Bulk Add Dialog State
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = React.useState(false);
+  const [bulkInput, setBulkInput] = React.useState("");
+  const [bulkStatus, setBulkStatus] = React.useState<string | null>(null);
+  const [bulkLoading, setBulkLoading] = React.useState(false);
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -148,6 +171,120 @@ export function Header({ lists, onListUpdate }: HeaderProps) {
         <NavLinks />
       </div>
       <div className="flex items-center gap-4">
+        {/* Bulk Add + icon */}
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Bulk Add"
+          onClick={() => setIsBulkDialogOpen(true)}
+          className="border border-blue-500 hover:bg-blue-100/40 transition-colors"
+        >
+          <Plus className="h-6 w-6 text-blue-600" />
+        </Button>
+        {/* Bulk Add Dialog */}
+        <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Bulk Add Movies & TV Shows</DialogTitle>
+            </DialogHeader>
+            <label htmlFor="bulk-names" className="font-medium">Paste multiple names (one per line):</label>
+            <textarea
+              id="bulk-names"
+              className="w-full rounded border border-blue-400 bg-blue-200/40 backdrop-blur-md p-2 text-base text-slate-900 placeholder:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              rows={4}
+              value={bulkInput}
+              onChange={e => setBulkInput(e.target.value)}
+              placeholder="Movie or Show 1, Movie or Show 2"
+              disabled={bulkLoading}
+              style={{
+                background: 'rgba(59, 130, 246, 0.15)',
+                color: '#ffffffff', // slate-900
+                boxShadow: '0 4px 24px 0 rgba(59,130,246,0.10)',
+                backdropFilter: 'blur(8px)'
+              }}
+            />
+            <Button
+              className="bg-primary text-primary-foreground px-4 py-2 rounded disabled:opacity-50 mt-2"
+              onClick={async () => {
+                setBulkStatus(null);
+                setBulkLoading(true);
+                const titles = bulkInput.split(/\r?\n/).map(t => t.trim()).filter(Boolean);
+                if (!titles.length) {
+                  setBulkStatus("Please enter at least one name.");
+                  setBulkLoading(false);
+                  return;
+                }
+                const foundMovies: Movie[] = [];
+                const foundShows: Movie[] = [];
+                const notFound: string[] = [];
+                for (const title of titles) {
+                  try {
+                    const results = await searchMulti(title);
+                    const item = results[0];
+                    if (item) {
+                      if (item.media_type === "movie" || (!item.media_type && item.title)) {
+                          if (!safeWatchedMovies.some(m => m.id === item.id)) foundMovies.push(item);
+                        } else if (item.media_type === "tv" || item.name) {
+                          if (!safeWatchedShows.some(s => s.id === item.id)) foundShows.push(item);
+                      } else {
+                        notFound.push(title);
+                      }
+                    } else {
+                      notFound.push(title);
+                    }
+                  } catch {
+                    notFound.push(title);
+                  }
+                }
+                // Always update both watched movies and shows in Firestore/localStorage
+                let newMovies = safeWatchedMovies;
+                let newShows = safeWatchedShows;
+                if (foundMovies.length) {
+                  newMovies = [...safeWatchedMovies, ...foundMovies];
+                  if (setWatchedMovies) setWatchedMovies(newMovies);
+                }
+                if (foundShows.length) {
+                  newShows = [...safeWatchedShows, ...foundShows];
+                  if (setWatchedShows) setWatchedShows(newShows);
+                }
+                if (user) {
+                  // Get current lists from Firestore, merge, and update
+                  const { getUserLists, updateUserLists } = await import("@/lib/firestore");
+                  const lists = await getUserLists(user.uid);
+                  const watchedMovies = lists.watched.filter((m: Movie) => m.media_type === 'movie' || (!m.media_type && m.title));
+                  const watchedShows = lists.watched.filter((m: Movie) => m.media_type === 'tv' || m.name);
+                  const mergedMovies = [...watchedMovies, ...foundMovies.filter((fm: Movie) => !watchedMovies.some((m: Movie) => m.id === fm.id))];
+                  const mergedShows = [...watchedShows, ...foundShows.filter((fs: Movie) => !watchedShows.some((s: Movie) => s.id === fs.id))];
+                  await updateUserLists(user.uid, { watched: [...mergedMovies, ...mergedShows] });
+                } else {
+                  // LocalStorage: merge and update
+                  const stored = localStorage.getItem("watched");
+                  let watchedList = [];
+                  try { watchedList = stored ? JSON.parse(stored) : []; } catch {}
+                  const watchedMovies = watchedList.filter((m: Movie) => m.media_type === 'movie' || (!m.media_type && m.title));
+                  const watchedShows = watchedList.filter((m: Movie) => m.media_type === 'tv' || m.name);
+                  const mergedMovies = [...watchedMovies, ...foundMovies.filter((fm: Movie) => !watchedMovies.some((m: Movie) => m.id === fm.id))];
+                  const mergedShows = [...watchedShows, ...foundShows.filter((fs: Movie) => !watchedShows.some((s: Movie) => s.id === fs.id))];
+                  localStorage.setItem("watched", JSON.stringify([...mergedMovies, ...mergedShows]));
+                }
+                setBulkStatus(
+                  (foundMovies.length ? `Added ${foundMovies.length} movie(s). ` : "") +
+                  (foundShows.length ? `Added ${foundShows.length} show(s). ` : "") +
+                  (notFound.length ? `Not found: ${notFound.join(", ")}` : "")
+                );
+                setBulkLoading(false);
+                setBulkInput("");
+              }}
+              disabled={bulkLoading}
+            >
+              {bulkLoading ? "Adding..." : "Add to Watched"}
+            </Button>
+            {bulkStatus && <div className="text-sm text-muted-foreground mt-2">{bulkStatus}</div>}
+            <DialogClose asChild>
+              <Button variant="outline" className="mt-2 w-full">Close</Button>
+            </DialogClose>
+          </DialogContent>
+        </Dialog>
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
           <form onSubmit={handleLegacySearchSubmit} className="relative w-full max-w-xs">

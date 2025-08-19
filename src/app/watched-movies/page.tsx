@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Header } from "@/components/Header";
+import { Plus } from "lucide-react";
+import { BulkAddDialog } from "@/components/BulkAddDialog";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
 import type { Movie, MediaType } from "@/lib/types";
@@ -11,6 +13,7 @@ import { getUserLists, updateUserLists } from "@/lib/firestore";
 type ListType = "watchlist" | "watching" | "watched";
 
 export default function WatchedMoviesPage() {
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = React.useState(false);
   const { user } = useAuth();
   const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
@@ -48,6 +51,8 @@ export default function WatchedMoviesPage() {
     setSelectedItem(null);
   };
   
+
+
   const watchedMovies = watched.filter(movie => movie.media_type === 'movie' || (!movie.media_type && movie.title));
 
   const isMovieInList = (movieId: number, list: ListType) => {
@@ -122,13 +127,18 @@ export default function WatchedMoviesPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-       <Header
+      <Header
         lists={{ watchlist, watching, watched }}
         onListUpdate={handleListUpdate}
+        watchedMovies={watched.filter(movie => movie.media_type === 'movie' || (!movie.media_type && movie.title))}
+        setWatchedMovies={setWatched}
+        watchedShows={[]}
+        setWatchedShows={() => {}}
+        user={user}
       />
       <main className="flex-1 space-y-12 py-8">
-        <div className="container">
-           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Watched Movies</h1>
+        <div className="container space-y-4">
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Watched Movies</h1>
         </div>
         {watchedMovies.length > 0 ? (
           <MovieRow

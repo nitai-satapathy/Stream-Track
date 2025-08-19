@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Header } from "@/components/Header";
+import { Plus } from "lucide-react";
+import { BulkAddDialog } from "@/components/BulkAddDialog";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
 import type { Movie, MediaType } from "@/lib/types";
@@ -48,6 +50,8 @@ export default function WatchedTvShowsPage() {
   const handleCloseModal = () => {
     setSelectedItem(null);
   };
+
+
 
   const watchedTvShows = watched.filter(movie => movie.media_type === 'tv' || movie.name);
   
@@ -126,9 +130,14 @@ export default function WatchedTvShowsPage() {
       <Header
         lists={{ watchlist, watching, watched }}
         onListUpdate={handleListUpdate}
+        watchedMovies={[]}
+        setWatchedMovies={() => {}}
+        watchedShows={watched.filter(movie => movie.media_type === 'tv' || movie.name)}
+        setWatchedShows={setWatched}
+        user={user}
       />
       <main className="flex-1 space-y-12 py-8">
-        <div className="container">
+        <div className="container space-y-4">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Watched TV Shows</h1>
         </div>
         {watchedTvShows.length > 0 ? (
