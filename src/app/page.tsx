@@ -10,6 +10,7 @@ import {
   fetchUpcomingMovies,
   searchMulti,
 } from "@/lib/tmdb";
+import { fetchTopRatedTvShows } from "@/lib/fetchTopRatedTvShows";
 import type { Movie, MediaType } from "@/lib/types";
 import { getRecommendations } from "@/ai/flows/recommendation-flow";
 import { useAuth } from "@/hooks/useAuth";
@@ -187,6 +188,11 @@ export default function Home() {
         <MovieRow
           title="Top Rated Movies"
           fetchFunction={fetchTopRatedMovies}
+          onMovieClick={handleMovieClick}
+        />
+        <MovieRow
+          title="Top Rated TV Shows"
+          fetchFunction={fetchTopRatedTvShows}
           onMovieClick={handleMovieClick}
         />
         <MovieRow

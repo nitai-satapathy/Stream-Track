@@ -7,7 +7,7 @@ if (!apiKey) {
   throw new Error("TMDB API key is not defined in environment variables.");
 }
 
-const tmdbApi = axios.create({
+export const tmdbApi = axios.create({
   baseURL: "https://api.themoviedb.org/3",
   params: {
     api_key: apiKey,
