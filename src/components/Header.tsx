@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { searchMulti } from "@/lib/tmdb";
-import type { Movie } from "@/lib/types";
+import type { Movie, MediaType } from "@/lib/types";
 import Image from "next/image";
 import { MovieModal } from "./MovieModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,7 +37,7 @@ export function Header({ lists, onListUpdate }: HeaderProps) {
   const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-  const [selectedMovieId, setSelectedMovieId] = React.useState<number | null>(null);
+  const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
 
   const { watchlist, watching, watched } = lists;
 
@@ -74,14 +74,14 @@ export function Header({ lists, onListUpdate }: HeaderProps) {
     };
   }, [searchQuery]);
   
-  const handleMovieClick = (id: number) => {
-    setSelectedMovieId(id);
+  const handleMovieClick = (id: number, media_type: MediaType) => {
+    setSelectedItem({ id, media_type });
     setIsPopoverOpen(false);
     setSearchQuery('');
   };
 
   const handleCloseModal = () => {
-    setSelectedMovieId(null);
+    setSelectedItem(null);
   };
 
   const isMovieInList = (movieId: number, list: ListType) => {
@@ -171,7 +171,7 @@ export function Header({ lists, onListUpdate }: HeaderProps) {
            {!isLoading && searchResults.length > 0 && (
           <div className="space-y-2">
             {searchResults.map((item) => (
-             <div key={item.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer" onClick={() => handleMovieClick(item.id)}>
+             <div key={item.id + (item.media_type || '')} className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer" onClick={() => handleMovieClick(item.id, item.media_type || 'movie')}>
               <div className="w-12 h-16 relative shrink-0">
                  <Image 
                   src={item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : "https://placehold.co/80x120.png"}
@@ -239,9 +239,10 @@ export function Header({ lists, onListUpdate }: HeaderProps) {
       </div>
       </div>
     </header>
-     <MovieModal
-        movieId={selectedMovieId}
-        isOpen={!!selectedMovieId}
+      <MovieModal
+        movieId={selectedItem?.id ?? null}
+        mediaType={selectedItem?.media_type ?? null}
+        isOpen={!!selectedItem}
         onClose={handleCloseModal}
         onListUpdate={onListUpdate}
         isMovieInList={isMovieInList}
