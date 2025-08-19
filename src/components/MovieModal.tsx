@@ -20,6 +20,7 @@ type ListType = "watchlist" | "watching" | "watched";
 
 interface MovieModalProps {
   movieId: number | null;
+  mediaType: 'movie' | 'tv' | null;
   isOpen: boolean;
   onClose: () => void;
   onListUpdate: (movie: Movie, list: ListType) => void;
@@ -28,17 +29,17 @@ interface MovieModalProps {
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
 
-export function MovieModal({ movieId, isOpen, onClose, onListUpdate, isMovieInList }: MovieModalProps) {
+export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, isMovieInList }: MovieModalProps) {
   const [movie, setMovie] = React.useState<Movie | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
   React.useEffect(() => {
-    if (movieId) {
+    if (movieId && mediaType) {
       const getMovieDetails = async () => {
         setIsLoading(true);
         try {
-          const details = await fetchMovieDetails(movieId);
+          const details = await fetchMovieDetails(movieId, mediaType);
           setMovie(details);
         } catch (error) {
           console.error("Failed to fetch movie details:", error);
@@ -56,7 +57,7 @@ export function MovieModal({ movieId, isOpen, onClose, onListUpdate, isMovieInLi
     } else {
       setMovie(null);
     }
-  }, [movieId, onClose, toast]);
+  }, [movieId, mediaType, onClose, toast]);
 
   const trailer = movie?.videos?.results.find(
     (video) => video.site === "YouTube" && video.type === "Trailer"

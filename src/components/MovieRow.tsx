@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Movie } from "@/lib/types";
+import { Movie, MediaType } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { MovieCard } from "./MovieCard";
 import { MovieCardSkeleton } from "./MovieCardSkeleton";
@@ -13,7 +13,7 @@ interface MovieRowProps {
   title: string;
   movies?: Movie[];
   fetchFunction?: () => Promise<Movie[]>;
-  onMovieClick: (id: number) => void;
+  onMovieClick: (id: number, media_type: MediaType) => void;
   isLoading?: boolean;
 }
 
@@ -97,9 +97,9 @@ export function MovieRow({
       <div className="flex space-x-4">
         {movies.map((movie) => (
           <MovieCard
-            key={movie.id}
+            key={movie.id + (movie.media_type || '')}
             movie={movie}
-            onClick={() => onMovieClick(movie.id)}
+            onClick={() => onMovieClick(movie.id, movie.media_type || 'movie')}
           />
         ))}
       </div>

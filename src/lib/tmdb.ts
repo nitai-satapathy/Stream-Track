@@ -30,8 +30,7 @@ export const fetchUpcomingMovies = async (): Promise<Movie[]> => {
   return response.data.results;
 };
 
-export const fetchMovieDetails = async (movieId: number): Promise<Movie> => {
-  const mediaType = await getMediaType(movieId);
+export const fetchMovieDetails = async (movieId: number, mediaType: 'movie' | 'tv'): Promise<Movie> => {
   const response = await tmdbApi.get<Movie>(`/${mediaType}/${movieId}`, {
     params: {
       append_to_response: "videos",
