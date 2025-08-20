@@ -28,7 +28,7 @@ interface UserLists {
 
 interface HeaderProps {
   lists: UserLists;
-  onListUpdate: (movie: Movie, list: ListType) => Promise<void>;
+  onListUpdate?: (movie: Movie, list: ListType) => Promise<void>;
   onBulkAdd?: (added: {movies: Movie[], shows: Movie[], notFound: string[]}) => void;
   setWatchedMovies?: (movies: Movie[]) => void;
   setWatchedShows?: (shows: Movie[]) => void;
@@ -45,6 +45,8 @@ export function Header(props: HeaderProps) {
     watchedMovies,
     watchedShows,
   } = props;
+  // Provide a default no-op if onListUpdate is not provided
+  const safeOnListUpdate = onListUpdate ?? (async () => {});
   const { user, logout } = useAuth();
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
@@ -140,6 +142,10 @@ export function Header(props: HeaderProps) {
       <Link href="/watchlist" className="hover:text-foreground transition-colors flex items-center gap-2">
         <ListPlus className="h-4 w-4" />
         Watchlist
+      </Link>
+      <Link href="/recommendation" className="hover:text-foreground transition-colors flex items-center gap-2">
+        <span className="h-4 w-4">🌟</span>
+        Recommendations
       </Link>
       {isMobile && !user && (
          <>
@@ -383,7 +389,7 @@ export function Header(props: HeaderProps) {
         mediaType={selectedItem?.media_type ?? null}
         isOpen={!!selectedItem}
         onClose={handleCloseModal}
-        onListUpdate={onListUpdate}
+        onListUpdate={safeOnListUpdate}
         isMovieInList={isMovieInList}
       />
     </>

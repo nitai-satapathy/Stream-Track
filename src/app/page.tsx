@@ -172,15 +172,7 @@ export default function Home() {
         onListUpdate={handleListUpdate}
       />
       <main className="flex-1 space-y-12 py-8">
-        {(recommendations.length > 0 || isRecommendationsLoading) && (
-          <MovieRow
-            title="Recommended For You"
-            movies={recommendations}
-            onMovieClick={handleMovieClick}
-            isLoading={isRecommendationsLoading}
-            horizontal={true}
-          />
-        )}
+  {/* Recommendations moved to /recommendation page */}
         <MovieRow
           title="Popular Movies"
           fetchFunction={fetchPopularMovies}

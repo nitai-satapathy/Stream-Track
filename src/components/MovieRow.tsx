@@ -7,7 +7,7 @@ import { MovieCard } from "./MovieCard";
 import { MovieCardSkeleton } from "./MovieCardSkeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
 interface MovieRowProps {
   title: string;
@@ -16,6 +16,8 @@ interface MovieRowProps {
   onMovieClick: (id: number, media_type: MediaType) => void;
   isLoading?: boolean;
   horizontal?: boolean;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 export function MovieRow({
@@ -25,6 +27,8 @@ export function MovieRow({
   onMovieClick,
   isLoading: initialIsLoading,
   horizontal = false,
+  onRefresh,
+  refreshing
 }: MovieRowProps) {
   const [movies, setMovies] = React.useState<Movie[]>(initialMovies || []);
   const [isLoading, setIsLoading] = React.useState(!!initialIsLoading || !initialMovies);
@@ -127,7 +131,19 @@ export function MovieRow({
 
   return (
     <section className="container max-w-screen-2xl">
-      <h2 className="text-2xl font-bold mb-4">{title}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold">{title}</h2>
+        {onRefresh && (
+          <button
+            onClick={onRefresh}
+            className="ml-2 p-2 rounded hover:bg-muted"
+            title="Refresh recommendations"
+            disabled={!!refreshing}
+          >
+            <RefreshCw className={refreshing ? 'animate-spin' : ''} />
+          </button>
+        )}
+      </div>
       <div className="w-full rounded-md">
         {renderContent()}
       </div>
