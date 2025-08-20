@@ -13,8 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Movie } from "@/lib/types";
 import { fetchMovieDetails } from "@/lib/tmdb";
-import { Popcorn, ListPlus, Clapperboard, Star, Youtube } from "lucide-react";
+import { fetchOmdbData } from "@/lib/omdb";
+import type { OmdbData } from "@/lib/omdb.types";
+import { Popcorn, ListPlus, Clapperboard, Star, Youtube, Wallet } from "lucide-react";
+import { LiaImdb } from "react-icons/lia";
+import { SiThemoviedatabase, SiRottentomatoes, SiMetacritic } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
+import { FcCalendar } from "react-icons/fc";
 
 type ListType = "watchlist" | "watching" | "watched";
 
@@ -32,15 +37,29 @@ const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
 export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, isMovieInList }: MovieModalProps) {
   const [movie, setMovie] = React.useState<Movie | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [omdb, setOmdb] = React.useState<OmdbData | null>(null);
   const { toast } = useToast();
 
   React.useEffect(() => {
     if (movieId && mediaType) {
       const getMovieDetails = async () => {
         setIsLoading(true);
+        setOmdb(null);
         try {
           const details = await fetchMovieDetails(movieId, mediaType);
           setMovie(details);
+          // Try to get OMDb data using title/name and year
+          let title = details.title || details.name;
+          let year = details.release_date?.slice(0, 4) || details.first_air_date?.slice(0, 4);
+          let type: 'movie' | 'series' | undefined = mediaType === 'movie' ? 'movie' : mediaType === 'tv' ? 'series' : undefined;
+          if (title) {
+            try {
+              const omdbData = await fetchOmdbData(title, year, type);
+              setOmdb(omdbData);
+            } catch (err) {
+              setOmdb(null);
+            }
+          }
         } catch (error) {
           console.error("Failed to fetch movie details:", error);
           toast({
@@ -56,6 +75,7 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
       getMovieDetails();
     } else {
       setMovie(null);
+      setOmdb(null);
     }
   }, [movieId, mediaType, onClose, toast]);
 
@@ -116,13 +136,52 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
               {movie.title || movie.name}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex items-center space-x-4 text-sm">
+          {/* Ratings Row */}
+          <div className="flex flex-wrap items-center space-x-4 text-sm mb-2">
+            {/* TMDb Rating */}
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
+              <SiThemoviedatabase className="h-5 w-5 text-green-600" />
               <span>{movie.vote_average.toFixed(1)} / 10</span>
             </div>
-            <span>{releaseDate}</span>
+            {/* IMDb Rating */}
+            {omdb?.imdbRating && omdb.imdbRating !== 'N/A' && (
+              <div className="flex items-center gap-1">
+                <LiaImdb className="h-6 w-6 text-yellow-500" />
+                <span>{omdb.imdbRating} / 10</span>
+              </div>
+            )}
+            {/* Rotten Tomatoes */}
+            {omdb?.Ratings?.find(r => r.Source === 'Rotten Tomatoes') && (
+              <div className="flex items-center gap-1">
+                <SiRottentomatoes className="h-5 w-5 text-red-600" />
+                <span>{omdb.Ratings.find(r => r.Source === 'Rotten Tomatoes')?.Value}</span>
+              </div>
+            )}
+            {/* Metacritic */}
+            {omdb?.Metascore && omdb.Metascore !== 'N/A' && (
+              <div className="flex items-center gap-1">
+                <SiMetacritic className="h-5 w-5 text-green-700" />
+                <span>{omdb.Metascore} / 100</span>
+              </div>
+            )}
           </div>
+          {/* Box Office and Release Date Row */}
+          {(omdb?.BoxOffice && omdb.BoxOffice !== 'N/A') || releaseDate ? (
+            <div className="flex items-center space-x-4 text-sm mb-2">
+              {omdb?.BoxOffice && omdb.BoxOffice !== 'N/A' && (
+                <div className="flex items-center gap-1">
+                  <Wallet className="h-5 w-5 text-blue-700" />
+                  <span>{omdb.BoxOffice}</span>
+                </div>
+              )}
+              {releaseDate && (
+                <span className="flex items-center gap-1">
+                  <FcCalendar className="h-5 w-5" />
+                  {releaseDate}
+                </span>
+              )}
+            </div>
+          ) : null}
           <div className="flex flex-wrap gap-2">
             {movie.genres?.map((genre) => (
               <Badge key={genre.id} variant="secondary">
