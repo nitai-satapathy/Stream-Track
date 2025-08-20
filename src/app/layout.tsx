@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/hooks/useAuth';
 import { Analytics } from '@vercel/analytics/next';
 
+import Footer from "@/components/Footer";
+
 export const metadata: Metadata = {
   title: 'Stream Track',
   description: 'Track What You Watch. Love What You Watch. Never Forget a Single Show.',
@@ -26,6 +28,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </AuthProvider>
+        <Footer />
         <Analytics />
       </body>
     </html>
