@@ -26,7 +26,18 @@ export const fetchTopRatedMovies = async (): Promise<Movie[]> => {
 };
 
 export const fetchUpcomingMovies = async (): Promise<Movie[]> => {
-  const response = await tmdbApi.get<TmdbApiResponse>("/movie/upcoming");
+  const response = await tmdbApi.get<TmdbApiResponse>("/movie/upcoming", {
+    params: {
+      region: "US", // Adjust region as needed
+    },
+  });
+  const minimum = response.data.dates?.minimum;
+  const maximum = response.data.dates?.maximum;
+  if (minimum && maximum) {
+    return response.data.results.filter(
+      movie => movie.release_date >= minimum && movie.release_date <= maximum
+    );
+  }
   return response.data.results;
 };
 

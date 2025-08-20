@@ -40,4 +40,8 @@ export interface TmdbApiResponse {
   results: Movie[];
   total_pages: number;
   total_results: number;
+  dates?: {
+    minimum: string;
+    maximum: string;
+  };
 }
