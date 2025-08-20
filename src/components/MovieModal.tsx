@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Movie } from "@/lib/types";
 import { fetchMovieDetails } from "@/lib/tmdb";
-import { Eye, ListPlus, Check, Star, Youtube } from "lucide-react";
+import { Popcorn, ListPlus, Clapperboard, Star, Youtube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type ListType = "watchlist" | "watching" | "watched";
@@ -151,7 +151,7 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
               variant={inWatching ? "default" : "secondary"}
               onClick={() => handleListButtonClick("watching")}
             >
-              <Eye />
+              <Popcorn />
               {inWatching ? "Watching" : "Set as Watching"}
             </Button>
             <Button
@@ -165,7 +165,7 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
               variant={inWatched ? "default" : "secondary"}
               onClick={() => handleListButtonClick("watched")}
             >
-              <Check />
+              <Clapperboard />
               {inWatched ? "Watched" : "Mark as Watched"}
             </Button>
           </div>

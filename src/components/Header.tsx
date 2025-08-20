@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Search, Tv, Eye, Check, Loader2, LogOut, Menu, Plus, ListPlus } from "lucide-react";
+import { Search, TvMinimalPlay, Popcorn, Clapperboard, Loader2, LogOut, Menu, Plus, ListPlus, Sparkles } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import logoUrl from "@/public/icons/logo.svg";
 import { Input } from "@/components/ui/input";
@@ -128,15 +128,15 @@ export function Header(props: HeaderProps) {
   const NavLinks = ({isMobile = false} : {isMobile?: boolean}) => (
     <nav className={isMobile ? "flex flex-col gap-4 text-lg" : "hidden md:flex items-center gap-4 text-sm font-medium text-muted-foreground"}>
       <Link href="/watching" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <Eye className="h-4 w-4" />
+        <Popcorn className="h-4 w-4" />
         Currently Watching
       </Link>
       <Link href="/watched-movies" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <Check className="h-4 w-4" />
+        <Clapperboard className="h-4 w-4" />
         Watched Movies
       </Link>
       <Link href="/watched-tv" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <Tv className="h-4 w-4" />
+        <TvMinimalPlay className="h-4 w-4" />
         Watched TV Shows
       </Link>
       <Link href="/watchlist" className="hover:text-foreground transition-colors flex items-center gap-2">
@@ -144,7 +144,7 @@ export function Header(props: HeaderProps) {
         Watchlist
       </Link>
       <Link href="/recommendation" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <span className="h-4 w-4">🌟</span>
+        <Sparkles className="h-4 w-4" />
         Recommendations
       </Link>
       {isMobile && !user && (
