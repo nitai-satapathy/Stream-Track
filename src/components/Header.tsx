@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Search, Tv, Eye, Check, Loader2, LogOut, Menu, Plus } from "lucide-react";
+import { Search, Tv, Eye, Check, Loader2, LogOut, Menu, Plus, ListPlus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import logoUrl from "@/public/icons/logo.svg";
 import { Input } from "@/components/ui/input";
@@ -136,6 +136,10 @@ export function Header(props: HeaderProps) {
       <Link href="/watched-tv" className="hover:text-foreground transition-colors flex items-center gap-2">
         <Tv className="h-4 w-4" />
         Watched TV Shows
+      </Link>
+      <Link href="/watchlist" className="hover:text-foreground transition-colors flex items-center gap-2">
+        <ListPlus className="h-4 w-4" />
+        Watchlist
       </Link>
       {isMobile && !user && (
          <>

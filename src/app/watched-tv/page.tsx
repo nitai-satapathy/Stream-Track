@@ -20,31 +20,33 @@ export default function WatchedTvShowsPage() {
   const [watched, setWatched] = React.useState<Movie[]>([]);
 
 
+  // Extracted loadLists so it can be reused after updates
+  const loadLists = async () => {
+    if (user) {
+      const { watchlist, watching, watched } = await getUserLists(user.uid);
+      setWatchlist(watchlist);
+      setWatching(watching);
+      setWatched(watched);
+    } else {
+      // Clear lists if user logs out
+      setWatchlist([]);
+      setWatching([]);
+      setWatched([]);
+      const storedWatchlist = localStorage.getItem("watchlist");
+      const storedWatching = localStorage.getItem("watching");
+      const storedWatched = localStorage.getItem("watched");
+      if (storedWatchlist) setWatchlist(JSON.parse(storedWatchlist));
+      if (storedWatching) setWatching(JSON.parse(storedWatching));
+      if (storedWatched) setWatched(JSON.parse(storedWatched));
+    }
+  };
+
   React.useEffect(() => {
-    const loadLists = async () => {
-      if (user) {
-        const { watchlist, watching, watched } = await getUserLists(user.uid);
-        setWatchlist(watchlist);
-        setWatching(watching);
-        setWatched(watched);
-      } else {
-        // Clear lists if user logs out
-        setWatchlist([]);
-        setWatching([]);
-        setWatched([]);
-        const storedWatchlist = localStorage.getItem("watchlist");
-        const storedWatching = localStorage.getItem("watching");
-        const storedWatched = localStorage.getItem("watched");
-        if (storedWatchlist) setWatchlist(JSON.parse(storedWatchlist));
-        if (storedWatching) setWatching(JSON.parse(storedWatching));
-        if (storedWatched) setWatched(JSON.parse(storedWatched));
-      }
-    };
     loadLists();
   }, [user]);
 
   const handleMovieClick = (id: number, media_type: MediaType) => {
-    setSelectedItem({ id, media_type });
+    setSelectedItem({ id, media_type: 'tv' });
   };
 
   const handleCloseModal = () => {
@@ -122,6 +124,8 @@ export default function WatchedTvShowsPage() {
       updateLocalStorage("watching", newWatching);
       updateLocalStorage("watched", newWatched);
     }
+    // Refetch lists after update to refresh UI
+    await loadLists();
   };
 
 
@@ -134,7 +138,6 @@ export default function WatchedTvShowsPage() {
         setWatchedMovies={() => {}}
         watchedShows={watched.filter(movie => movie.media_type === 'tv' || movie.name)}
         setWatchedShows={setWatched}
-        user={user}
       />
       <main className="flex-1 space-y-12 py-8">
         <div className="container space-y-4">
@@ -147,9 +150,9 @@ export default function WatchedTvShowsPage() {
             title=""
           />
         ) : (
-            <div className="container">
-             <p className="text-muted-foreground">You haven't marked any TV shows as watched yet.</p>
-            </div>
+          <div className="container">
+            <p className="text-muted-foreground">You haven't marked any TV shows as watched yet.</p>
+          </div>
         )}
       </main>
       <MovieModal
