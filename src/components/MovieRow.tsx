@@ -15,6 +15,7 @@ interface MovieRowProps {
   fetchFunction?: () => Promise<Movie[]>;
   onMovieClick: (id: number, media_type: MediaType) => void;
   isLoading?: boolean;
+  horizontal?: boolean;
 }
 
 export function MovieRow({
@@ -23,6 +24,7 @@ export function MovieRow({
   fetchFunction,
   onMovieClick,
   isLoading: initialIsLoading,
+  horizontal = false,
 }: MovieRowProps) {
   const [movies, setMovies] = React.useState<Movie[]>(initialMovies || []);
   const [isLoading, setIsLoading] = React.useState(!!initialIsLoading || !initialMovies);
@@ -93,8 +95,25 @@ export function MovieRow({
         )
     }
 
+    if (horizontal) {
+      return (
+        <ScrollArea className="w-full whitespace-nowrap rounded-md">
+          <div className="flex space-x-4">
+            {movies.map((movie) => (
+              <MovieCard
+                key={movie.id + (movie.media_type || '')}
+                movie={movie}
+                onClick={() => onMovieClick(movie.id, movie.media_type || 'movie')}
+              />
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      );
+    }
     return (
-      <div className="flex space-x-4">
+      <div className="grid justify-start gap-x-3 gap-y-6"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
         {movies.map((movie) => (
           <MovieCard
             key={movie.id + (movie.media_type || '')}
@@ -109,10 +128,9 @@ export function MovieRow({
   return (
     <section className="container max-w-screen-2xl">
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
-      <ScrollArea className="w-full whitespace-nowrap rounded-md">
+      <div className="w-full rounded-md">
         {renderContent()}
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </div>
     </section>
   );
 }

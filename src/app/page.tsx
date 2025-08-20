@@ -178,27 +178,32 @@ export default function Home() {
             movies={recommendations}
             onMovieClick={handleMovieClick}
             isLoading={isRecommendationsLoading}
+            horizontal={true}
           />
         )}
         <MovieRow
           title="Popular Movies"
           fetchFunction={fetchPopularMovies}
           onMovieClick={handleMovieClick}
+          horizontal={true}
         />
         <MovieRow
           title="Top Rated Movies"
           fetchFunction={fetchTopRatedMovies}
           onMovieClick={handleMovieClick}
+          horizontal={true}
         />
         <MovieRow
           title="Top Rated TV Shows"
           fetchFunction={fetchTopRatedTvShows}
           onMovieClick={handleMovieClick}
+          horizontal={true}
         />
         <MovieRow
           title="Upcoming Movies"
           fetchFunction={fetchUpcomingMovies}
           onMovieClick={handleMovieClick}
+          horizontal={true}
         />
       </main>
       <MovieModal
