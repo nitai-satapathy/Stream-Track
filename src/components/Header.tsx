@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Search, TvMinimalPlay, Popcorn, Clapperboard, Loader2, LogOut, Menu, Plus, ListPlus, Sparkles } from "lucide-react";
+import { Search, TvMinimalPlay, Popcorn, Clapperboard, Loader2, LogOut, Menu, ListPlus, Sparkles, ChevronDown, BadgePlus, Bell } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import logoUrl from "@/public/icons/logo.svg";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import { searchMulti } from "@/lib/tmdb";
 import type { Movie, MediaType } from "@/lib/types";
 import Image from "next/image";
 import { MovieModal } from "./MovieModal";
+import { NotificationModal } from "./NotificationModal";
 import { useAuth } from "@/hooks/useAuth";
 
 
@@ -55,6 +57,8 @@ export function Header(props: HeaderProps) {
   const [bulkInput, setBulkInput] = React.useState("");
   const [bulkStatus, setBulkStatus] = React.useState<string | null>(null);
   const [bulkLoading, setBulkLoading] = React.useState(false);
+  // Notification Modal State
+  const [isNotifOpen, setIsNotifOpen] = React.useState(false);
   const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
@@ -131,14 +135,38 @@ export function Header(props: HeaderProps) {
         <Popcorn className="h-4 w-4" />
         Currently Watching
       </Link>
-      <Link href="/watched-movies" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <Clapperboard className="h-4 w-4" />
-        Watched Movies
-      </Link>
-      <Link href="/watched-tv" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <TvMinimalPlay className="h-4 w-4" />
-        Watched TV Shows
-      </Link>
+      <div className="relative">
+        {/* Dropdown for Watched */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            {/* Use a button for accessibility and to allow focus/active state */}
+            <button
+              type="button"
+              className="hover:text-foreground transition-colors flex items-center gap-2 cursor-pointer focus:outline-none"
+              aria-haspopup="menu"
+              aria-expanded={undefined} // will be set by DropdownMenu
+            >
+              Watched
+              {/* Dropdown icon, rotate when open using data-state attribute */}
+              <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem asChild>
+              <Link href="/watched-movies" className="flex items-center gap-2">
+                <Clapperboard className="h-4 w-4" />
+                Watched Movies
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/watched-tv" className="flex items-center gap-2">
+                <TvMinimalPlay className="h-4 w-4" />
+                Watched TV Shows
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <Link href="/watchlist" className="hover:text-foreground transition-colors flex items-center gap-2">
         <ListPlus className="h-4 w-4" />
         Watchlist
@@ -179,15 +207,24 @@ export function Header(props: HeaderProps) {
         <NavLinks />
       </div>
       <div className="flex items-center gap-4">
-        {/* Bulk Add + icon */}
+        {/* Notification icon */}
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Notifications"
+          onClick={() => setIsNotifOpen(true)}
+        >
+          <Bell className="h-8 w-8" />
+        </Button>
+  <NotificationModal isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+        {/* Bulk Add BadgePlus icon */}
         <Button
           variant="ghost"
           size="icon"
           aria-label="Bulk Add"
           onClick={() => setIsBulkDialogOpen(true)}
-          className="border border-blue-500 hover:bg-blue-100/40 transition-colors"
         >
-          <Plus className="h-6 w-6 text-blue-600" />
+          <BadgePlus className="h-10 w-10" />
         </Button>
         {/* Bulk Add Dialog */}
         <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
