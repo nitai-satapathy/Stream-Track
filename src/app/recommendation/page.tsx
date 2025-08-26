@@ -212,86 +212,94 @@ const RecommendationPage = () => {
       <div className="container mx-auto py-8 space-y-10">
         <h1 className="text-3xl font-bold mb-4">Recommendations</h1>
         <p className="text-lg text-gray-600 mb-8">Get personalized movie and TV show recommendations based on your activity.</p>
-        {/* Only show section if there are items in the corresponding list */}
-        {watched.some(m => m.media_type === 'movie' || (!m.media_type && m.title)) && (
-          <MovieRow
-            title="Recommendations Based on Watched Movies"
-            movies={recWatchedMovies}
-            onMovieClick={handleMovieClick}
-            isLoading={loadingWatchedMovies}
-            horizontal={true}
-            onRefresh={() => handleRefresh(
-              'watchedMovies',
-              watched.filter(m => m.media_type === 'movie' || (!m.media_type && m.title)).map(m => m.title || m.name).filter(Boolean) as string[],
-              'movie',
-              setRecWatchedMovies,
-              setLoadingWatchedMovies
+        {/* Filter out movies/shows already in watched or watchlist */}
+        {(() => {
+          const watchedIds = new Set(watched.map(m => m.id));
+          const watchlistIds = new Set(watchlist.map(m => m.id));
+          const filterRecs = (recs: Movie[]) => recs.filter(m => !watchedIds.has(m.id) && !watchlistIds.has(m.id));
+          return <>
+            {watched.some(m => m.media_type === 'movie' || (!m.media_type && m.title)) && (
+              <MovieRow
+                title="Recommendations Based on Watched Movies"
+                movies={filterRecs(recWatchedMovies)}
+                onMovieClick={handleMovieClick}
+                isLoading={loadingWatchedMovies}
+                horizontal={true}
+                onRefresh={() => handleRefresh(
+                  'watchedMovies',
+                  watched.filter(m => m.media_type === 'movie' || (!m.media_type && m.title)).map(m => m.title || m.name).filter(Boolean) as string[],
+                  'movie',
+                  setRecWatchedMovies,
+                  setLoadingWatchedMovies
+                )}
+                refreshing={refreshing.watchedMovies}
+              />
             )}
-            refreshing={refreshing.watchedMovies}
-          />
-        )}
-        {watched.some(m => m.media_type === 'tv' || m.name) && (
-          <MovieRow
-            title="Recommendations Based on Watched TV Shows"
-            movies={recWatchedTV}
-            onMovieClick={handleMovieClick}
-            isLoading={loadingWatchedTV}
-            horizontal={true}
-            onRefresh={() => handleRefresh(
-              'watchedTV',
-              watched.filter(m => m.media_type === 'tv' || m.name).map(m => m.name || m.title).filter(Boolean) as string[],
-              'tv',
-              setRecWatchedTV,
-              setLoadingWatchedTV
+            {watched.some(m => m.media_type === 'tv' || m.name) && (
+              <MovieRow
+                title="Recommendations Based on Watched TV Shows"
+                movies={filterRecs(recWatchedTV)}
+                onMovieClick={handleMovieClick}
+                isLoading={loadingWatchedTV}
+                horizontal={true}
+                onRefresh={() => handleRefresh(
+                  'watchedTV',
+                  watched.filter(m => m.media_type === 'tv' || m.name).map(m => m.name || m.title).filter(Boolean) as string[],
+                  'tv',
+                  setRecWatchedTV,
+                  setLoadingWatchedTV
+                )}
+                refreshing={refreshing.watchedTV}
+              />
             )}
-            refreshing={refreshing.watchedTV}
-          />
-        )}
-        {watchlist.some(m => m.media_type === 'movie' || (!m.media_type && m.title)) && (
-          <MovieRow
-            title="Recommendations Based on Watchlist Movies"
-            movies={recWatchlistMovies}
-            onMovieClick={handleMovieClick}
-            isLoading={loadingWatchlistMovies}
-            horizontal={true}
-            onRefresh={() => handleRefresh(
-              'watchlistMovies',
-              watchlist.filter(m => m.media_type === 'movie' || (!m.media_type && m.title)).map(m => m.title || m.name).filter(Boolean) as string[],
-              'movie',
-              setRecWatchlistMovies,
-              setLoadingWatchlistMovies
+            {watchlist.some(m => m.media_type === 'movie' || (!m.media_type && m.title)) && (
+              <MovieRow
+                title="Recommendations Based on Watchlist Movies"
+                movies={filterRecs(recWatchlistMovies)}
+                onMovieClick={handleMovieClick}
+                isLoading={loadingWatchlistMovies}
+                horizontal={true}
+                onRefresh={() => handleRefresh(
+                  'watchlistMovies',
+                  watchlist.filter(m => m.media_type === 'movie' || (!m.media_type && m.title)).map(m => m.title || m.name).filter(Boolean) as string[],
+                  'movie',
+                  setRecWatchlistMovies,
+                  setLoadingWatchlistMovies
+                )}
+                refreshing={refreshing.watchlistMovies}
+              />
             )}
-            refreshing={refreshing.watchlistMovies}
-          />
-        )}
-        {watchlist.some(m => m.media_type === 'tv' || m.name) && (
-          <MovieRow
-            title="Recommendations Based on Watchlist TV Shows"
-            movies={recWatchlistTV}
-            onMovieClick={handleMovieClick}
-            isLoading={loadingWatchlistTV}
-            horizontal={true}
-            onRefresh={() => handleRefresh(
-              'watchlistTV',
-              watchlist.filter(m => m.media_type === 'tv' || m.name).map(m => m.name || m.title).filter(Boolean) as string[],
-              'tv',
-              setRecWatchlistTV,
-              setLoadingWatchlistTV
+            {watchlist.some(m => m.media_type === 'tv' || m.name) && (
+              <MovieRow
+                title="Recommendations Based on Watchlist TV Shows"
+                movies={filterRecs(recWatchlistTV)}
+                onMovieClick={handleMovieClick}
+                isLoading={loadingWatchlistTV}
+                horizontal={true}
+                onRefresh={() => handleRefresh(
+                  'watchlistTV',
+                  watchlist.filter(m => m.media_type === 'tv' || m.name).map(m => m.name || m.title).filter(Boolean) as string[],
+                  'tv',
+                  setRecWatchlistTV,
+                  setLoadingWatchlistTV
+                )}
+                refreshing={refreshing.watchlistTV}
+              />
             )}
-            refreshing={refreshing.watchlistTV}
+          </>;
+        })()}
+        {selectedItem && (
+          <MovieModal
+            movieId={selectedItem.id}
+            mediaType={selectedItem.media_type}
+            isOpen={!!selectedItem}
+            onClose={handleCloseModal}
+            onListUpdate={handleListUpdate}
+            isMovieInList={isMovieInList}
           />
         )}
       </div>
-      <MovieModal
-        movieId={selectedItem?.id ?? null}
-        mediaType={selectedItem?.media_type ?? null}
-        isOpen={!!selectedItem}
-        onClose={handleCloseModal}
-        onListUpdate={handleListUpdate}
-        isMovieInList={isMovieInList}
-      />
     </>
   );
-};
-
+}
 export default RecommendationPage;

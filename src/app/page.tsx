@@ -5,6 +5,12 @@ import { Header } from "@/components/Header";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
 import {
+  fetchTrendingMovies,
+  fetchTrendingTv,
+  fetchPopularTvShows,
+  fetchAiringTodayTvShows,
+} from "@/lib/fetchTvAndTrending";
+import {
   fetchPopularMovies,
   fetchTopRatedMovies,
   fetchUpcomingMovies,
@@ -19,6 +25,13 @@ import { getUserLists, updateUserLists } from "@/lib/firestore";
 type ListType = "watchlist" | "watching" | "watched";
 
 export default function Home() {
+  const [trendingMovies, setTrendingMovies] = React.useState<Movie[]>([]);
+  const [trendingTv, setTrendingTv] = React.useState<Movie[]>([]);
+  const [isTrendingLoading, setIsTrendingLoading] = React.useState(false);
+  const [popularTv, setPopularTv] = React.useState<Movie[]>([]);
+  const [airingTodayTv, setAiringTodayTv] = React.useState<Movie[]>([]);
+  const [isPopularTvLoading, setIsPopularTvLoading] = React.useState(false);
+  const [isAiringTodayLoading, setIsAiringTodayLoading] = React.useState(false);
   const { user } = useAuth();
   const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
@@ -51,25 +64,44 @@ export default function Home() {
     loadLists();
   }, [user]);
 
+  // Trending fetch (only today)
+  React.useEffect(() => {
+    setIsTrendingLoading(true);
+    Promise.all([
+      fetchTrendingMovies("day"),
+      fetchTrendingTv("day"),
+    ]).then(([movies, tv]) => {
+      setTrendingMovies(movies);
+      setTrendingTv(tv);
+    }).finally(() => setIsTrendingLoading(false));
+  }, []);
+
+  // Popular TV fetch
+  React.useEffect(() => {
+    setIsPopularTvLoading(true);
+    fetchPopularTvShows().then(setPopularTv).finally(() => setIsPopularTvLoading(false));
+  }, []);
+
+  // Airing Today TV fetch
+  React.useEffect(() => {
+    setIsAiringTodayLoading(true);
+    fetchAiringTodayTvShows().then(setAiringTodayTv).finally(() => setIsAiringTodayLoading(false));
+  }, []);
+
   React.useEffect(() => {
     const fetchRecommendations = async () => {
       if (watched.length === 0 && watching.length === 0) {
         setRecommendations([]);
         return;
       }
-      
       setIsRecommendationsLoading(true);
-
       try {
         const watchedTitles = watched.map(m => m.title || m.name).filter(Boolean) as string[];
         const watchingTitles = watching.map(m => m.title || m.name).filter(Boolean) as string[];
-
         const result = await getRecommendations({ watched: watchedTitles, watching: watchingTitles });
-        
         if (result.recommendations) {
           const moviePromises = result.recommendations.map(async (rec) => {
             const searchResults = await searchMulti(rec.title);
-            // Return the first result that is a movie or tv show
             return searchResults.find(item => item.media_type === 'movie' || item.media_type === 'tv') || null;
           });
           const recommendedMovies = (await Promise.all(moviePromises)).filter(Boolean) as Movie[];
@@ -81,10 +113,8 @@ export default function Home() {
         setIsRecommendationsLoading(false);
       }
     };
-
     const timer = setTimeout(fetchRecommendations, 1000);
     return () => clearTimeout(timer);
-
   }, [watched, watching]);
 
 
@@ -172,29 +202,66 @@ export default function Home() {
         onListUpdate={handleListUpdate}
       />
       <main className="flex-1 space-y-12 py-8">
-  {/* Recommendations moved to /recommendation page */}
+        {/* Trending Today Section */}
+        <section>
+          <MovieRow
+            title="Trending Movies Today"
+            movies={trendingMovies.map(m => ({ ...m, media_type: 'movie' }))}
+            onMovieClick={handleMovieClick}
+            isLoading={isTrendingLoading}
+            horizontal={true}
+          />
+          <div className="mt-8" />
+          <MovieRow
+            title="Trending TV Shows Today"
+            movies={trendingTv.map(m => ({ ...m, media_type: 'tv' }))}
+            onMovieClick={handleMovieClick}
+            isLoading={isTrendingLoading}
+            horizontal={true}
+          />
+        </section>
+        {/* Popular Movies */}
         <MovieRow
           title="Popular Movies"
-          fetchFunction={fetchPopularMovies}
+          fetchFunction={async () => (await fetchPopularMovies()).map(m => ({ ...m, media_type: 'movie' }))}
           onMovieClick={handleMovieClick}
           horizontal={true}
         />
+        {/* Popular TV Shows */}
+        <MovieRow
+          title="Popular TV Shows"
+          movies={popularTv.map(m => ({ ...m, media_type: 'tv' }))}
+          onMovieClick={handleMovieClick}
+          isLoading={isPopularTvLoading}
+          horizontal={true}
+        />
+        {/* Top Rated Movies */}
         <MovieRow
           title="Top Rated Movies"
-          fetchFunction={fetchTopRatedMovies}
+          fetchFunction={async () => (await fetchTopRatedMovies()).map(m => ({ ...m, media_type: 'movie' }))}
           onMovieClick={handleMovieClick}
           horizontal={true}
         />
+        {/* Top Rated TV Shows */}
         <MovieRow
           title="Top Rated TV Shows"
-          fetchFunction={fetchTopRatedTvShows}
+          fetchFunction={async () => (await fetchTopRatedTvShows()).map(m => ({ ...m, media_type: 'tv' }))}
           onMovieClick={handleMovieClick}
           horizontal={true}
         />
+        {/* Upcoming Movies */}
         <MovieRow
           title="Upcoming Movies"
-          fetchFunction={fetchUpcomingMovies}
+          fetchFunction={async () => (await fetchUpcomingMovies()).map(m => ({ ...m, media_type: 'movie' }))}
           onMovieClick={handleMovieClick}
+          horizontal={true}
+        />
+        {/* TV Shows Airing Today */}
+        <MovieRow
+          title="TV Shows Airing Today"
+          movies={airingTodayTv.map(m => ({ ...m, media_type: 'tv' }))}
+          onMovieClick={handleMovieClick}
+          isLoading={isAiringTodayLoading}
           horizontal={true}
         />
       </main>
