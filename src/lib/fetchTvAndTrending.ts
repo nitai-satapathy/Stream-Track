@@ -17,6 +17,6 @@ export const fetchPopularTvShows = async (): Promise<Movie[]> => {
 };
 
 export const fetchAiringTodayTvShows = async (): Promise<Movie[]> => {
-  const response = await tmdbApi.get<TmdbApiResponse>("/tv/on_the_air");
+  const response = await tmdbApi.get<TmdbApiResponse>("/tv/airing_today");
   return response.data.results;
 };
