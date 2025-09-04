@@ -2,18 +2,33 @@
 
 import * as React from "react";
 import { Header } from "@/components/Header";
-import { Plus } from "lucide-react";
+import { Plus, Funnel } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { BulkAddDialog } from "@/components/BulkAddDialog";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
+import { FilterSortModal } from "@/components/FilterSortModal";
 import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserLists, updateUserLists } from "@/lib/firestore";
 
 type ListType = "watchlist" | "watching" | "watched";
 
+const MOVIE_GENRES = [
+  "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "TV Movie", "Thriller", "War", "Western"
+];
+
 export default function WatchedMoviesPage() {
   const [isBulkDialogOpen, setIsBulkDialogOpen] = React.useState(false);
+  const [selectedGenres, setSelectedGenres] = React.useState<string[]>([]);
+  const [sortBy, setSortBy] = React.useState("popularity_desc");
   const { user } = useAuth();
   const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
@@ -53,7 +68,41 @@ export default function WatchedMoviesPage() {
   
 
 
-  const watchedMovies = watched.filter(movie => movie.media_type === 'movie' || (!movie.media_type && movie.title));
+  const watchedMovies = React.useMemo(() => {
+    let base = watched.filter(movie => movie.media_type === 'movie' || (!movie.media_type && movie.title));
+    if (selectedGenres.length > 0) {
+      base = base.filter(movie => {
+        if (movie.genres && movie.genres.length > 0) {
+          return movie.genres.some(g => selectedGenres.includes(g.name));
+        }
+        if ((movie as any).Genre && typeof (movie as any).Genre === 'string') {
+          return (movie as any).Genre.split(',').map((s: string) => s.trim()).some((g: string) => selectedGenres.includes(g));
+        }
+        return false;
+      });
+    }
+    // Sort logic
+    switch (sortBy) {
+      case "popularity_desc":
+        return [...base].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0));
+      case "popularity_asc":
+        return [...base].sort((a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0));
+      case "rating_desc":
+        return [...base].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0));
+      case "rating_asc":
+        return [...base].sort((a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0));
+      case "release_desc":
+        return [...base].sort((a, b) => (b.release_date ?? "") > (a.release_date ?? "") ? 1 : -1);
+      case "release_asc":
+        return [...base].sort((a, b) => (a.release_date ?? "") > (b.release_date ?? "") ? 1 : -1);
+      case "title_az":
+        return [...base].sort((a, b) => ((a.title ?? "").localeCompare(b.title ?? "")));
+      case "title_za":
+        return [...base].sort((a, b) => ((b.title ?? "").localeCompare(a.title ?? "")));
+      default:
+        return base;
+    }
+  }, [watched, selectedGenres, sortBy]);
 
   const isMovieInList = (movieId: number, list: ListType) => {
     const listMap = {
@@ -134,11 +183,27 @@ export default function WatchedMoviesPage() {
         setWatchedMovies={setWatched}
         watchedShows={[]}
         setWatchedShows={() => {}}
-        user={user}
+  // user={user}
       />
       <main className="flex-1 space-y-12 py-8">
-        <div className="container space-y-4">
+        <div className="container space-y-4 flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Watched Movies</h1>
+          <FilterSortModal
+            isOpen={isBulkDialogOpen}
+            onClose={() => setIsBulkDialogOpen(false)}
+            genres={MOVIE_GENRES}
+            selectedGenres={selectedGenres}
+            setSelectedGenres={setSelectedGenres}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+          />
+          <button
+            className="ml-2 p-2 rounded hover:bg-muted transition-colors"
+            aria-label="Filter watched movies"
+            onClick={() => setIsBulkDialogOpen(true)}
+          >
+            <Funnel className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors" />
+          </button>
         </div>
         {watchedMovies.length > 0 ? (
           <MovieRow

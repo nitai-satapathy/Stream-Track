@@ -2,7 +2,16 @@
 
 import * as React from "react";
 import { Header } from "@/components/Header";
-import { Plus } from "lucide-react";
+import { Plus, Funnel } from "lucide-react";
+import { FilterSortModal } from "@/components/FilterSortModal";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { BulkAddDialog } from "@/components/BulkAddDialog";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
@@ -12,8 +21,18 @@ import { getUserLists, updateUserLists } from "@/lib/firestore";
 
 type ListType = "watchlist" | "watching" | "watched";
 
+const TV_GENRES = [
+  "Action & Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Kids", "Mystery", "News", "Reality", "Sci-Fi & Fantasy", "Soap", "Talk", "War & Politics", "Western"
+];
+
 export default function WatchedTvShowsPage() {
   const { user } = useAuth();
+  const [selectedGenres, setSelectedGenres] = React.useState<string[]>([]);
+  const [filterModalOpen, setFilterModalOpen] = React.useState(false);
+  const [sortBy, setSortBy] = React.useState("popularity_desc");
+  const [releaseFrom, setReleaseFrom] = React.useState("");
+  const [releaseTo, setReleaseTo] = React.useState("");
+  const [rating, setRating] = React.useState<number | null>(null);
   const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
   const [watching, setWatching] = React.useState<Movie[]>([]);
@@ -55,7 +74,41 @@ export default function WatchedTvShowsPage() {
 
 
 
-  const watchedTvShows = watched.filter(movie => movie.media_type === 'tv' || movie.name);
+  const watchedTvShows = React.useMemo(() => {
+    let base = watched.filter(movie => movie.media_type === 'tv' || movie.name);
+    if (selectedGenres.length > 0) {
+      base = base.filter(show => {
+        if (show.genres && show.genres.length > 0) {
+          return show.genres.some(g => selectedGenres.includes(g.name));
+        }
+        if ((show as any).Genre && typeof (show as any).Genre === 'string') {
+          return (show as any).Genre.split(',').map((s: string) => s.trim()).some((g: string) => selectedGenres.includes(g));
+        }
+        return false;
+      });
+    }
+    // Sort logic
+    switch (sortBy) {
+      case "popularity_desc":
+        return [...base].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0));
+      case "popularity_asc":
+        return [...base].sort((a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0));
+      case "rating_desc":
+        return [...base].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0));
+      case "rating_asc":
+        return [...base].sort((a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0));
+      case "release_desc":
+        return [...base].sort((a, b) => (b.first_air_date ?? "") > (a.first_air_date ?? "") ? 1 : -1);
+      case "release_asc":
+        return [...base].sort((a, b) => (a.first_air_date ?? "") > (b.first_air_date ?? "") ? 1 : -1);
+      case "title_az":
+        return [...base].sort((a, b) => ((a.name ?? a.title ?? "").localeCompare(b.name ?? b.title ?? "")));
+      case "title_za":
+        return [...base].sort((a, b) => ((b.name ?? b.title ?? "").localeCompare(a.name ?? a.title ?? "")));
+      default:
+        return base;
+    }
+  }, [watched, selectedGenres, sortBy]);
   
   const isMovieInList = (movieId: number, list: ListType) => {
     const listMap = {
@@ -140,8 +193,24 @@ export default function WatchedTvShowsPage() {
         setWatchedShows={setWatched}
       />
       <main className="flex-1 space-y-12 py-8">
-        <div className="container space-y-4">
+        <div className="container space-y-4 flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Watched TV Shows</h1>
+          <button
+            className="ml-2 p-2 rounded hover:bg-muted transition-colors"
+            aria-label="Filter watched TV shows"
+            onClick={() => setFilterModalOpen(true)}
+          >
+            <Funnel className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors" />
+          </button>
+          <FilterSortModal
+            isOpen={filterModalOpen}
+            onClose={() => setFilterModalOpen(false)}
+            genres={TV_GENRES}
+            selectedGenres={selectedGenres}
+            setSelectedGenres={setSelectedGenres}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+          />
         </div>
         {watchedTvShows.length > 0 ? (
           <MovieRow
