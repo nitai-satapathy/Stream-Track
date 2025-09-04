@@ -28,7 +28,7 @@ const MOVIE_GENRES = [
 export default function WatchedMoviesPage() {
   const [isBulkDialogOpen, setIsBulkDialogOpen] = React.useState(false);
   const [selectedGenres, setSelectedGenres] = React.useState<string[]>([]);
-  const [sortBy, setSortBy] = React.useState("popularity_desc");
+  const [sortBy, setSortBy] = React.useState("");
   const { user } = useAuth();
   const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
@@ -82,6 +82,7 @@ export default function WatchedMoviesPage() {
       });
     }
     // Sort logic
+    if (!sortBy) return base;
     switch (sortBy) {
       case "popularity_desc":
         return [...base].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0));
