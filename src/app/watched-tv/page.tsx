@@ -29,7 +29,7 @@ export default function WatchedTvShowsPage() {
   const { user } = useAuth();
   const [selectedGenres, setSelectedGenres] = React.useState<string[]>([]);
   const [filterModalOpen, setFilterModalOpen] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState("popularity_desc");
+  const [sortBy, setSortBy] = React.useState("");
   const [releaseFrom, setReleaseFrom] = React.useState("");
   const [releaseTo, setReleaseTo] = React.useState("");
   const [rating, setRating] = React.useState<number | null>(null);

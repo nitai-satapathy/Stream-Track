@@ -108,7 +108,7 @@ export function FilterSortModal({
           </DialogClose>
           <Button className="w-full sm:w-1/2" variant="outline" type="button" onClick={() => {
             setSelectedGenres([]);
-            setSortBy("popularity_desc");
+            setSortBy("");
             onClose();
           }}>Clear Filters</Button>
         </div>
