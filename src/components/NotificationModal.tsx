@@ -61,6 +61,33 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
           </h2>
         </div>
         <div className="space-y-4 max-h-[60vh] overflow-y-auto px-4 pb-4">
+          {notifications.length === 0 && (
+            <div
+              className="bg-blue-400/30 dark:bg-blue-900/30 rounded-md p-4 backdrop-blur-sm"
+              style={{ boxShadow: "0 4px 24px 0 rgba(30, 64, 175, 0.10)" }}
+            >
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-white truncate">
+                  Maintenance Notice
+                </h3>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full text-white ${categoryColors['Announcement']}`}
+                  style={{ backdropFilter: "blur(2px)" }}
+                >
+                  Announcement
+                </span>
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-200">
+                We’re doing some maintenance right now!<br />Login and sign-up are temporarily paused while we improve our servers. Thanks for sticking with us everything will be back soon.
+              </p>
+              <div className="flex items-center justify-between mt-2 text-xs text-gray-600 dark:text-gray-300">
+                <span>{new Date().toLocaleString()}</span>
+                <div className="flex items-center space-x-1">
+                  <span>System</span>
+                </div>
+              </div>
+            </div>
+          )}
           {notifications.map((note) => (
             <div
               key={note.id}
