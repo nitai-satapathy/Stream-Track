@@ -18,7 +18,8 @@ interface SelectedItem {
   media_type: MediaType;
 }
 
-export default function SearchPage() {
+
+function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q");
   const { user } = useAuth();
@@ -177,3 +178,12 @@ export default function SearchPage() {
     </div>
   );
 }
+
+export default function SearchPage() {
+  return (
+    <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading search...</div>}>
+      <SearchContent />
+    </React.Suspense>
+  );
+}
+

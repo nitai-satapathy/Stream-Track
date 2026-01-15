@@ -1,4 +1,4 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -23,6 +23,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('@opentelemetry/exporter-jaeger');
+    }
+    return config;
   },
 };
 
