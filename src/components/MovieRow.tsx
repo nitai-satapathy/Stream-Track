@@ -28,10 +28,12 @@ export function MovieRow({
   isLoading: initialIsLoading,
   horizontal = false,
   onRefresh,
-  refreshing
+  refreshing,
 }: MovieRowProps) {
   const [movies, setMovies] = React.useState<Movie[]>(initialMovies || []);
-  const [isLoading, setIsLoading] = React.useState(!!initialIsLoading || !initialMovies);
+  const [isLoading, setIsLoading] = React.useState(
+    !!initialIsLoading || !initialMovies,
+  );
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
 
@@ -64,19 +66,18 @@ export function MovieRow({
       loadMovies();
     }
   }, [fetchFunction, toast]);
-  
+
   React.useEffect(() => {
     if (initialMovies) {
       setMovies(initialMovies);
     }
   }, [initialMovies]);
-  
+
   React.useEffect(() => {
-    if(initialIsLoading !== undefined) {
+    if (initialIsLoading !== undefined) {
       setIsLoading(initialIsLoading);
     }
-  }, [initialIsLoading])
-
+  }, [initialIsLoading]);
 
   const renderContent = () => {
     if (isLoading) {
@@ -88,26 +89,28 @@ export function MovieRow({
         </div>
       );
     }
-    
+
     if (error) {
-        return (
-            <Alert variant="destructive" className="w-auto max-w-xl">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-            </Alert>
-        )
+      return (
+        <Alert variant="destructive" className="w-auto max-w-xl">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      );
     }
 
     if (horizontal) {
       return (
         <ScrollArea className="w-full whitespace-nowrap rounded-md">
           <div className="flex space-x-4">
-            {movies.map((movie) => (
+            {movies.map((movie, index) => (
               <MovieCard
-                key={movie.id + (movie.media_type || '')}
+                key={`${movie.id}-${movie.media_type || ""}-${index}`}
                 movie={movie}
-                onClick={() => onMovieClick(movie.id, movie.media_type || 'movie')}
+                onClick={() =>
+                  onMovieClick(movie.id, movie.media_type || "movie")
+                }
               />
             ))}
           </div>
@@ -116,13 +119,15 @@ export function MovieRow({
       );
     }
     return (
-      <div className="grid justify-start gap-x-3 gap-y-6"
-        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-        {movies.map((movie) => (
+      <div
+        className="grid justify-start gap-x-3 gap-y-6"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}
+      >
+        {movies.map((movie, index) => (
           <MovieCard
-            key={movie.id + (movie.media_type || '')}
+            key={`${movie.id}-${movie.media_type || ""}-${index}`}
             movie={movie}
-            onClick={() => onMovieClick(movie.id, movie.media_type || 'movie')}
+            onClick={() => onMovieClick(movie.id, movie.media_type || "movie")}
           />
         ))}
       </div>
@@ -140,13 +145,11 @@ export function MovieRow({
             title="Refresh recommendations"
             disabled={!!refreshing}
           >
-            <RefreshCw className={refreshing ? 'animate-spin' : ''} />
+            <RefreshCw className={refreshing ? "animate-spin" : ""} />
           </button>
         )}
       </div>
-      <div className="w-full rounded-md">
-        {renderContent()}
-      </div>
+      <div className="w-full rounded-md">{renderContent()}</div>
     </section>
   );
 }

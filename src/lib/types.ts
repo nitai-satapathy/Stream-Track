@@ -1,4 +1,4 @@
-export type MediaType = 'movie' | 'tv';
+export type MediaType = "movie" | "tv";
 export interface Movie {
   id: number;
   title: string;
@@ -14,7 +14,7 @@ export interface Movie {
   videos?: {
     results: Video[];
   };
-  media_type?: 'movie' | 'tv';
+  media_type?: "movie" | "tv";
 }
 
 export interface Genre {

@@ -1,15 +1,13 @@
-
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
-import { getUserLists, updateUserLists } from "@/lib/firestore";
+import { getLists, updateUserLists } from "@/actions/user";
 import type { Movie } from "@/lib/types";
 import { MovieCard } from "@/components/MovieCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Header } from "@/components/Header";
 import { MovieModal } from "@/components/MovieModal";
-
 
 const WatchlistPage = () => {
   const { user } = useAuth();
@@ -18,17 +16,30 @@ const WatchlistPage = () => {
   const [watchlist, setWatchlist] = useState<Movie[]>([]);
   const [watching, setWatching] = useState<Movie[]>([]);
   const [watched, setWatched] = useState<Movie[]>([]);
-  const [selectedItem, setSelectedItem] = useState<{ id: number; media_type: 'movie' | 'tv' } | null>(null);
+  const [selectedItem, setSelectedItem] = useState<{
+    id: number;
+    media_type: "movie" | "tv";
+  } | null>(null);
 
   // Extracted fetchLists so it can be reused after updates
   const fetchLists = async () => {
     if (user) {
-      const { watchlist, watching, watched } = await getUserLists(user.uid);
+      const { watchlist, watching, watched } = await getLists(user.uid);
       setWatchlist(watchlist);
       setWatching(watching);
       setWatched(watched);
-      setMovies(watchlist.filter(item => item.media_type === 'movie' || (!item.media_type && item.title)));
-      setTvShows(watchlist.filter(item => item.media_type === 'tv' || (!item.media_type && item.name)));
+      setMovies(
+        watchlist.filter(
+          (item: Movie) =>
+            item.media_type === "movie" || (!item.media_type && item.title),
+        ),
+      );
+      setTvShows(
+        watchlist.filter(
+          (item: Movie) =>
+            item.media_type === "tv" || (!item.media_type && item.name),
+        ),
+      );
     } else {
       // fallback to localStorage for guests
       const storedWatchlist = localStorage.getItem("watchlist");
@@ -40,8 +51,17 @@ const WatchlistPage = () => {
       setWatchlist(wl);
       setWatching(wg);
       setWatched(wd);
-      setMovies(wl.filter(item => item.media_type === 'movie' || (!item.media_type && item.title)));
-      setTvShows(wl.filter(item => item.media_type === 'tv' || (!item.media_type && item.name)));
+      setMovies(
+        wl.filter(
+          (item) =>
+            item.media_type === "movie" || (!item.media_type && item.title),
+        ),
+      );
+      setTvShows(
+        wl.filter(
+          (item) => item.media_type === "tv" || (!item.media_type && item.name),
+        ),
+      );
     }
   };
 
@@ -49,7 +69,7 @@ const WatchlistPage = () => {
     fetchLists();
   }, [user]);
 
-  const handleMovieClick = (id: number, media_type: 'movie' | 'tv') => {
+  const handleMovieClick = (id: number, media_type: "movie" | "tv") => {
     setSelectedItem({ id, media_type });
   };
 
@@ -65,40 +85,47 @@ const WatchlistPage = () => {
     let newWatching = [...watching];
     let newWatched = [...watched];
 
-    const lists: Record<ListType, {state: Movie[], setter: React.Dispatch<React.SetStateAction<Movie[]>>}> = {
+    const lists: Record<
+      ListType,
+      { state: Movie[]; setter: React.Dispatch<React.SetStateAction<Movie[]>> }
+    > = {
       watchlist: { state: newWatchlist, setter: setWatchlist },
       watching: { state: newWatching, setter: setWatching },
       watched: { state: newWatched, setter: setWatched },
     };
 
-    const otherLists = (Object.keys(lists) as ListType[]).filter(l => l !== list);
+    const otherLists = (Object.keys(lists) as ListType[]).filter(
+      (l) => l !== list,
+    );
 
     // Remove from other lists
-    otherLists.forEach(listName => {
-        const updatedList = lists[listName].state.filter(m => m.id !== movie.id);
-        lists[listName].setter(updatedList);
-        if (listName === 'watchlist') newWatchlist = updatedList;
-        if (listName === 'watching') newWatching = updatedList;
-        if (listName === 'watched') newWatched = updatedList;
+    otherLists.forEach((listName) => {
+      const updatedList = lists[listName].state.filter(
+        (m) => m.id !== movie.id,
+      );
+      lists[listName].setter(updatedList);
+      if (listName === "watchlist") newWatchlist = updatedList;
+      if (listName === "watching") newWatching = updatedList;
+      if (listName === "watched") newWatched = updatedList;
     });
 
     const targetList = lists[list];
-    const movieIndex = targetList.state.findIndex(m => m.id === movie.id);
+    const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
 
     if (movieIndex > -1) {
       // Remove from target list if it's already there (toggle off)
-      const updatedList = targetList.state.filter(m => m.id !== movie.id);
+      const updatedList = targetList.state.filter((m) => m.id !== movie.id);
       targetList.setter(updatedList);
-      if (list === 'watchlist') newWatchlist = updatedList;
-      if (list === 'watching') newWatching = updatedList;
-      if (list === 'watched') newWatched = updatedList;
+      if (list === "watchlist") newWatchlist = updatedList;
+      if (list === "watching") newWatching = updatedList;
+      if (list === "watched") newWatched = updatedList;
     } else {
       // Add to target list
       const updatedList = [...targetList.state, movie];
       targetList.setter(updatedList);
-      if (list === 'watchlist') newWatchlist = updatedList;
-      if (list === 'watching') newWatching = updatedList;
-      if (list === 'watched') newWatched = updatedList;
+      if (list === "watchlist") newWatchlist = updatedList;
+      if (list === "watching") newWatching = updatedList;
+      if (list === "watched") newWatched = updatedList;
     }
 
     if (user) {
@@ -134,7 +161,9 @@ const WatchlistPage = () => {
       <main className="flex-1 p-6">
         <h1 className="text-3xl font-bold mb-6">Your Watchlist</h1>
         {movies.length === 0 && tvShows.length === 0 ? (
-          <div className="text-lg text-muted-foreground">No movies or shows in Watchlist.</div>
+          <div className="text-lg text-muted-foreground">
+            No movies or shows in Watchlist.
+          </div>
         ) : (
           <>
             {movies.length > 0 && (
@@ -142,8 +171,12 @@ const WatchlistPage = () => {
                 <h2 className="text-2xl font-semibold mb-4">Movies</h2>
                 <ScrollArea className="w-full whitespace-nowrap rounded-md">
                   <div className="flex gap-4">
-                    {movies.map(movie => (
-                      <MovieCard key={movie.id} movie={movie} onClick={() => handleMovieClick(movie.id, 'movie')} />
+                    {movies.map((movie) => (
+                      <MovieCard
+                        key={movie.id}
+                        movie={movie}
+                        onClick={() => handleMovieClick(movie.id, "movie")}
+                      />
                     ))}
                   </div>
                   <ScrollBar orientation="horizontal" />
@@ -155,8 +188,12 @@ const WatchlistPage = () => {
                 <h2 className="text-2xl font-semibold mb-4">TV Shows</h2>
                 <ScrollArea className="w-full whitespace-nowrap rounded-md">
                   <div className="flex gap-4">
-                    {tvShows.map(show => (
-                      <MovieCard key={show.id} movie={show} onClick={() => handleMovieClick(show.id, 'tv')} />
+                    {tvShows.map((show) => (
+                      <MovieCard
+                        key={show.id}
+                        movie={show}
+                        onClick={() => handleMovieClick(show.id, "tv")}
+                      />
                     ))}
                   </div>
                   <ScrollBar orientation="horizontal" />

@@ -1,4 +1,4 @@
-'use server';
+"use server";
 /**
  * @fileOverview A movie and TV show recommendation AI agent.
  *
@@ -7,34 +7,53 @@
  * - RecommendationOutput - The return type for the getRecommendations function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from "@/ai/genkit";
+import { z } from "genkit";
 
 const RecommendationInputSchema = z.object({
-  watched: z.array(z.string()).describe('A list of movies and TV shows the user has watched.'),
-  watching: z.array(z.string()).describe('A list of movies and TV shows the user is currently watching.'),
+  watched: z
+    .array(z.string())
+    .describe("A list of movies and TV shows the user has watched."),
+  watching: z
+    .array(z.string())
+    .describe("A list of movies and TV shows the user is currently watching."),
 });
 export type RecommendationInput = z.infer<typeof RecommendationInputSchema>;
 
 const RecommendationOutputSchema = z.object({
-    recommendations: z.array(z.object({
-        title: z.string().describe('The title of the recommended movie or TV show.'),
-        overview: z.string().describe('A brief overview of the recommended movie or TV show.'),
-    })).describe('A list of recommended movies or TV shows.')
+  recommendations: z
+    .array(
+      z.object({
+        title: z
+          .string()
+          .describe("The title of the recommended movie or TV show."),
+        overview: z
+          .string()
+          .describe("A brief overview of the recommended movie or TV show."),
+      }),
+    )
+    .describe("A list of recommended movies or TV shows."),
 });
 export type RecommendationOutput = z.infer<typeof RecommendationOutputSchema>;
 
-export async function getRecommendations(input: RecommendationInput): Promise<RecommendationOutput> {
+export async function getRecommendations(
+  input: RecommendationInput,
+): Promise<RecommendationOutput> {
   return recommendationFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'recommendationPrompt',
-  input: {schema: RecommendationInputSchema},
-  output: {schema: RecommendationOutputSchema},
-  prompt: `You are a movie and TV show recommendation expert. Based on the following lists of what a user has watched and is currently watching, provide a list of 5 new recommendations. Provide a mix of both movies and TV shows.
-
-Do not recommend titles that are already in the user's watched or watching lists.
+  name: "recommendationPrompt",
+  input: { schema: RecommendationInputSchema },
+  output: { schema: RecommendationOutputSchema },
+  prompt: `You are a movie and TV show recommendation expert. Based on the following lists of what a user has watched and is currently watching, provide a list of 5 HIGHLY RELEVANT but DISTINCT recommendations.
+  
+  Selection Criteria:
+  1. Analyze the user's taste based on genres, themes, and tone of the watched content.
+  2. Provide a mix of Movies and TV Shows.
+  3. Include at least 1 "Hidden Gem" (highly rated but less mainstream).
+  4. Avoid recommending titles structurally similar to the user's list if they are too generic (e.g., if they watched only one marvel movie, don't just recommend all other marvel movies unless there's a pattern).
+  5. **Explain WHY** you recommended it in the overview.
 
 User's Watched List:
 {{#each watched}}
@@ -50,12 +69,12 @@ User's Currently Watching List:
 
 const recommendationFlow = ai.defineFlow(
   {
-    name: 'recommendationFlow',
+    name: "recommendationFlow",
     inputSchema: RecommendationInputSchema,
     outputSchema: RecommendationOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const { output } = await prompt(input);
     return output!;
-  }
+  },
 );

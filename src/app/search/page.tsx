@@ -8,11 +8,9 @@ import { MovieModal } from "@/components/MovieModal";
 import { searchMulti } from "@/lib/tmdb";
 import type { Movie } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
-import { getUserLists, updateUserLists } from "@/lib/firestore";
+import { getLists, updateUserLists } from "@/actions/user";
 
-
-
-type MediaType = 'movie' | 'tv';
+type MediaType = "movie" | "tv";
 type ListType = "watchlist" | "watching" | "watched";
 
 interface SelectedItem {
@@ -25,7 +23,9 @@ export default function SearchPage() {
   const query = searchParams.get("q");
   const { user } = useAuth();
 
-  const [selectedItem, setSelectedItem] = React.useState<SelectedItem | null>(null);
+  const [selectedItem, setSelectedItem] = React.useState<SelectedItem | null>(
+    null,
+  );
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
   const [watching, setWatching] = React.useState<Movie[]>([]);
   const [watched, setWatched] = React.useState<Movie[]>([]);
@@ -33,7 +33,7 @@ export default function SearchPage() {
   React.useEffect(() => {
     const loadLists = async () => {
       if (user) {
-        const { watchlist, watching, watched } = await getUserLists(user.uid);
+        const { watchlist, watching, watched } = await getLists(user.uid);
         setWatchlist(watchlist);
         setWatching(watching);
         setWatched(watched);
@@ -88,42 +88,49 @@ export default function SearchPage() {
     let newWatching = [...watching];
     let newWatched = [...watched];
 
-    const lists: Record<ListType, {state: Movie[], setter: React.Dispatch<React.SetStateAction<Movie[]>>}> = {
+    const lists: Record<
+      ListType,
+      { state: Movie[]; setter: React.Dispatch<React.SetStateAction<Movie[]>> }
+    > = {
       watchlist: { state: newWatchlist, setter: setWatchlist },
       watching: { state: newWatching, setter: setWatching },
       watched: { state: newWatched, setter: setWatched },
     };
 
-    const otherLists = (Object.keys(lists) as ListType[]).filter(l => l !== list);
+    const otherLists = (Object.keys(lists) as ListType[]).filter(
+      (l) => l !== list,
+    );
 
     // Remove from other lists
-    otherLists.forEach(listName => {
-        const updatedList = lists[listName].state.filter(m => m.id !== movie.id);
-        lists[listName].setter(updatedList);
-        if (listName === 'watchlist') newWatchlist = updatedList;
-        if (listName === 'watching') newWatching = updatedList;
-        if (listName === 'watched') newWatched = updatedList;
+    otherLists.forEach((listName) => {
+      const updatedList = lists[listName].state.filter(
+        (m) => m.id !== movie.id,
+      );
+      lists[listName].setter(updatedList);
+      if (listName === "watchlist") newWatchlist = updatedList;
+      if (listName === "watching") newWatching = updatedList;
+      if (listName === "watched") newWatched = updatedList;
     });
 
     const targetList = lists[list];
-    const movieIndex = targetList.state.findIndex(m => m.id === movie.id);
+    const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
 
     if (movieIndex > -1) {
       // Remove from target list if it's already there (toggle off)
-      const updatedList = targetList.state.filter(m => m.id !== movie.id);
+      const updatedList = targetList.state.filter((m) => m.id !== movie.id);
       targetList.setter(updatedList);
-      if (list === 'watchlist') newWatchlist = updatedList;
-      if (list === 'watching') newWatching = updatedList;
-      if (list === 'watched') newWatched = updatedList;
+      if (list === "watchlist") newWatchlist = updatedList;
+      if (list === "watching") newWatching = updatedList;
+      if (list === "watched") newWatched = updatedList;
     } else {
       // Add to target list
       const updatedList = [...targetList.state, movie];
       targetList.setter(updatedList);
-      if (list === 'watchlist') newWatchlist = updatedList;
-      if (list === 'watching') newWatching = updatedList;
-      if (list === 'watched') newWatched = updatedList;
+      if (list === "watchlist") newWatchlist = updatedList;
+      if (list === "watching") newWatching = updatedList;
+      if (list === "watched") newWatched = updatedList;
     }
-    
+
     if (user) {
       await updateUserLists(user.uid, {
         watchlist: newWatchlist,
@@ -153,7 +160,9 @@ export default function SearchPage() {
           />
         ) : (
           <div className="container">
-            <p className="text-muted-foreground">Please enter a search term to find movies.</p>
+            <p className="text-muted-foreground">
+              Please enter a search term to find movies.
+            </p>
           </div>
         )}
       </main>

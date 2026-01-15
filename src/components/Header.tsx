@@ -1,16 +1,51 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Search, TvMinimalPlay, Popcorn, Clapperboard, Loader2, LogOut, Menu, ListPlus, Sparkles, ChevronDown, BadgePlus, Bell, Settings } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import {
+  Search,
+  TvMinimalPlay,
+  Popcorn,
+  Clapperboard,
+  Loader2,
+  LogOut,
+  Menu,
+  ListPlus,
+  Sparkles,
+  ChevronDown,
+  BadgePlus,
+  Bell,
+  Settings,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 import logoUrl from "@/public/icons/logo.svg";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  PopoverAnchor,
+} from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 import { searchMulti } from "@/lib/tmdb";
 import type { Movie, MediaType } from "@/lib/types";
 import Image from "next/image";
@@ -18,7 +53,6 @@ import { MovieModal } from "./MovieModal";
 import { NotificationModal } from "./NotificationModal";
 import { SettingsModal } from "./SettingsModal";
 import { useAuth } from "@/hooks/useAuth";
-
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
 
@@ -32,12 +66,100 @@ interface UserLists {
 interface HeaderProps {
   lists: UserLists;
   onListUpdate?: (movie: Movie, list: ListType) => Promise<void>;
-  onBulkAdd?: (added: { movies: Movie[], shows: Movie[], notFound: string[] }) => void;
+  onBulkAdd?: (added: {
+    movies: Movie[];
+    shows: Movie[];
+    notFound: string[];
+  }) => void;
   setWatchedMovies?: (movies: Movie[]) => void;
   setWatchedShows?: (shows: Movie[]) => void;
   watchedMovies?: Movie[];
   watchedShows?: Movie[];
 }
+
+const NavLinks = ({
+  isMobile = false,
+  user,
+}: {
+  isMobile?: boolean;
+  user: any;
+}) => (
+  <nav
+    className={
+      isMobile
+        ? "flex flex-col gap-4 text-lg"
+        : "hidden md:flex items-center gap-4 text-sm font-medium text-muted-foreground"
+    }
+  >
+    <Link
+      href="/watching"
+      className="hover:text-foreground transition-colors flex items-center gap-2"
+    >
+      <Popcorn className="h-4 w-4" />
+      Currently Watching
+    </Link>
+    <div className="relative">
+      {/* Dropdown for Watched */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          {/* Use a button for accessibility and to allow focus/active state */}
+          <button
+            type="button"
+            className="hover:text-foreground transition-colors flex items-center gap-2 cursor-pointer focus:outline-none"
+            aria-haspopup="menu"
+            aria-expanded={undefined}
+          >
+            Watched
+            {/* Dropdown icon, rotate when open using data-state attribute */}
+            <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem asChild>
+            <Link href="/watched-movies" className="flex items-center gap-2">
+              <Clapperboard className="h-4 w-4" />
+              Watched Movies
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/watched-tv" className="flex items-center gap-2">
+              <TvMinimalPlay className="h-4 w-4" />
+              Watched TV Shows
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+    <Link
+      href="/watchlist"
+      className="hover:text-foreground transition-colors flex items-center gap-2"
+    >
+      <ListPlus className="h-4 w-4" />
+      Watchlist
+    </Link>
+    <Link
+      href="/recommendation"
+      className="hover:text-foreground transition-colors flex items-center gap-2"
+    >
+      <Sparkles className="h-4 w-4" />
+      Recommendations
+    </Link>
+    {isMobile && !user && (
+      <>
+        <SheetClose asChild>
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/login">Login</Link>
+          </Button>
+        </SheetClose>
+        <SheetClose asChild>
+          <Button asChild className="w-full">
+            <Link href="/signup">Sign Up</Link>
+          </Button>
+        </SheetClose>
+      </>
+    )}
+  </nav>
+);
 
 export function Header(props: HeaderProps) {
   const {
@@ -49,7 +171,7 @@ export function Header(props: HeaderProps) {
     watchedShows,
   } = props;
   // Provide a default no-op if onListUpdate is not provided
-  const safeOnListUpdate = onListUpdate ?? (async () => { });
+  const safeOnListUpdate = onListUpdate ?? (async () => {});
   const { user, logout } = useAuth();
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
@@ -67,7 +189,10 @@ export function Header(props: HeaderProps) {
   const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-  const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
+  const [selectedItem, setSelectedItem] = React.useState<{
+    id: number;
+    media_type: MediaType;
+  } | null>(null);
 
   const { watchlist, watching, watched } = lists;
 
@@ -107,7 +232,7 @@ export function Header(props: HeaderProps) {
   const handleMovieClick = (id: number, media_type: MediaType) => {
     setSelectedItem({ id, media_type });
     setIsPopoverOpen(false);
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   const handleCloseModal = () => {
@@ -128,72 +253,9 @@ export function Header(props: HeaderProps) {
     if (searchQuery.trim()) {
       setIsPopoverOpen(false);
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
+      setSearchQuery("");
     }
   };
-
-  const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <nav className={isMobile ? "flex flex-col gap-4 text-lg" : "hidden md:flex items-center gap-4 text-sm font-medium text-muted-foreground"}>
-      <Link href="/watching" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <Popcorn className="h-4 w-4" />
-        Currently Watching
-      </Link>
-      <div className="relative">
-        {/* Dropdown for Watched */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            {/* Use a button for accessibility and to allow focus/active state */}
-            <button
-              type="button"
-              className="hover:text-foreground transition-colors flex items-center gap-2 cursor-pointer focus:outline-none"
-              aria-haspopup="menu"
-              aria-expanded={undefined} // will be set by DropdownMenu
-            >
-              Watched
-              {/* Dropdown icon, rotate when open using data-state attribute */}
-              <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem asChild>
-              <Link href="/watched-movies" className="flex items-center gap-2">
-                <Clapperboard className="h-4 w-4" />
-                Watched Movies
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/watched-tv" className="flex items-center gap-2">
-                <TvMinimalPlay className="h-4 w-4" />
-                Watched TV Shows
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <Link href="/watchlist" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <ListPlus className="h-4 w-4" />
-        Watchlist
-      </Link>
-      <Link href="/recommendation" className="hover:text-foreground transition-colors flex items-center gap-2">
-        <Sparkles className="h-4 w-4" />
-        Recommendations
-      </Link>
-      {isMobile && !user && (
-        <>
-          <SheetClose asChild>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/login">Login</Link>
-            </Button>
-          </SheetClose>
-          <SheetClose asChild>
-            <Button asChild className="w-full">
-              <Link href="/signup">Sign Up</Link>
-            </Button>
-          </SheetClose>
-        </>
-      )}
-    </nav>
-  );
 
   return (
     <>
@@ -202,12 +264,14 @@ export function Header(props: HeaderProps) {
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
               <Image src={logoUrl} alt="Logo" width={44} height={44} />
-              <h1 className="text-2xl font-bold text-foreground">Stream Track</h1>
+              <h1 className="text-2xl font-bold text-foreground">
+                Stream Track
+              </h1>
             </Link>
           </div>
           {/* Center navigation links */}
           <div className="hidden md:flex flex-1 justify-center">
-            <NavLinks />
+            <NavLinks user={user} />
           </div>
           <div className="flex items-center gap-4">
             {/* Notification icon */}
@@ -219,7 +283,10 @@ export function Header(props: HeaderProps) {
             >
               <Bell className="h-8 w-8" />
             </Button>
-            <NotificationModal isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+            <NotificationModal
+              isOpen={isNotifOpen}
+              onClose={() => setIsNotifOpen(false)}
+            />
             {/* Bulk Add BadgePlus icon */}
             <Button
               variant="ghost"
@@ -235,20 +302,22 @@ export function Header(props: HeaderProps) {
                 <DialogHeader>
                   <DialogTitle>Bulk Add Movies & TV Shows</DialogTitle>
                 </DialogHeader>
-                <label htmlFor="bulk-names" className="font-medium">Paste multiple names (one per line):</label>
+                <label htmlFor="bulk-names" className="font-medium">
+                  Paste multiple names (one per line):
+                </label>
                 <textarea
                   id="bulk-names"
                   className="w-full rounded border border-blue-400 bg-blue-200/40 backdrop-blur-md p-2 text-base text-slate-900 placeholder:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   rows={4}
                   value={bulkInput}
-                  onChange={e => setBulkInput(e.target.value)}
+                  onChange={(e) => setBulkInput(e.target.value)}
                   placeholder="Movie or Show 1, Movie or Show 2"
                   disabled={bulkLoading}
                   style={{
-                    background: 'rgba(59, 130, 246, 0.15)',
-                    color: '#ffffffff', // slate-900
-                    boxShadow: '0 4px 24px 0 rgba(59,130,246,0.10)',
-                    backdropFilter: 'blur(8px)'
+                    background: "rgba(59, 130, 246, 0.15)",
+                    color: "#ffffffff", // slate-900
+                    boxShadow: "0 4px 24px 0 rgba(59,130,246,0.10)",
+                    backdropFilter: "blur(8px)",
                   }}
                 />
                 <Button
@@ -256,7 +325,10 @@ export function Header(props: HeaderProps) {
                   onClick={async () => {
                     setBulkStatus(null);
                     setBulkLoading(true);
-                    const titles = bulkInput.split(/\r?\n/).map(t => t.trim()).filter(Boolean);
+                    const titles = bulkInput
+                      .split(/\r?\n/)
+                      .map((t) => t.trim())
+                      .filter(Boolean);
                     if (!titles.length) {
                       setBulkStatus("Please enter at least one name.");
                       setBulkLoading(false);
@@ -270,10 +342,17 @@ export function Header(props: HeaderProps) {
                         const results = await searchMulti(title);
                         const item = results[0];
                         if (item) {
-                          if (item.media_type === "movie" || (!item.media_type && item.title)) {
-                            if (!safeWatchedMovies.some(m => m.id === item.id)) foundMovies.push(item);
+                          if (
+                            item.media_type === "movie" ||
+                            (!item.media_type && item.title)
+                          ) {
+                            if (
+                              !safeWatchedMovies.some((m) => m.id === item.id)
+                            )
+                              foundMovies.push(item);
                           } else if (item.media_type === "tv" || item.name) {
-                            if (!safeWatchedShows.some(s => s.id === item.id)) foundShows.push(item);
+                            if (!safeWatchedShows.some((s) => s.id === item.id))
+                              foundShows.push(item);
                           } else {
                             notFound.push(title);
                           }
@@ -296,29 +375,79 @@ export function Header(props: HeaderProps) {
                       if (setWatchedShows) setWatchedShows(newShows);
                     }
                     if (user) {
-                      // Get current lists from Firestore, merge, and update
-                      const { getUserLists, updateUserLists } = await import("@/lib/firestore");
-                      const lists = await getUserLists(user.uid);
-                      const watchedMovies = lists.watched.filter((m: Movie) => m.media_type === 'movie' || (!m.media_type && m.title));
-                      const watchedShows = lists.watched.filter((m: Movie) => m.media_type === 'tv' || m.name);
-                      const mergedMovies = [...watchedMovies, ...foundMovies.filter((fm: Movie) => !watchedMovies.some((m: Movie) => m.id === fm.id))];
-                      const mergedShows = [...watchedShows, ...foundShows.filter((fs: Movie) => !watchedShows.some((s: Movie) => s.id === fs.id))];
-                      await updateUserLists(user.uid, { watched: [...mergedMovies, ...mergedShows] });
+                      // Get current lists from DB, merge, and update
+                      const { getLists, updateUserLists } =
+                        await import("@/actions/user");
+                      const lists = await getLists(user.uid);
+                      const watchedMovies = lists.watched.filter(
+                        (m: Movie) =>
+                          m.media_type === "movie" ||
+                          (!m.media_type && m.title),
+                      );
+                      const watchedShows = lists.watched.filter(
+                        (m: Movie) => m.media_type === "tv" || m.name,
+                      );
+                      const mergedMovies = [
+                        ...watchedMovies,
+                        ...foundMovies.filter(
+                          (fm: Movie) =>
+                            !watchedMovies.some((m: Movie) => m.id === fm.id),
+                        ),
+                      ];
+                      const mergedShows = [
+                        ...watchedShows,
+                        ...foundShows.filter(
+                          (fs: Movie) =>
+                            !watchedShows.some((s: Movie) => s.id === fs.id),
+                        ),
+                      ];
+                      await updateUserLists(user.uid, {
+                        watched: [...mergedMovies, ...mergedShows],
+                      });
                     } else {
                       // LocalStorage: merge and update
                       const stored = localStorage.getItem("watched");
                       let watchedList = [];
-                      try { watchedList = stored ? JSON.parse(stored) : []; } catch { }
-                      const watchedMovies = watchedList.filter((m: Movie) => m.media_type === 'movie' || (!m.media_type && m.title));
-                      const watchedShows = watchedList.filter((m: Movie) => m.media_type === 'tv' || m.name);
-                      const mergedMovies = [...watchedMovies, ...foundMovies.filter((fm: Movie) => !watchedMovies.some((m: Movie) => m.id === fm.id))];
-                      const mergedShows = [...watchedShows, ...foundShows.filter((fs: Movie) => !watchedShows.some((s: Movie) => s.id === fs.id))];
-                      localStorage.setItem("watched", JSON.stringify([...mergedMovies, ...mergedShows]));
+                      try {
+                        watchedList = stored ? JSON.parse(stored) : [];
+                      } catch {}
+                      const watchedMovies = watchedList.filter(
+                        (m: Movie) =>
+                          m.media_type === "movie" ||
+                          (!m.media_type && m.title),
+                      );
+                      const watchedShows = watchedList.filter(
+                        (m: Movie) => m.media_type === "tv" || m.name,
+                      );
+                      const mergedMovies = [
+                        ...watchedMovies,
+                        ...foundMovies.filter(
+                          (fm: Movie) =>
+                            !watchedMovies.some((m: Movie) => m.id === fm.id),
+                        ),
+                      ];
+                      const mergedShows = [
+                        ...watchedShows,
+                        ...foundShows.filter(
+                          (fs: Movie) =>
+                            !watchedShows.some((s: Movie) => s.id === fs.id),
+                        ),
+                      ];
+                      localStorage.setItem(
+                        "watched",
+                        JSON.stringify([...mergedMovies, ...mergedShows]),
+                      );
                     }
                     setBulkStatus(
-                      (foundMovies.length ? `Added ${foundMovies.length} movie(s). ` : "") +
-                      (foundShows.length ? `Added ${foundShows.length} show(s). ` : "") +
-                      (notFound.length ? `Not found: ${notFound.join(", ")}` : "")
+                      (foundMovies.length
+                        ? `Added ${foundMovies.length} movie(s). `
+                        : "") +
+                        (foundShows.length
+                          ? `Added ${foundShows.length} show(s). `
+                          : "") +
+                        (notFound.length
+                          ? `Not found: ${notFound.join(", ")}`
+                          : ""),
                     );
                     setBulkLoading(false);
                     setBulkInput("");
@@ -327,61 +456,109 @@ export function Header(props: HeaderProps) {
                 >
                   {bulkLoading ? "Adding..." : "Add to Watched"}
                 </Button>
-                {bulkStatus && <div className="text-sm text-muted-foreground mt-2">{bulkStatus}</div>}
+                {bulkStatus && (
+                  <div className="text-sm text-muted-foreground mt-2">
+                    {bulkStatus}
+                  </div>
+                )}
                 <DialogClose asChild>
-                  <Button variant="outline" className="mt-2 w-full">Close</Button>
+                  <Button variant="outline" className="mt-2 w-full">
+                    Close
+                  </Button>
                 </DialogClose>
               </DialogContent>
             </Dialog>
-            <Button variant="ghost" size="icon" aria-label="Settings" onClick={() => setIsSettingsOpen(true)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Settings"
+              onClick={() => setIsSettingsOpen(true)}
+            >
               <Settings className="h-6 w-6" />
             </Button>
-            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} lists={lists} />
+            <SettingsModal
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+              lists={lists}
+            />
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <form onSubmit={handleLegacySearchSubmit} className="relative w-full max-w-xs">
-                  <Input
-                    type="search"
-                    placeholder="Search movies & TV..."
-                    className="pl-10"
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    onFocus={() => { if (searchQuery.trim()) setIsPopoverOpen(true); }}
-                  />
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                </form>
-              </PopoverTrigger>
-              <PopoverContent className="w-[340px] p-2" align="end">
-                {isLoading && (
-                  <div className="flex items-center justify-center p-4">
-                    <Loader2 className="animate-spin" />
-                  </div>
-                )}
-                {!isLoading && searchResults.length > 0 && (
-                  <div className="space-y-2">
-                    {searchResults.map((item) => (
-                      <div key={item.id + (item.media_type || '')} className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer" onClick={() => handleMovieClick(item.id, item.media_type || 'movie')}>
-                        <div className="w-12 h-16 relative shrink-0">
-                          <Image
-                            src={item.poster_path ? `${IMAGE_BASE_URL}${item.poster_path}` : "https://placehold.co/80x120.png"}
-                            alt={item.title || item.name || "Poster"}
-                            layout="fill"
-                            objectFit="cover"
-                            className="rounded-sm"
-                          />
+              <div className="relative w-full max-w-xs">
+                <PopoverAnchor asChild>
+                  <form
+                    onSubmit={handleLegacySearchSubmit}
+                    className="relative w-full"
+                  >
+                    <Input
+                      type="search"
+                      placeholder="Search movies & TV..."
+                      className="pl-10"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      onFocus={() => {
+                        if (searchQuery.trim()) setIsPopoverOpen(true);
+                      }}
+                    />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  </form>
+                </PopoverAnchor>
+                <PopoverContent
+                  className="w-[340px] p-2"
+                  align="end"
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                >
+                  {isLoading && (
+                    <div className="flex items-center justify-center p-4">
+                      <Loader2 className="animate-spin" />
+                    </div>
+                  )}
+                  {!isLoading && searchResults.length > 0 && (
+                    <div className="space-y-2">
+                      {searchResults.map((item) => (
+                        <div
+                          key={item.id + (item.media_type || "")}
+                          className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer"
+                          onClick={() =>
+                            handleMovieClick(
+                              item.id,
+                              item.media_type || "movie",
+                            )
+                          }
+                        >
+                          <div className="w-12 h-16 relative shrink-0">
+                            <Image
+                              src={
+                                item.poster_path
+                                  ? `${IMAGE_BASE_URL}${item.poster_path}`
+                                  : "https://placehold.co/80x120.png"
+                              }
+                              alt={item.title || item.name || "Poster"}
+                              fill
+                              className="rounded-sm object-cover"
+                              sizes="48px"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold truncate">
+                              {item.title || item.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.release_date?.substring(0, 4) ||
+                                item.first_air_date?.substring(0, 4)}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold truncate">{item.title || item.name}</p>
-                          <p className="text-xs text-muted-foreground">{item.release_date?.substring(0, 4) || item.first_air_date?.substring(0, 4)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {!isLoading && searchResults.length === 0 && searchQuery.trim().length > 0 && (
-                  <p className="text-center text-sm text-muted-foreground p-4">No results found.</p>
-                )}
-              </PopoverContent>
+                      ))}
+                    </div>
+                  )}
+                  {!isLoading &&
+                    searchResults.length === 0 &&
+                    searchQuery.trim().length > 0 && (
+                      <p className="text-center text-sm text-muted-foreground p-4">
+                        No results found.
+                      </p>
+                    )}
+                </PopoverContent>
+              </div>
             </Popover>
             <div className="hidden sm:flex items-center gap-2">
               {user ? (
@@ -411,11 +588,13 @@ export function Header(props: HeaderProps) {
                   <SheetClose asChild>
                     <Link href="/" className="flex items-center gap-2">
                       <Image src={logoUrl} alt="Logo" width={34} height={34} />
-                      <h1 className="text-2xl font-bold text-foreground">Stream Track</h1>
+                      <h1 className="text-2xl font-bold text-foreground">
+                        Stream Track
+                      </h1>
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
-                    <NavLinks isMobile={true} />
+                    <NavLinks isMobile={true} user={user} />
                   </SheetClose>
                   {user && (
                     <Button variant="outline" onClick={logout} className="mt-4">

@@ -16,9 +16,20 @@ import { fetchCredits, CastMember } from "@/lib/fetchCredits";
 import { fetchMovieDetails } from "@/lib/tmdb";
 import { fetchOmdbData } from "@/lib/omdb";
 import type { OmdbData } from "@/lib/omdb.types";
-import { Popcorn, ListPlus, Clapperboard, Star, Youtube, Wallet } from "lucide-react";
+import {
+  Popcorn,
+  ListPlus,
+  Clapperboard,
+  Star,
+  Youtube,
+  Wallet,
+} from "lucide-react";
 import { LiaImdb } from "react-icons/lia";
-import { SiThemoviedatabase, SiRottentomatoes, SiMetacritic } from "react-icons/si";
+import {
+  SiThemoviedatabase,
+  SiRottentomatoes,
+  SiMetacritic,
+} from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 import { FcCalendar } from "react-icons/fc";
 
@@ -26,7 +37,7 @@ type ListType = "watchlist" | "watching" | "watched";
 
 interface MovieModalProps {
   movieId: number | null;
-  mediaType: 'movie' | 'tv' | null;
+  mediaType: "movie" | "tv" | null;
   isOpen: boolean;
   onClose: () => void;
   onListUpdate: (movie: Movie, list: ListType) => void;
@@ -35,8 +46,14 @@ interface MovieModalProps {
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
 
-
-export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, isMovieInList }: MovieModalProps) {
+export function MovieModal({
+  movieId,
+  mediaType,
+  isOpen,
+  onClose,
+  onListUpdate,
+  isMovieInList,
+}: MovieModalProps) {
   const [movie, setMovie] = React.useState<Movie | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [omdb, setOmdb] = React.useState<OmdbData | null>(null);
@@ -53,8 +70,15 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
           setMovie(details);
           // Try to get OMDb data using title/name and year
           let title = details.title || details.name;
-          let year = details.release_date?.slice(0, 4) || details.first_air_date?.slice(0, 4);
-          let type: 'movie' | 'series' | undefined = mediaType === 'movie' ? 'movie' : mediaType === 'tv' ? 'series' : undefined;
+          let year =
+            details.release_date?.slice(0, 4) ||
+            details.first_air_date?.slice(0, 4);
+          let type: "movie" | "series" | undefined =
+            mediaType === "movie"
+              ? "movie"
+              : mediaType === "tv"
+                ? "series"
+                : undefined;
           if (title) {
             try {
               const omdbData = await fetchOmdbData(title, year, type);
@@ -74,7 +98,8 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
           console.error("Failed to fetch movie details:", error);
           toast({
             title: "Error",
-            description: "Failed to load movie details. Please try again later.",
+            description:
+              "Failed to load movie details. Please try again later.",
             variant: "destructive",
           });
           onClose();
@@ -91,9 +116,9 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
   }, [movieId, mediaType, onClose, toast]);
 
   const trailer = movie?.videos?.results.find(
-    (video) => video.site === "YouTube" && video.type === "Trailer"
+    (video) => video.site === "YouTube" && video.type === "Trailer",
   );
-  
+
   const handleListButtonClick = (list: ListType) => {
     if (movie) {
       onListUpdate(movie, list);
@@ -104,30 +129,29 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
     if (isLoading || !movie) {
       return (
         <>
-        <DialogHeader>
+          <DialogHeader>
             <DialogTitle className="sr-only">Loading movie details</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Skeleton className="h-[450px] md:h-[350px] w-full col-span-1 md:col-span-1" />
-          <div className="space-y-4 col-span-1 md:col-span-2">
-            <Skeleton className="h-8 w-3/4" />
-            <div className="flex gap-2">
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-20" />
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Skeleton className="h-[450px] md:h-[350px] w-full col-span-1 md:col-span-1" />
+            <div className="space-y-4 col-span-1 md:col-span-2">
+              <Skeleton className="h-8 w-3/4" />
+              <div className="flex gap-2">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-20" />
+              </div>
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-10 w-40" />
             </div>
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-10 w-40" />
           </div>
-        </div>
         </>
       );
     }
-    
+
     const inWatchlist = isMovieInList(movie.id, "watchlist");
     const inWatching = isMovieInList(movie.id, "watching");
     const inWatched = isMovieInList(movie.id, "watched");
     const releaseDate = movie.release_date || movie.first_air_date;
-
 
     return (
       <>
@@ -156,21 +180,26 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
                 <span>{movie.vote_average.toFixed(1)} / 10</span>
               </div>
               {/* IMDb Rating */}
-              {omdb?.imdbRating && omdb.imdbRating !== 'N/A' && (
+              {omdb?.imdbRating && omdb.imdbRating !== "N/A" && (
                 <div className="flex items-center gap-1">
                   <LiaImdb className="h-6 w-6 text-yellow-500" />
                   <span>{omdb.imdbRating} / 10</span>
                 </div>
               )}
               {/* Rotten Tomatoes */}
-              {omdb?.Ratings?.find(r => r.Source === 'Rotten Tomatoes') && (
+              {omdb?.Ratings?.find((r) => r.Source === "Rotten Tomatoes") && (
                 <div className="flex items-center gap-1">
                   <SiRottentomatoes className="h-5 w-5 text-red-600" />
-                  <span>{omdb.Ratings.find(r => r.Source === 'Rotten Tomatoes')?.Value}</span>
+                  <span>
+                    {
+                      omdb.Ratings.find((r) => r.Source === "Rotten Tomatoes")
+                        ?.Value
+                    }
+                  </span>
                 </div>
               )}
               {/* Metacritic */}
-              {omdb?.Metascore && omdb.Metascore !== 'N/A' && (
+              {omdb?.Metascore && omdb.Metascore !== "N/A" && (
                 <div className="flex items-center gap-1">
                   <SiMetacritic className="h-5 w-5 text-green-700" />
                   <span>{omdb.Metascore} / 100</span>
@@ -178,9 +207,9 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
               )}
             </div>
             {/* Box Office and Release Date Row */}
-            {(omdb?.BoxOffice && omdb.BoxOffice !== 'N/A') || releaseDate ? (
+            {(omdb?.BoxOffice && omdb.BoxOffice !== "N/A") || releaseDate ? (
               <div className="flex items-center space-x-4 text-sm mb-2">
-                {omdb?.BoxOffice && omdb.BoxOffice !== 'N/A' && (
+                {omdb?.BoxOffice && omdb.BoxOffice !== "N/A" && (
                   <div className="flex items-center gap-1">
                     <Wallet className="h-5 w-5 text-blue-700" />
                     <span>{omdb.BoxOffice}</span>
@@ -204,12 +233,12 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
             <p className="text-muted-foreground">{movie.overview}</p>
 
             <div className="flex flex-wrap gap-2 pt-4">
-               {trailer && (
+              {trailer && (
                 <Button
                   onClick={() =>
                     window.open(
                       `https://www.youtube.com/watch?v=${trailer.key}`,
-                      "_blank"
+                      "_blank",
                     )
                   }
                   variant="default"
@@ -248,7 +277,10 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
             <h4 className="font-bold mb-2 text-lg">Cast</h4>
             <div className="flex flex-wrap gap-3">
               {cast.map((member) => (
-                <div key={member.id} className="flex flex-col items-center text-center w-[90px] mb-2">
+                <div
+                  key={member.id}
+                  className="flex flex-col items-center text-center w-[90px] mb-2"
+                >
                   {member.profile_path ? (
                     <Image
                       src={`https://image.tmdb.org/t/p/w185${member.profile_path}`}
@@ -258,10 +290,16 @@ export function MovieModal({ movieId, mediaType, isOpen, onClose, onListUpdate, 
                       className="rounded-md object-cover"
                     />
                   ) : (
-                    <div className="w-[70px] h-[90px] bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">No Photo</div>
+                    <div className="w-[70px] h-[90px] bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                      No Photo
+                    </div>
                   )}
-                  <span className="mt-1 font-medium text-xs truncate w-[70px]">{member.name}</span>
-                  <span className="text-[10px] text-muted-foreground truncate w-[70px]">{member.character}</span>
+                  <span className="mt-1 font-medium text-xs truncate w-[70px]">
+                    {member.name}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground truncate w-[70px]">
+                    {member.character}
+                  </span>
                 </div>
               ))}
             </div>

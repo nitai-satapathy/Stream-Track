@@ -35,13 +35,16 @@ export const fetchUpcomingMovies = async (): Promise<Movie[]> => {
   const maximum = response.data.dates?.maximum;
   if (minimum && maximum) {
     return response.data.results.filter(
-      movie => movie.release_date >= minimum && movie.release_date <= maximum
+      (movie) => movie.release_date >= minimum && movie.release_date <= maximum,
     );
   }
   return response.data.results;
 };
 
-export const fetchMovieDetails = async (movieId: number, mediaType: 'movie' | 'tv'): Promise<Movie> => {
+export const fetchMovieDetails = async (
+  movieId: number,
+  mediaType: "movie" | "tv",
+): Promise<Movie> => {
   const response = await tmdbApi.get<Movie>(`/${mediaType}/${movieId}`, {
     params: {
       append_to_response: "videos",
@@ -60,22 +63,22 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
 };
 
 export const searchMulti = async (query: string): Promise<Movie[]> => {
-    const response = await tmdbApi.get<TmdbApiResponse>('/search/multi', {
-        params: {
-            query
-        }
-    });
-    return response.data.results.filter(
-        (item) => item.media_type === "movie" || item.media_type === "tv"
-    );
+  const response = await tmdbApi.get<TmdbApiResponse>("/search/multi", {
+    params: {
+      query,
+    },
+  });
+  return response.data.results.filter(
+    (item) => item.media_type === "movie" || item.media_type === "tv",
+  );
 };
 
-const getMediaType = async (id: number): Promise<'movie' | 'tv'> => {
+const getMediaType = async (id: number): Promise<"movie" | "tv"> => {
   try {
     await tmdbApi.get(`/movie/${id}`);
-    return 'movie';
+    return "movie";
   } catch (error) {
     // If movie fails, assume it's a TV show
-    return 'tv';
+    return "tv";
   }
 };

@@ -6,13 +6,16 @@ import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
 import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
-import { getUserLists, updateUserLists } from "@/lib/firestore";
+import { getLists, updateUserLists } from "@/actions/user";
 
 type ListType = "watchlist" | "watching" | "watched";
 
 export default function WatchingPage() {
   const { user } = useAuth();
-  const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
+  const [selectedItem, setSelectedItem] = React.useState<{
+    id: number;
+    media_type: MediaType;
+  } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
   const [watching, setWatching] = React.useState<Movie[]>([]);
   const [watched, setWatched] = React.useState<Movie[]>([]);
@@ -20,7 +23,7 @@ export default function WatchingPage() {
   React.useEffect(() => {
     const loadLists = async () => {
       if (user) {
-        const { watchlist, watching, watched } = await getUserLists(user.uid);
+        const { watchlist, watching, watched } = await getLists(user.uid);
         setWatchlist(watchlist);
         setWatching(watching);
         setWatched(watched);
@@ -48,8 +51,13 @@ export default function WatchingPage() {
     setSelectedItem(null);
   };
 
-  const watchingMovies = watching.filter(movie => movie.media_type === 'movie' || (!movie.media_type && movie.title));
-  const watchingTvShows = watching.filter(movie => movie.media_type === 'tv' || movie.name);
+  const watchingMovies = watching.filter(
+    (movie) =>
+      movie.media_type === "movie" || (!movie.media_type && movie.title),
+  );
+  const watchingTvShows = watching.filter(
+    (movie) => movie.media_type === "tv" || movie.name,
+  );
 
   const isMovieInList = (movieId: number, list: ListType) => {
     const listMap = {
@@ -59,54 +67,61 @@ export default function WatchingPage() {
     };
     return listMap[list].some((m) => m.id === movieId);
   };
-  
+
   const updateLocalStorage = (key: ListType, data: Movie[]) => {
     if (!user) {
-     localStorage.setItem(key, JSON.stringify(data));
-   }
- };
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+  };
 
   const handleListUpdate = async (movie: Movie, list: ListType) => {
     let newWatchlist = [...watchlist];
     let newWatching = [...watching];
     let newWatched = [...watched];
 
-    const lists: Record<ListType, {state: Movie[], setter: React.Dispatch<React.SetStateAction<Movie[]>>}> = {
+    const lists: Record<
+      ListType,
+      { state: Movie[]; setter: React.Dispatch<React.SetStateAction<Movie[]>> }
+    > = {
       watchlist: { state: newWatchlist, setter: setWatchlist },
       watching: { state: newWatching, setter: setWatching },
       watched: { state: newWatched, setter: setWatched },
     };
 
-    const otherLists = (Object.keys(lists) as ListType[]).filter(l => l !== list);
+    const otherLists = (Object.keys(lists) as ListType[]).filter(
+      (l) => l !== list,
+    );
 
     // Remove from other lists
-    otherLists.forEach(listName => {
-        const updatedList = lists[listName].state.filter(m => m.id !== movie.id);
-        lists[listName].setter(updatedList);
-        if (listName === 'watchlist') newWatchlist = updatedList;
-        if (listName === 'watching') newWatching = updatedList;
-        if (listName === 'watched') newWatched = updatedList;
+    otherLists.forEach((listName) => {
+      const updatedList = lists[listName].state.filter(
+        (m) => m.id !== movie.id,
+      );
+      lists[listName].setter(updatedList);
+      if (listName === "watchlist") newWatchlist = updatedList;
+      if (listName === "watching") newWatching = updatedList;
+      if (listName === "watched") newWatched = updatedList;
     });
 
     const targetList = lists[list];
-    const movieIndex = targetList.state.findIndex(m => m.id === movie.id);
+    const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
 
     if (movieIndex > -1) {
       // Remove from target list if it's already there (toggle off)
-      const updatedList = targetList.state.filter(m => m.id !== movie.id);
+      const updatedList = targetList.state.filter((m) => m.id !== movie.id);
       targetList.setter(updatedList);
-      if (list === 'watchlist') newWatchlist = updatedList;
-      if (list === 'watching') newWatching = updatedList;
-      if (list === 'watched') newWatched = updatedList;
+      if (list === "watchlist") newWatchlist = updatedList;
+      if (list === "watching") newWatching = updatedList;
+      if (list === "watched") newWatched = updatedList;
     } else {
       // Add to target list
       const updatedList = [...targetList.state, movie];
       targetList.setter(updatedList);
-      if (list === 'watchlist') newWatchlist = updatedList;
-      if (list === 'watching') newWatching = updatedList;
-      if (list === 'watched') newWatched = updatedList;
+      if (list === "watchlist") newWatchlist = updatedList;
+      if (list === "watching") newWatching = updatedList;
+      if (list === "watched") newWatched = updatedList;
     }
-    
+
     if (user) {
       await updateUserLists(user.uid, {
         watchlist: newWatchlist,
@@ -120,22 +135,25 @@ export default function WatchingPage() {
     }
   };
 
-
   return (
     <div className="flex min-h-screen flex-col">
-       <Header
+      <Header
         lists={{ watchlist, watching, watched }}
         onListUpdate={handleListUpdate}
       />
       <main className="flex-1 space-y-8 py-8">
         <div className="container">
-         <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Currently Watching</h1>
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+            Currently Watching
+          </h1>
         </div>
 
         {watching.length === 0 && (
-            <div className="container">
-                <p className="text-muted-foreground">You haven't added anything to your currently watching list yet.</p>
-            </div>
+          <div className="container">
+            <p className="text-muted-foreground">
+              You haven't added anything to your currently watching list yet.
+            </p>
+          </div>
         )}
 
         {watchingMovies.length > 0 && (

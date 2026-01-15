@@ -11,18 +11,36 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { BulkAddDialog } from "@/components/BulkAddDialog";
+
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
 import { FilterSortModal } from "@/components/FilterSortModal";
 import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
-import { getUserLists, updateUserLists } from "@/lib/firestore";
+import { getLists, updateUserLists } from "@/actions/user";
 
 type ListType = "watchlist" | "watching" | "watched";
 
 const MOVIE_GENRES = [
-  "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "TV Movie", "Thriller", "War", "Western"
+  "Action",
+  "Adventure",
+  "Animation",
+  "Comedy",
+  "Crime",
+  "Documentary",
+  "Drama",
+  "Family",
+  "Fantasy",
+  "History",
+  "Horror",
+  "Music",
+  "Mystery",
+  "Romance",
+  "Science Fiction",
+  "TV Movie",
+  "Thriller",
+  "War",
+  "Western",
 ];
 
 export default function WatchedMoviesPage() {
@@ -30,7 +48,10 @@ export default function WatchedMoviesPage() {
   const [selectedGenres, setSelectedGenres] = React.useState<string[]>([]);
   const [sortBy, setSortBy] = React.useState("");
   const { user } = useAuth();
-  const [selectedItem, setSelectedItem] = React.useState<{ id: number; media_type: MediaType } | null>(null);
+  const [selectedItem, setSelectedItem] = React.useState<{
+    id: number;
+    media_type: MediaType;
+  } | null>(null);
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
   const [watching, setWatching] = React.useState<Movie[]>([]);
   const [watched, setWatched] = React.useState<Movie[]>([]);
@@ -38,7 +59,7 @@ export default function WatchedMoviesPage() {
   React.useEffect(() => {
     const loadLists = async () => {
       if (user) {
-        const { watchlist, watching, watched } = await getUserLists(user.uid);
+        const { watchlist, watching, watched } = await getLists(user.uid);
         setWatchlist(watchlist);
         setWatching(watching);
         setWatched(watched);
@@ -65,18 +86,21 @@ export default function WatchedMoviesPage() {
   const handleCloseModal = () => {
     setSelectedItem(null);
   };
-  
-
 
   const watchedMovies = React.useMemo(() => {
-    let base = watched.filter(movie => movie.media_type === 'movie' || (!movie.media_type && movie.title));
+    let base = watched.filter(
+      (movie) =>
+        movie.media_type === "movie" || (!movie.media_type && movie.title),
+    );
     if (selectedGenres.length > 0) {
-      base = base.filter(movie => {
+      base = base.filter((movie) => {
         if (movie.genres && movie.genres.length > 0) {
-          return movie.genres.some(g => selectedGenres.includes(g.name));
+          return movie.genres.some((g) => selectedGenres.includes(g.name));
         }
-        if ((movie as any).Genre && typeof (movie as any).Genre === 'string') {
-          return (movie as any).Genre.split(',').map((s: string) => s.trim()).some((g: string) => selectedGenres.includes(g));
+        if ((movie as any).Genre && typeof (movie as any).Genre === "string") {
+          return (movie as any).Genre.split(",")
+            .map((s: string) => s.trim())
+            .some((g: string) => selectedGenres.includes(g));
         }
         return false;
       });
@@ -85,21 +109,37 @@ export default function WatchedMoviesPage() {
     if (!sortBy) return base;
     switch (sortBy) {
       case "popularity_desc":
-        return [...base].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0));
+        return [...base].sort(
+          (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
+        );
       case "popularity_asc":
-        return [...base].sort((a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0));
+        return [...base].sort(
+          (a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0),
+        );
       case "rating_desc":
-        return [...base].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0));
+        return [...base].sort(
+          (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
+        );
       case "rating_asc":
-        return [...base].sort((a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0));
+        return [...base].sort(
+          (a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0),
+        );
       case "release_desc":
-        return [...base].sort((a, b) => (b.release_date ?? "") > (a.release_date ?? "") ? 1 : -1);
+        return [...base].sort((a, b) =>
+          (b.release_date ?? "") > (a.release_date ?? "") ? 1 : -1,
+        );
       case "release_asc":
-        return [...base].sort((a, b) => (a.release_date ?? "") > (b.release_date ?? "") ? 1 : -1);
+        return [...base].sort((a, b) =>
+          (a.release_date ?? "") > (b.release_date ?? "") ? 1 : -1,
+        );
       case "title_az":
-        return [...base].sort((a, b) => ((a.title ?? "").localeCompare(b.title ?? "")));
+        return [...base].sort((a, b) =>
+          (a.title ?? "").localeCompare(b.title ?? ""),
+        );
       case "title_za":
-        return [...base].sort((a, b) => ((b.title ?? "").localeCompare(a.title ?? "")));
+        return [...base].sort((a, b) =>
+          (b.title ?? "").localeCompare(a.title ?? ""),
+        );
       default:
         return base;
     }
@@ -113,54 +153,61 @@ export default function WatchedMoviesPage() {
     };
     return listMap[list].some((m) => m.id === movieId);
   };
-  
+
   const updateLocalStorage = (key: ListType, data: Movie[]) => {
     if (!user) {
-     localStorage.setItem(key, JSON.stringify(data));
-   }
- };
- 
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+  };
+
   const handleListUpdate = async (movie: Movie, list: ListType) => {
     let newWatchlist = [...watchlist];
     let newWatching = [...watching];
     let newWatched = [...watched];
 
-    const lists: Record<ListType, {state: Movie[], setter: React.Dispatch<React.SetStateAction<Movie[]>>}> = {
+    const lists: Record<
+      ListType,
+      { state: Movie[]; setter: React.Dispatch<React.SetStateAction<Movie[]>> }
+    > = {
       watchlist: { state: newWatchlist, setter: setWatchlist },
       watching: { state: newWatching, setter: setWatching },
       watched: { state: newWatched, setter: setWatched },
     };
 
-    const otherLists = (Object.keys(lists) as ListType[]).filter(l => l !== list);
+    const otherLists = (Object.keys(lists) as ListType[]).filter(
+      (l) => l !== list,
+    );
 
     // Remove from other lists
-    otherLists.forEach(listName => {
-        const updatedList = lists[listName].state.filter(m => m.id !== movie.id);
-        lists[listName].setter(updatedList);
-        if (listName === 'watchlist') newWatchlist = updatedList;
-        if (listName === 'watching') newWatching = updatedList;
-        if (listName === 'watched') newWatched = updatedList;
+    otherLists.forEach((listName) => {
+      const updatedList = lists[listName].state.filter(
+        (m) => m.id !== movie.id,
+      );
+      lists[listName].setter(updatedList);
+      if (listName === "watchlist") newWatchlist = updatedList;
+      if (listName === "watching") newWatching = updatedList;
+      if (listName === "watched") newWatched = updatedList;
     });
 
     const targetList = lists[list];
-    const movieIndex = targetList.state.findIndex(m => m.id === movie.id);
+    const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
 
     if (movieIndex > -1) {
       // Remove from target list if it's already there (toggle off)
-      const updatedList = targetList.state.filter(m => m.id !== movie.id);
+      const updatedList = targetList.state.filter((m) => m.id !== movie.id);
       targetList.setter(updatedList);
-      if (list === 'watchlist') newWatchlist = updatedList;
-      if (list === 'watching') newWatching = updatedList;
-      if (list === 'watched') newWatched = updatedList;
+      if (list === "watchlist") newWatchlist = updatedList;
+      if (list === "watching") newWatching = updatedList;
+      if (list === "watched") newWatched = updatedList;
     } else {
       // Add to target list
       const updatedList = [...targetList.state, movie];
       targetList.setter(updatedList);
-      if (list === 'watchlist') newWatchlist = updatedList;
-      if (list === 'watching') newWatching = updatedList;
-      if (list === 'watched') newWatched = updatedList;
+      if (list === "watchlist") newWatchlist = updatedList;
+      if (list === "watching") newWatching = updatedList;
+      if (list === "watched") newWatched = updatedList;
     }
-    
+
     if (user) {
       await updateUserLists(user.uid, {
         watchlist: newWatchlist,
@@ -174,21 +221,25 @@ export default function WatchedMoviesPage() {
     }
   };
 
-
   return (
     <div className="flex min-h-screen flex-col">
       <Header
         lists={{ watchlist, watching, watched }}
         onListUpdate={handleListUpdate}
-        watchedMovies={watched.filter(movie => movie.media_type === 'movie' || (!movie.media_type && movie.title))}
+        watchedMovies={watched.filter(
+          (movie) =>
+            movie.media_type === "movie" || (!movie.media_type && movie.title),
+        )}
         setWatchedMovies={setWatched}
         watchedShows={[]}
         setWatchedShows={() => {}}
-  // user={user}
+        // user={user}
       />
       <main className="flex-1 space-y-12 py-8">
         <div className="container space-y-4 flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Watched Movies</h1>
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+            Watched Movies
+          </h1>
           <FilterSortModal
             isOpen={isBulkDialogOpen}
             onClose={() => setIsBulkDialogOpen(false)}
@@ -213,9 +264,11 @@ export default function WatchedMoviesPage() {
             title=""
           />
         ) : (
-            <div className="container">
-                <p className="text-muted-foreground">You haven't marked any movies as watched yet.</p>
-            </div>
+          <div className="container">
+            <p className="text-muted-foreground">
+              You haven't marked any movies as watched yet.
+            </p>
+          </div>
         )}
       </main>
       <MovieModal
