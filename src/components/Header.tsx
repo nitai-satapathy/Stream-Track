@@ -17,6 +17,7 @@ import {
   BadgePlus,
   Bell,
   Settings,
+  CheckCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -109,6 +110,7 @@ const NavLinks = ({
             aria-haspopup="menu"
             aria-expanded={undefined}
           >
+            <CheckCircle className="h-4 w-4" />
             Watched
             {/* Dropdown icon, rotate when open using data-state attribute */}
             <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
@@ -171,7 +173,7 @@ export function Header(props: HeaderProps) {
     watchedShows,
   } = props;
   // Provide a default no-op if onListUpdate is not provided
-  const safeOnListUpdate = onListUpdate ?? (async () => {});
+  const safeOnListUpdate = onListUpdate ?? (async () => { });
   const { user, logout } = useAuth();
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
@@ -410,7 +412,7 @@ export function Header(props: HeaderProps) {
                       let watchedList = [];
                       try {
                         watchedList = stored ? JSON.parse(stored) : [];
-                      } catch {}
+                      } catch { }
                       const watchedMovies = watchedList.filter(
                         (m: Movie) =>
                           m.media_type === "movie" ||
@@ -442,12 +444,12 @@ export function Header(props: HeaderProps) {
                       (foundMovies.length
                         ? `Added ${foundMovies.length} movie(s). `
                         : "") +
-                        (foundShows.length
-                          ? `Added ${foundShows.length} show(s). `
-                          : "") +
-                        (notFound.length
-                          ? `Not found: ${notFound.join(", ")}`
-                          : ""),
+                      (foundShows.length
+                        ? `Added ${foundShows.length} show(s). `
+                        : "") +
+                      (notFound.length
+                        ? `Not found: ${notFound.join(", ")}`
+                        : ""),
                     );
                     setBulkLoading(false);
                     setBulkInput("");
