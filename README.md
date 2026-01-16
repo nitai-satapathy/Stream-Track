@@ -2,61 +2,99 @@
 
 **Track What You Watch. Love What You Watch. Never Forget a Single Show.**
 
-Stream Track is a modern web application for tracking movies and TV shows you’ve watched, are watching, or want to watch. It features AI-powered recommendations, beautiful UI, and seamless authentication with Firebase.
+Stream Track is a modern web application designed for movie and TV enthusiasts to track their watching habits. It features a robust recommendation system powered by **Gemini AI**, a sleek responsive UI, and seamless authentication.
 
 ## Features
 
-- **User Authentication:** Sign up and log in with Firebase Auth.
-- **Personal Lists:** Manage your Watchlist, Watching, and Watched lists for movies and TV shows.
-- **AI Recommendations:** Get personalized recommendations based on your viewing history using Genkit AI.
-- **Movie & TV Data:** Powered by [The Movie Database (TMDb)](https://www.themoviedb.org/) API.
-- **Responsive UI:** Built with Next.js, Tailwind CSS, and Radix UI components.
-- **Search:** Quickly find movies and TV shows to add to your lists.
-- **Persistent Storage:** User data is stored in Firestore for authenticated users, and in localStorage for guests.
+- **User Authentication:** Secure signup and login using **NextAuth.js** with **MongoDB** storage.
+- **Personal Lists:** Manage your **Watchlist**, **Watching**, and **Watched** history for both movies and TV shows.
+- **AI Recommendations:** Get personalized recommendations based on your unique viewing history using **Google's Gemini AI**.
+- **Powerful Search:** Instantly find movies and TV shows using **TMDb API**.
+- **Notifications:** Stay updated with system announcements and maintenance notices.
+- **Responsive UI:** Built with **Next.js 15**, **Tailwind CSS**, and **Radix UI** for a premium experience on mobile and desktop.
+- **Persistent Storage:** User data is securely stored in **MongoDB Atlas**. Guest users can also test features using local storage.
+- **Bulk Add:** Quickly paste a list of movies to add them to your watched history in one go.
 
 ## Tech Stack
 
-- **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS, Radix UI
-- **Backend/AI:** Genkit AI for recommendations
-- **Auth & Database:** Firebase Auth & Firestore
-- **APIs:** TMDb for movie/TV metadata
+- **Frontend:** Next.js 15 (App Router), React, TypeScript, Tailwind CSS, Lucide Icons, Radix UI.
+- **Backend:** Server Actions (Next.js), Node.js.
+- **Database:** MongoDB (via Mongoose).
+- **Authentication:** NextAuth.js (Credentials Provider).
+- **AI Integration:** Genkit with Google Gemini.
+- **Data Source:** TMDb (The Movie Database).
 
 ## Getting Started
 
+Follow these instructions to run the project locally.
+
+### Prerequisites
+
+- **Node.js**: Version 18+ installed.
+- **MongoDB Atlas**: A cloud database cluster (or local instance).
+- **TMDb API Key**: Sign up at [themoviedb.org](https://www.themoviedb.org/).
+- **Gemini API Key**: Get your key from [Google AI Studio](https://aistudio.google.com/).
+
+### Installation
+
 1. **Clone the repository:**
-	```sh
-	git clone https://github.com/nitai-satapathy/Stream-Track.git
-	cd Stream-Track
-	```
+   ```bash
+   git clone https://github.com/nitai-satapathy/Stream-Track.git
+   cd Stream-Track
+   ```
 
 2. **Install dependencies:**
-	```sh
-	npm install
-	```
+   ```bash
+   npm install
+   ```
 
-3. **Set up environment variables:**
-	- Copy `.env.example` to `.env.local` and fill in your Firebase and TMDb API keys.
+3. **Set up Environment Variables:**
+   Create a `.env` file in the root directory and add the following keys:
+
+   ```env
+   # Database Connection (MongoDB Atlas)
+   MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/stream-track?retryWrites=true&w=majority
+
+   # Authentication Secret (Generate one with `openssl rand -base64 32`)
+   NEXTAUTH_SECRET=your_secret_key_here
+   NEXTAUTH_URL=http://localhost:3000
+
+   # External APIs
+   TMDB_API_KEY=your_tmdb_api_key_here
+   GEMINI_API_KEY=your_gemini_api_key_here
+
+   # Genkit Configuration
+   GENKIT_ENV=dev
+   ```
 
 4. **Run the development server:**
-	```sh
-	npm run dev
-	```
-	The app will be available at [http://localhost:9002](http://localhost:9002).
+   ```bash
+   npm run dev
+   ```
+   The app will be available at [http://localhost:9002](http://localhost:9002) (or user configured port).
 
 ## Project Structure
 
-- `src/app/` — Next.js app pages (home, login, signup, search, etc.)
-- `src/components/` — Reusable UI components (Header, MovieCard, MovieRow, etc.)
-- `src/lib/` — API clients, Firebase, Firestore, TMDb logic, and utility types
-- `src/ai/` — AI flows and Genkit integration for recommendations
-- `src/hooks/` — Custom React hooks (authentication, toast notifications)
-- `public/` — Static assets (icons, images)
+```
+src/
+├── app/               # Next.js App Router pages (Search, Login, Dashboard)
+├── components/        # Reusable UI components (Header, MovieCard, Modals)
+├── lib/               # Utilities, Database connection, Notifications data
+├── models/            # Mongoose Schemas (User)
+├── actions/           # Server Actions for Data Mutations
+├── hooks/             # Custom React Hooks (useAuth)
+├── ai/                # Genkit AI Logic flows
+└── public/            # Static assets
+```
 
-## Customization
+## Scripts
 
-- **Firebase:** Update `src/lib/firebase.ts` with your Firebase project config.
-- **TMDb:** Set your TMDb API key in the environment variables.
-- **AI:** The recommendation system is powered by Genkit and can be extended in `src/ai/flows/recommendation-flow.ts`.
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the application for production.
+- `npm run start`: Starts the production server.
+- `npm run lint`: Runs ESLint to check for code issues.
+- `npm run typecheck`: Checks TypeScript types.
+- `npm run genkit:dev`: Starts the Genkit developer UI for testing AI flows.
 
 ## Contributing
 
@@ -64,4 +102,4 @@ Contributions are welcome! Please open issues or pull requests for improvements 
 
 ## License
 
-MIT
+MIT License. Free to use and modify.
