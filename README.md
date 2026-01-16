@@ -2,13 +2,13 @@
 
 **Track What You Watch. Love What You Watch. Never Forget a Single Show.**
 
-Stream Track is a modern web application designed for movie and TV enthusiasts to track their watching habits. It features a robust recommendation system powered by **Gemini AI**, a sleek responsive UI, and seamless authentication.
+Stream Track is a modern web application designed for movie and TV enthusiasts to track their watching habits. It features a robust recommendation system powered by **Groq AI**, a sleek responsive UI, and seamless authentication.
 
 ## Features
 
 - **User Authentication:** Secure signup and login using **NextAuth.js** with **MongoDB** storage.
 - **Personal Lists:** Manage your **Watchlist**, **Watching**, and **Watched** history for both movies and TV shows.
-- **AI Recommendations:** Get personalized recommendations based on your unique viewing history using **Google's Gemini AI**.
+- **AI Recommendations:** Get personalized recommendations based on your unique viewing history using **Groq AI (Llama 3)** (via Genkit).
 - **Powerful Search:** Instantly find movies and TV shows using **TMDb API**.
 - **Notifications:** Stay updated with system announcements and maintenance notices.
 - **Responsive UI:** Built with **Next.js 15**, **Tailwind CSS**, and **Radix UI** for a premium experience on mobile and desktop.
@@ -21,7 +21,7 @@ Stream Track is a modern web application designed for movie and TV enthusiasts t
 - **Backend:** Server Actions (Next.js), Node.js.
 - **Database:** MongoDB (via Mongoose).
 - **Authentication:** NextAuth.js (Credentials Provider).
-- **AI Integration:** Genkit with Google Gemini.
+- **AI Integration:** Genkit with Groq Plugin.
 - **Data Source:** TMDb (The Movie Database).
 
 ## Getting Started
@@ -33,7 +33,7 @@ Follow these instructions to run the project locally.
 - **Node.js**: Version 18+ installed.
 - **MongoDB Atlas**: A cloud database cluster (or local instance).
 - **TMDb API Key**: Sign up at [themoviedb.org](https://www.themoviedb.org/).
-- **Gemini API Key**: Get your key from [Google AI Studio](https://aistudio.google.com/).
+- **Groq API Key**: Get your key from [Groq Console](https://console.groq.com/).
 
 ### Installation
 
@@ -61,7 +61,7 @@ Follow these instructions to run the project locally.
 
    # External APIs
    TMDB_API_KEY=your_tmdb_api_key_here
-   GEMINI_API_KEY=your_gemini_api_key_here
+   GROQ_API_KEY=your_groq_api_key_here
 
    # Genkit Configuration
    GENKIT_ENV=dev
