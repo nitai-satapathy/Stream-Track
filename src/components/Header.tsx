@@ -100,39 +100,58 @@ const NavLinks = ({
       <Popcorn className="h-4 w-4" />
       Currently Watching
     </Link>
-    <div className="relative">
-      {/* Dropdown for Watched */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          {/* Use a button for accessibility and to allow focus/active state */}
-          <button
-            type="button"
-            className="hover:text-foreground transition-colors flex items-center gap-2 cursor-pointer focus:outline-none"
-            aria-haspopup="menu"
-            aria-expanded={undefined}
-          >
-            <CheckCircle className="h-4 w-4" />
-            Watched
-            {/* Dropdown icon, rotate when open using data-state attribute */}
-            <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem asChild>
-            <Link href="/watched-movies" className="flex items-center gap-2">
-              <Clapperboard className="h-4 w-4" />
-              Watched Movies
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/watched-tv" className="flex items-center gap-2">
-              <TvMinimalPlay className="h-4 w-4" />
-              Watched TV Shows
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    {isMobile ? (
+      <div className="flex flex-col gap-4 pl-2 border-l border-border/50 ml-1">
+        <Link
+          href="/watched-movies"
+          className="hover:text-foreground transition-colors flex items-center gap-2 text-base text-muted-foreground"
+        >
+          <Clapperboard className="h-4 w-4" />
+          Watched Movies
+        </Link>
+        <Link
+          href="/watched-tv"
+          className="hover:text-foreground transition-colors flex items-center gap-2 text-base text-muted-foreground"
+        >
+          <TvMinimalPlay className="h-4 w-4" />
+          Watched TV Shows
+        </Link>
+      </div>
+    ) : (
+      <div className="relative">
+        {/* Dropdown for Watched */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            {/* Use a button for accessibility and to allow focus/active state */}
+            <button
+              type="button"
+              className="hover:text-foreground transition-colors flex items-center gap-2 cursor-pointer focus:outline-none"
+              aria-haspopup="menu"
+              aria-expanded={undefined}
+            >
+              <CheckCircle className="h-4 w-4" />
+              Watched
+              {/* Dropdown icon, rotate when open using data-state attribute */}
+              <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem asChild>
+              <Link href="/watched-movies" className="flex items-center gap-2">
+                <Clapperboard className="h-4 w-4" />
+                Watched Movies
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/watched-tv" className="flex items-center gap-2">
+                <TvMinimalPlay className="h-4 w-4" />
+                Watched TV Shows
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    )}
     <Link
       href="/watchlist"
       className="hover:text-foreground transition-colors flex items-center gap-2"
