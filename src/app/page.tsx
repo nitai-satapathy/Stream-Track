@@ -227,7 +227,7 @@ export default function Home() {
         lists={{ watchlist, watching, watched }}
         onListUpdate={handleListUpdate}
       />
-      <main className="flex-1 space-y-12 py-8">
+      <main className="flex-1 space-y-6 md:space-y-12 py-4 md:py-8">
         {/* Trending Today Section */}
         <section>
           <MovieRow

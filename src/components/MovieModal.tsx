@@ -155,14 +155,14 @@ export function MovieModal({
 
     return (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-foreground">
-          <div className="col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 text-foreground">
+          <div className="col-span-1 flex justify-center md:block">
             <Image
               src={`${IMAGE_BASE_URL}${movie.poster_path}`}
               alt={movie.title || movie.name || "Poster"}
               width={500}
               height={750}
-              className="rounded-lg shadow-lg"
+              className="rounded-lg shadow-lg max-h-[400px] w-auto h-auto object-contain md:max-h-none"
               data-ai-hint="movie poster"
             />
           </div>
@@ -230,7 +230,7 @@ export function MovieModal({
                 </Badge>
               ))}
             </div>
-            <p className="text-muted-foreground">{movie.overview}</p>
+            <p className="text-muted-foreground text-justify">{movie.overview}</p>
 
             <div className="flex flex-wrap gap-2 pt-4">
               {trailer && (
@@ -311,7 +311,7 @@ export function MovieModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-8 overflow-y-auto max-h-[90vh]">
+      <DialogContent className="max-w-4xl bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 md:p-8 overflow-y-auto max-h-[90vh]">
         {renderContent()}
       </DialogContent>
     </Dialog>

@@ -46,6 +46,7 @@ import {
   SheetContent,
   SheetTrigger,
   SheetClose,
+  SheetTitle,
 } from "@/components/ui/sheet";
 import { searchMulti } from "@/lib/tmdb";
 import type { Movie, MediaType } from "@/lib/types";
@@ -265,7 +266,7 @@ export function Header(props: HeaderProps) {
         <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
-              <Image src={logoUrl} alt="Logo" width={44} height={44} />
+              <Image src={logoUrl} alt="Logo" width={44} height={44} className="w-8 h-8 md:w-11 md:h-11" />
               <h1 className="text-2xl font-bold text-foreground">
                 Stream Track
               </h1>
@@ -282,8 +283,9 @@ export function Header(props: HeaderProps) {
               size="icon"
               aria-label="Notifications"
               onClick={() => setIsNotifOpen(true)}
+              className="hidden md:flex"
             >
-              <Bell className="h-8 w-8" />
+              <Bell className="h-5 w-5 md:h-6 md:w-6" />
             </Button>
             <NotificationModal
               isOpen={isNotifOpen}
@@ -295,8 +297,9 @@ export function Header(props: HeaderProps) {
               size="icon"
               aria-label="Bulk Add"
               onClick={() => setIsBulkDialogOpen(true)}
+              className="hidden md:flex"
             >
-              <BadgePlus className="h-10 w-10" />
+              <BadgePlus className="h-6 w-6 md:h-8 md:w-8" />
             </Button>
             {/* Bulk Add Dialog */}
             <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
@@ -475,8 +478,9 @@ export function Header(props: HeaderProps) {
               size="icon"
               aria-label="Settings"
               onClick={() => setIsSettingsOpen(true)}
+              className="hidden md:flex"
             >
-              <Settings className="h-6 w-6" />
+              <Settings className="h-5 w-5 md:h-6 md:w-6" />
             </Button>
             <SettingsModal
               isOpen={isSettingsOpen}
@@ -586,6 +590,7 @@ export function Header(props: HeaderProps) {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">
+                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 <div className="flex flex-col gap-6 p-4">
                   <SheetClose asChild>
                     <Link href="/" className="flex items-center gap-2">
@@ -597,6 +602,33 @@ export function Header(props: HeaderProps) {
                   </SheetClose>
                   <SheetClose asChild>
                     <NavLinks isMobile={true} user={user} />
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
+                      onClick={() => setIsBulkDialogOpen(true)}
+                    >
+                      <BadgePlus className="h-5 w-5" />
+                      Bulk Add
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
+                      onClick={() => setIsSettingsOpen(true)}
+                    >
+                      <Settings className="h-5 w-5" />
+                      Settings
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
+                      onClick={() => setIsNotifOpen(true)}
+                    >
+                      <Bell className="h-5 w-5" />
+                      Notifications
+                    </button>
                   </SheetClose>
                   {user && (
                     <Button variant="outline" onClick={logout} className="mt-4">

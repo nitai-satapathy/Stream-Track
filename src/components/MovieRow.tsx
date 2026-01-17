@@ -120,8 +120,7 @@ export function MovieRow({
     }
     return (
       <div
-        className="grid justify-start gap-x-3 gap-y-6"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}
+        className="grid justify-start gap-x-3 gap-y-6 grid-cols-[repeat(auto-fit,minmax(140px,1fr))] md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]"
       >
         {movies.map((movie, index) => (
           <MovieCard
@@ -137,7 +136,7 @@ export function MovieRow({
   return (
     <section className="container max-w-screen-2xl">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">{title}</h2>
+        <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
         {onRefresh && (
           <button
             onClick={onRefresh}
