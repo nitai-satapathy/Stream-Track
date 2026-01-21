@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Movie, TmdbApiResponse } from "./types";
+import type { Movie, TmdbApiResponse, Genre } from "./types";
 
 const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
@@ -78,7 +78,31 @@ const getMediaType = async (id: number): Promise<"movie" | "tv"> => {
     await tmdbApi.get(`/movie/${id}`);
     return "movie";
   } catch (error) {
-    // If movie fails, assume it's a TV show
     return "tv";
   }
+};
+
+export const fetchGenres = async (
+  mediaType: "movie" | "tv",
+): Promise<Genre[]> => {
+  const response = await tmdbApi.get<{ genres: Genre[] }>(
+    `/genre/${mediaType}/list`,
+  );
+  return response.data.genres;
+};
+
+export const discoverByGenre = async (
+  mediaType: "movie" | "tv",
+  genreId: number,
+): Promise<Movie[]> => {
+  const response = await tmdbApi.get<TmdbApiResponse>(
+    `/discover/${mediaType}`,
+    {
+      params: {
+        with_genres: genreId,
+        sort_by: "popularity.desc",
+      },
+    },
+  );
+  return response.data.results.map((item) => ({ ...item, media_type: mediaType }));
 };

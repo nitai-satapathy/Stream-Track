@@ -18,6 +18,7 @@ interface MovieRowProps {
   horizontal?: boolean;
   onRefresh?: () => void;
   refreshing?: boolean;
+  headerActions?: React.ReactNode;
 }
 
 export function MovieRow({
@@ -29,6 +30,7 @@ export function MovieRow({
   horizontal = false,
   onRefresh,
   refreshing,
+  headerActions,
 }: MovieRowProps) {
   const [movies, setMovies] = React.useState<Movie[]>(initialMovies || []);
   const [isLoading, setIsLoading] = React.useState(
@@ -147,6 +149,7 @@ export function MovieRow({
             <RefreshCw className={refreshing ? "animate-spin" : ""} />
           </button>
         )}
+        {headerActions && <div className="ml-auto">{headerActions}</div>}
       </div>
       <div className="w-full rounded-md">{renderContent()}</div>
     </section>

@@ -4,6 +4,7 @@ import * as React from "react";
 import { Header } from "@/components/Header";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
+import { BrowseSection } from "@/components/BrowseSection";
 import {
   fetchTrendingMovies,
   fetchTrendingTv,
@@ -290,6 +291,20 @@ export default function Home() {
           onMovieClick={handleMovieClick}
           horizontal={true}
         />
+        {/* Browse Movies by Genre */}
+        <BrowseSection
+          title="Browse Movies by Genre"
+          mediaType="movie"
+          onMovieClick={handleMovieClick}
+        />
+
+        {/* Browse TV by Genre */}
+        <BrowseSection
+          title="Browse TV Shows by Genre"
+          mediaType="tv"
+          onMovieClick={handleMovieClick}
+        />
+
         {/* Upcoming Movies */}
         <MovieRow
           title="Upcoming Movies"
