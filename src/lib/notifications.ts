@@ -18,6 +18,14 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
     {
+        id: "profile-update-1",
+        title: "Profile System Overhaul",
+        category: "Update",
+        description: "We've revamped the profile experience! You can now easily edit your user profile and choose avatars. Check it out in your account settings.",
+        timestamp: "21/01/2026, 23:19:48",
+        source: "System",
+    },
+    {
         id: "system-update-1",
         title: "System Update",
         category: "Update",
@@ -30,7 +38,7 @@ export const staticNotifications: Notification[] = [
         title: "Maintenance Notice",
         category: "Announcement",
         description: "We’re doing some maintenance right now! Login and sign-up are temporarily paused while we improve our servers. Thanks for sticking with us everything will be back soon.",
-        timestamp: "17/11/2026, 22:44:05",
+        timestamp: "17/11/2025, 22:44:05",
         source: "System",
     },
 ];
