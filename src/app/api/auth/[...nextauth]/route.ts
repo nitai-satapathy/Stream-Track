@@ -33,7 +33,12 @@ const handler = NextAuth({
           throw new Error("Invalid password");
         }
 
-        return { id: user._id.toString(), email: user.email, name: user.name };
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
       },
     }),
   ],
@@ -41,15 +46,21 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
+        token.picture = user.image;
+      }
+      if (trigger === "update" && session?.user) {
+        token.name = session.user.name;
+        token.picture = session.user.image;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
+        session.user.image = token.picture;
       }
       return session;
     },

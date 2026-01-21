@@ -17,10 +17,11 @@ export function useAuth() {
   const user = useMemo(() => {
     return session?.user
       ? {
-          uid: (session.user as any).id,
-          displayName: session.user.name,
-          email: session.user.email,
-        }
+        uid: (session.user as any).id,
+        displayName: session.user.name,
+        email: session.user.email,
+        photoURL: session.user.image || null,
+      }
       : null;
   }, [session]);
 

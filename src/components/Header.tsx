@@ -18,13 +18,25 @@ import {
   Bell,
   Settings,
   CheckCircle,
+  UserCircle,
+  Layers,
+  HelpCircle,
+  Box,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -54,6 +66,9 @@ import Image from "next/image";
 import { MovieModal } from "./MovieModal";
 import { NotificationModal } from "./NotificationModal";
 import { SettingsModal } from "./SettingsModal";
+import { ProfileModal } from "./ProfileModal";
+
+import { ProfileMenu } from "./ProfileMenu";
 import { useAuth } from "@/hooks/useAuth";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
@@ -226,6 +241,10 @@ export function Header(props: HeaderProps) {
   const [isNotifOpen, setIsNotifOpen] = React.useState(false);
   // Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+  // Profile Modal State
+  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+
+
   const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
@@ -316,20 +335,6 @@ export function Header(props: HeaderProps) {
             <NavLinks user={user} />
           </div>
           <div className="flex items-center gap-4">
-            {/* Notification icon */}
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Notifications"
-              onClick={() => setIsNotifOpen(true)}
-              className="hidden md:flex"
-            >
-              <Bell className="h-5 w-5 md:h-6 md:w-6" />
-            </Button>
-            <NotificationModal
-              isOpen={isNotifOpen}
-              onClose={() => setIsNotifOpen(false)}
-            />
             {/* Bulk Add BadgePlus icon */}
             <Button
               variant="ghost"
@@ -512,20 +517,21 @@ export function Header(props: HeaderProps) {
                 </DialogClose>
               </DialogContent>
             </Dialog>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Settings"
-              onClick={() => setIsSettingsOpen(true)}
-              className="hidden md:flex"
-            >
-              <Settings className="h-5 w-5 md:h-6 md:w-6" />
-            </Button>
             <SettingsModal
               isOpen={isSettingsOpen}
               onClose={() => setIsSettingsOpen(false)}
               lists={lists}
             />
+            <NotificationModal
+              isOpen={isNotifOpen}
+              onClose={() => setIsNotifOpen(false)}
+            />
+            <ProfileModal
+              isOpen={isProfileOpen}
+              onClose={() => setIsProfileOpen(false)}
+            />
+
+
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <div className="relative w-full max-w-xs">
                 <PopoverAnchor asChild>
@@ -606,20 +612,13 @@ export function Header(props: HeaderProps) {
               </div>
             </Popover>
             <div className="hidden sm:flex items-center gap-2">
-              {user ? (
-                <Button variant="outline" onClick={logout}>
-                  <LogOut className="mr-2 h-4 w-4" /> Logout
-                </Button>
-              ) : (
-                <>
-                  <Button asChild variant="outline">
-                    <Link href="/login">Login</Link>
-                  </Button>
-                  <Button asChild>
-                    <Link href="/signup">Sign Up</Link>
-                  </Button>
-                </>
-              )}
+              <ProfileMenu
+                user={user}
+                logout={logout}
+                onProfile={() => setIsProfileOpen(true)}
+                onSettings={() => setIsSettingsOpen(true)}
+                onChangelog={() => setIsNotifOpen(true)}
+              />
             </div>
             <Sheet>
               <SheetTrigger asChild>
@@ -665,14 +664,37 @@ export function Header(props: HeaderProps) {
                       className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
                       onClick={() => setIsNotifOpen(true)}
                     >
-                      <Bell className="h-5 w-5" />
-                      Notifications
+                      <Layers className="h-5 w-5" />
+                      Changelog
                     </button>
                   </SheetClose>
                   {user && (
-                    <Button variant="outline" onClick={logout} className="mt-4">
-                      <LogOut className="mr-2 h-4 w-4" /> Logout
-                    </Button>
+                    <div className="flex flex-col gap-4 mt-auto border-t pt-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User"} />
+                          <AvatarFallback>{user.displayName?.charAt(0) || "U"}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <p className="font-medium leading-none">{user.displayName}</p>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                        </div>
+                      </div>
+
+                      <SheetClose asChild>
+                        <button
+                          className="flex items-center gap-2 text-lg hover:text-foreground transition-colors w-full justify-start py-1"
+                          onClick={() => setIsProfileOpen(true)}
+                        >
+                          <UserCircle className="h-5 w-5" />
+                          Edit Profile
+                        </button>
+                      </SheetClose>
+
+                      <Button variant="outline" onClick={logout} className="w-full justify-start">
+                        <LogOut className="mr-2 h-4 w-4" /> Logout
+                      </Button>
+                    </div>
                   )}
                 </div>
               </SheetContent>

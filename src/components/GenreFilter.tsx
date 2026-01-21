@@ -36,51 +36,87 @@ export function GenreFilter({
 
     return (
         <div className="flex items-center space-x-2">
-            {visibleGenres.map((genre) => (
-                <Button
-                    key={genre.id}
-                    variant={selectedGenre === genre.id ? "default" : "secondary"}
-                    size="sm"
-                    onClick={() => onSelect(genre.id)}
-                    className={cn(
-                        "rounded-full transition-all",
-                        selectedGenre === genre.id
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground hover:bg-muted/80",
-                    )}
-                >
-                    {genre.name}
-                </Button>
-            ))}
+            {/* Desktop View */}
+            <div className="hidden md:flex items-center space-x-2">
+                {visibleGenres.map((genre) => (
+                    <Button
+                        key={genre.id}
+                        variant={selectedGenre === genre.id ? "default" : "secondary"}
+                        size="sm"
+                        onClick={() => onSelect(genre.id)}
+                        className={cn(
+                            "rounded-full transition-all",
+                            selectedGenre === genre.id
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground hover:bg-muted/80",
+                        )}
+                    >
+                        {genre.name}
+                    </Button>
+                ))}
 
-            {overflowGenres.length > 0 && (
+                {overflowGenres.length > 0 && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            {selectedOverflowGenre ? (
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center space-x-1 px-3"
+                                >
+                                    <span>{selectedOverflowGenre.name}</span>
+                                    <MoreHorizontal className="h-3 w-3" />
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-full"
+                                >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">More genres</span>
+                                </Button>
+                            )}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            align="end"
+                            className="max-h-[300px] overflow-y-auto"
+                        >
+                            {overflowGenres.map((genre) => (
+                                <DropdownMenuItem
+                                    key={genre.id}
+                                    onClick={() => onSelect(genre.id)}
+                                    className={cn(
+                                        selectedGenre === genre.id &&
+                                        "bg-accent text-accent-foreground",
+                                    )}
+                                >
+                                    {genre.name}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
+            </div>
+
+            {/* Mobile View */}
+            <div className="md:hidden">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        {selectedOverflowGenre ? (
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center space-x-1 px-3"
-                            >
-                                <span>{selectedOverflowGenre.name}</span>
-                                <MoreHorizontal className="h-3 w-3" />
-                            </Button>
-                        ) : (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-full"
-                            >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">More genres</span>
-                            </Button>
-                        )}
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 rounded-full"
+                        >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Select genre</span>
+                        </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         align="end"
                         className="max-h-[300px] overflow-y-auto"
                     >
-                        {overflowGenres.map((genre) => (
+                        {genres.map((genre) => (
                             <DropdownMenuItem
                                 key={genre.id}
                                 onClick={() => onSelect(genre.id)}
@@ -94,7 +130,7 @@ export function GenreFilter({
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
-            )}
+            </div>
         </div>
     );
 }

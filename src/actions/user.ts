@@ -19,10 +19,20 @@ export async function registerUser(
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const profileImages = [
+      "/profile/boy-1.webp",
+      "/profile/boy-2.webp",
+      "/profile/girl-1.webp",
+      "/profile/girl-2.webp",
+    ];
+    const randomImage =
+      profileImages[Math.floor(Math.random() * profileImages.length)];
+
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
+      image: randomImage,
       watchlist: [],
       watching: [],
       watched: [],
@@ -46,6 +56,20 @@ export async function updateUserLists(
   } catch (error) {
     console.error("Update Lists Error:", error);
     return { success: false };
+  }
+}
+
+export async function updateUserProfile(
+  userId: string,
+  data: { name?: string; image?: string },
+) {
+  try {
+    await connectDB();
+    await User.findByIdAndUpdate(userId, { $set: data });
+    return { success: true };
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    return { success: false, error: "Failed to update profile" };
   }
 }
 

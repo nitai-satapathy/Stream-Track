@@ -34,7 +34,7 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
         }}
       >
         <DialogHeader className="p-4 pb-0">
-          <DialogTitle>Notifications</DialogTitle>
+          <DialogTitle>Changelog</DialogTitle>
         </DialogHeader>
         <div className="flex items-center justify-between px-4 pt-2 pb-4">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
