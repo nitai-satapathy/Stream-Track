@@ -19,6 +19,7 @@ import {
     LogOut,
     UserCircle,
     Layers,
+    HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -79,6 +80,12 @@ export function ProfileMenu({
                     <DropdownMenuItem onClick={onSettings}>
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="/about" className="cursor-pointer w-full">
+                            <HelpCircle className="mr-2 h-4 w-4" />
+                            <span>About & FAQ</span>
+                        </Link>
                     </DropdownMenuItem>
                 </div>
                 <DropdownMenuSeparator />

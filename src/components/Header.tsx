@@ -44,7 +44,7 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
-import logoUrl from "@/public/icons/logo.svg";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -324,7 +324,7 @@ export function Header(props: HeaderProps) {
         <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
-              <Image src={logoUrl} alt="Logo" width={44} height={44} className="w-8 h-8 md:w-11 md:h-11" />
+              <Image src="/icons/logo.svg" alt="Logo" width={44} height={44} className="w-8 h-8 md:w-11 md:h-11" />
               <h1 className="text-2xl font-bold text-foreground">
                 Stream Track
               </h1>
@@ -632,7 +632,7 @@ export function Header(props: HeaderProps) {
                 <div className="flex flex-col gap-6 p-4">
                   <SheetClose asChild>
                     <Link href="/" className="flex items-center gap-2">
-                      <Image src={logoUrl} alt="Logo" width={34} height={34} />
+                      <Image src="/icons/logo.svg" alt="Logo" width={34} height={34} />
                       <h1 className="text-2xl font-bold text-foreground">
                         Stream Track
                       </h1>
@@ -658,6 +658,15 @@ export function Header(props: HeaderProps) {
                       <Settings className="h-5 w-5" />
                       Settings
                     </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      href="/about"
+                      className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
+                    >
+                      <HelpCircle className="h-5 w-5" />
+                      About & FAQ
+                    </Link>
                   </SheetClose>
                   <SheetClose asChild>
                     <button

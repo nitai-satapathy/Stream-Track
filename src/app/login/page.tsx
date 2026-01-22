@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import logoUrl from "@/public/icons/logo.svg";
+
 import Image from "next/image";
 
 const loginSchema = z.object({
@@ -76,7 +76,7 @@ export default function LoginPage() {
             href="/"
             className="flex items-center gap-2 justify-center mb-4"
           >
-            <Image src={logoUrl} alt="Logo" width={62} height={62} />
+            <Image src="/icons/logo.svg" alt="Logo" width={62} height={62} />
             <h1 className="text-3xl font-bold text-foreground">Stream Track</h1>
           </Link>
           <CardTitle className="text-2xl">Welcome Back</CardTitle>
