@@ -138,22 +138,22 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [watched, watching]);
 
-  const handleMovieClick = (id: number, media_type: MediaType) => {
+  const handleMovieClick = React.useCallback((id: number, media_type: MediaType) => {
     setSelectedItem({ id, media_type });
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = React.useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
-  const isMovieInList = (movieId: number, list: ListType) => {
+  const isMovieInList = React.useCallback((movieId: number, list: ListType) => {
     const listMap = {
       watchlist,
       watching,
       watched,
     };
     return listMap[list].some((m) => m.id === movieId);
-  };
+  }, [watchlist, watching, watched]);
 
   const updateLocalStorage = (key: ListType, data: Movie[]) => {
     if (!user) {
@@ -161,7 +161,7 @@ export default function Home() {
     }
   };
 
-  const handleListUpdate = async (movie: Movie, list: ListType) => {
+  const handleListUpdate = React.useCallback(async (movie: Movie, list: ListType) => {
     let newWatchlist = [...watchlist];
     let newWatching = [...watching];
     let newWatched = [...watched];
@@ -220,12 +220,38 @@ export default function Home() {
       updateLocalStorage("watching", newWatching);
       updateLocalStorage("watched", newWatched);
     }
-  };
+  }, [watchlist, watching, watched, user]);
+
+  const headerLists = React.useMemo(() => ({ watchlist, watching, watched }), [watchlist, watching, watched]);
+
+  const fetchPopularMoviesCallback = React.useCallback(async () =>
+    (await fetchPopularMovies()).map((m) => ({
+      ...m,
+      media_type: "movie" as const,
+    })), []);
+
+  const fetchTopRatedMoviesCallback = React.useCallback(async () =>
+    (await fetchTopRatedMovies()).map((m) => ({
+      ...m,
+      media_type: "movie" as const,
+    })), []);
+
+  const fetchTopRatedTvShowsCallback = React.useCallback(async () =>
+    (await fetchTopRatedTvShows()).map((m) => ({
+      ...m,
+      media_type: "tv" as const,
+    })), []);
+
+  const fetchUpcomingMoviesCallback = React.useCallback(async () =>
+    (await fetchUpcomingMovies()).map((m) => ({
+      ...m,
+      media_type: "movie" as const,
+    })), []);
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        lists={{ watchlist, watching, watched }}
+        lists={headerLists}
         onListUpdate={handleListUpdate}
       />
       <main className="flex-1 space-y-6 md:space-y-12 py-4 md:py-8">
@@ -250,12 +276,7 @@ export default function Home() {
         {/* Popular Movies */}
         <MovieRow
           title="Popular Movies"
-          fetchFunction={async () =>
-            (await fetchPopularMovies()).map((m) => ({
-              ...m,
-              media_type: "movie",
-            }))
-          }
+          fetchFunction={fetchPopularMoviesCallback}
           onMovieClick={handleMovieClick}
           horizontal={true}
         />
@@ -270,24 +291,14 @@ export default function Home() {
         {/* Top Rated Movies */}
         <MovieRow
           title="Top Rated Movies"
-          fetchFunction={async () =>
-            (await fetchTopRatedMovies()).map((m) => ({
-              ...m,
-              media_type: "movie",
-            }))
-          }
+          fetchFunction={fetchTopRatedMoviesCallback}
           onMovieClick={handleMovieClick}
           horizontal={true}
         />
         {/* Top Rated TV Shows */}
         <MovieRow
           title="Top Rated TV Shows"
-          fetchFunction={async () =>
-            (await fetchTopRatedTvShows()).map((m) => ({
-              ...m,
-              media_type: "tv",
-            }))
-          }
+          fetchFunction={fetchTopRatedTvShowsCallback}
           onMovieClick={handleMovieClick}
           horizontal={true}
         />
@@ -308,12 +319,7 @@ export default function Home() {
         {/* Upcoming Movies */}
         <MovieRow
           title="Upcoming Movies"
-          fetchFunction={async () =>
-            (await fetchUpcomingMovies()).map((m) => ({
-              ...m,
-              media_type: "movie",
-            }))
-          }
+          fetchFunction={fetchUpcomingMoviesCallback}
           onMovieClick={handleMovieClick}
           horizontal={true}
         />

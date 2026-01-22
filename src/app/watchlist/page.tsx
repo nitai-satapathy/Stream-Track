@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
@@ -22,7 +22,7 @@ const WatchlistPage = () => {
   } | null>(null);
 
   // Extracted fetchLists so it can be reused after updates
-  const fetchLists = async () => {
+  const fetchLists = useCallback(async () => {
     if (user) {
       const { watchlist, watching, watched } = await getLists(user.uid);
       setWatchlist(watchlist);
@@ -63,24 +63,24 @@ const WatchlistPage = () => {
         ),
       );
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchLists();
-  }, [user]);
+  }, [fetchLists]);
 
-  const handleMovieClick = (id: number, media_type: "movie" | "tv") => {
+  const handleMovieClick = useCallback((id: number, media_type: "movie" | "tv") => {
     setSelectedItem({ id, media_type });
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
   // Dummy handlers for now (customize as needed)
   // Copy-paste from main page logic for list management
   type ListType = "watchlist" | "watching" | "watched";
-  const handleListUpdate = async (movie: Movie, list: ListType) => {
+  const handleListUpdate = useCallback(async (movie: Movie, list: ListType) => {
     let newWatchlist = [...watchlist];
     let newWatching = [...watching];
     let newWatched = [...watched];
@@ -141,21 +141,23 @@ const WatchlistPage = () => {
     }
     // Refetch lists after update to refresh UI
     await fetchLists();
-  };
+  }, [watchlist, watching, watched, user, fetchLists]);
 
-  const isMovieInList = (movieId: number, list: ListType) => {
+  const isMovieInList = useCallback((movieId: number, list: ListType) => {
     const listMap = {
       watchlist,
       watching,
       watched,
     };
     return listMap[list].some((m) => m.id === movieId);
-  };
+  }, [watchlist, watching, watched]);
+
+  const headerLists = useMemo(() => ({ watchlist, watching, watched }), [watchlist, watching, watched]);
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        lists={{ watchlist, watching, watched }}
+        lists={headerLists}
         onListUpdate={handleListUpdate}
       />
       <main className="flex-1 p-6">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
@@ -180,20 +180,20 @@ const RecommendationPage = () => {
     [fetchRecs],
   );
 
-  const handleMovieClick = (id: number, media_type: MediaType) => {
+  const handleMovieClick = useCallback((id: number, media_type: MediaType) => {
     setSelectedItem({ id, media_type });
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
   // List update logic for marking movies
   type ListType = "watchlist" | "watching" | "watched";
-  const isMovieInList = (movieId: number, list: ListType) => {
+  const isMovieInList = useCallback((movieId: number, list: ListType) => {
     const listMap = { watchlist, watching, watched };
     return listMap[list].some((m) => m.id === movieId);
-  };
+  }, [watchlist, watching, watched]);
 
   const updateLocalStorage = (key: ListType, data: Movie[]) => {
     if (!user) {
@@ -201,7 +201,7 @@ const RecommendationPage = () => {
     }
   };
 
-  const handleListUpdate = async (movie: Movie, list: ListType) => {
+  const handleListUpdate = useCallback(async (movie: Movie, list: ListType) => {
     let newWatchlist = [...watchlist];
     let newWatching = [...watching];
     let newWatched = [...watched];
@@ -261,11 +261,17 @@ const RecommendationPage = () => {
       updateLocalStorage("watching", newWatching);
       updateLocalStorage("watched", newWatched);
     }
-  };
+  }, [watchlist, watching, watched, user]);
+
+  const headerLists = useMemo(
+    () => ({ watchlist, watching, watched }),
+    [watchlist, watching, watched]
+  );
+
   return (
     <>
       <Header
-        lists={{ watchlist, watching, watched }}
+        lists={headerLists}
         onListUpdate={handleListUpdate}
         watchedMovies={watched}
         watchedShows={watching}
@@ -289,31 +295,31 @@ const RecommendationPage = () => {
               {watched.some(
                 (m) => m.media_type === "movie" || (!m.media_type && m.title),
               ) && (
-                <MovieRow
-                  title="Recommendations Based on Watched Movies"
-                  movies={filterRecs(recWatchedMovies)}
-                  onMovieClick={handleMovieClick}
-                  isLoading={loadingWatchedMovies}
-                  horizontal={true}
-                  onRefresh={() =>
-                    handleRefresh(
-                      "watchedMovies",
-                      watched
-                        .filter(
-                          (m) =>
-                            m.media_type === "movie" ||
-                            (!m.media_type && m.title),
-                        )
-                        .map((m) => m.title || m.name)
-                        .filter(Boolean) as string[],
-                      "movie",
-                      setRecWatchedMovies,
-                      setLoadingWatchedMovies,
-                    )
-                  }
-                  refreshing={refreshing.watchedMovies}
-                />
-              )}
+                  <MovieRow
+                    title="Recommendations Based on Watched Movies"
+                    movies={filterRecs(recWatchedMovies)}
+                    onMovieClick={handleMovieClick}
+                    isLoading={loadingWatchedMovies}
+                    horizontal={true}
+                    onRefresh={() =>
+                      handleRefresh(
+                        "watchedMovies",
+                        watched
+                          .filter(
+                            (m) =>
+                              m.media_type === "movie" ||
+                              (!m.media_type && m.title),
+                          )
+                          .map((m) => m.title || m.name)
+                          .filter(Boolean) as string[],
+                        "movie",
+                        setRecWatchedMovies,
+                        setLoadingWatchedMovies,
+                      )
+                    }
+                    refreshing={refreshing.watchedMovies}
+                  />
+                )}
               {watched.some((m) => m.media_type === "tv" || m.name) && (
                 <MovieRow
                   title="Recommendations Based on Watched TV Shows"
@@ -339,31 +345,31 @@ const RecommendationPage = () => {
               {watchlist.some(
                 (m) => m.media_type === "movie" || (!m.media_type && m.title),
               ) && (
-                <MovieRow
-                  title="Recommendations Based on Watchlist Movies"
-                  movies={filterRecs(recWatchlistMovies)}
-                  onMovieClick={handleMovieClick}
-                  isLoading={loadingWatchlistMovies}
-                  horizontal={true}
-                  onRefresh={() =>
-                    handleRefresh(
-                      "watchlistMovies",
-                      watchlist
-                        .filter(
-                          (m) =>
-                            m.media_type === "movie" ||
-                            (!m.media_type && m.title),
-                        )
-                        .map((m) => m.title || m.name)
-                        .filter(Boolean) as string[],
-                      "movie",
-                      setRecWatchlistMovies,
-                      setLoadingWatchlistMovies,
-                    )
-                  }
-                  refreshing={refreshing.watchlistMovies}
-                />
-              )}
+                  <MovieRow
+                    title="Recommendations Based on Watchlist Movies"
+                    movies={filterRecs(recWatchlistMovies)}
+                    onMovieClick={handleMovieClick}
+                    isLoading={loadingWatchlistMovies}
+                    horizontal={true}
+                    onRefresh={() =>
+                      handleRefresh(
+                        "watchlistMovies",
+                        watchlist
+                          .filter(
+                            (m) =>
+                              m.media_type === "movie" ||
+                              (!m.media_type && m.title),
+                          )
+                          .map((m) => m.title || m.name)
+                          .filter(Boolean) as string[],
+                        "movie",
+                        setRecWatchlistMovies,
+                        setLoadingWatchlistMovies,
+                      )
+                    }
+                    refreshing={refreshing.watchlistMovies}
+                  />
+                )}
               {watchlist.some((m) => m.media_type === "tv" || m.name) && (
                 <MovieRow
                   title="Recommendations Based on Watchlist TV Shows"

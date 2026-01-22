@@ -61,22 +61,23 @@ function SearchContent() {
     return Promise.resolve([]);
   }, [query]);
 
-  const handleMovieClick = (id: number, media_type: MediaType) => {
+  const handleMovieClick = React.useCallback((id: number, media_type: MediaType) => {
     setSelectedItem({ id, media_type });
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = React.useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
-  const isMovieInList = (movieId: number, list: ListType) => {
+  // List update logic for marking movies
+  const isMovieInList = React.useCallback((movieId: number, list: ListType) => {
     const listMap = {
       watchlist,
       watching,
       watched,
     };
     return listMap[list].some((m) => m.id === movieId);
-  };
+  }, [watchlist, watching, watched]);
 
   const updateLocalStorage = (key: ListType, data: Movie[]) => {
     if (!user) {
@@ -84,7 +85,7 @@ function SearchContent() {
     }
   };
 
-  const handleListUpdate = async (movie: Movie, list: ListType) => {
+  const handleListUpdate = React.useCallback(async (movie: Movie, list: ListType) => {
     let newWatchlist = [...watchlist];
     let newWatching = [...watching];
     let newWatched = [...watched];
@@ -133,6 +134,7 @@ function SearchContent() {
     }
 
     if (user) {
+      const { updateUserLists } = await import("@/actions/user");
       await updateUserLists(user.uid, {
         watchlist: newWatchlist,
         watching: newWatching,
@@ -143,12 +145,14 @@ function SearchContent() {
       updateLocalStorage("watching", newWatching);
       updateLocalStorage("watched", newWatched);
     }
-  };
+  }, [watchlist, watching, watched, user]);
+
+  const headerLists = React.useMemo(() => ({ watchlist, watching, watched }), [watchlist, watching, watched]);
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        lists={{ watchlist, watching, watched }}
+        lists={headerLists}
         onListUpdate={handleListUpdate}
       />
       <main className="flex-1 space-y-12 py-8">

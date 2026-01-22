@@ -79,13 +79,13 @@ export default function WatchedMoviesPage() {
     loadLists();
   }, [user]);
 
-  const handleMovieClick = (id: number, media_type: MediaType) => {
+  const handleMovieClick = React.useCallback((id: number, media_type: MediaType) => {
     setSelectedItem({ id, media_type });
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = React.useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
   const watchedMovies = React.useMemo(() => {
     let base = watched.filter(
@@ -145,14 +145,14 @@ export default function WatchedMoviesPage() {
     }
   }, [watched, selectedGenres, sortBy]);
 
-  const isMovieInList = (movieId: number, list: ListType) => {
+  const isMovieInList = React.useCallback((movieId: number, list: ListType) => {
     const listMap = {
       watchlist,
       watching,
       watched,
     };
     return listMap[list].some((m) => m.id === movieId);
-  };
+  }, [watchlist, watching, watched]);
 
   const updateLocalStorage = (key: ListType, data: Movie[]) => {
     if (!user) {
@@ -160,7 +160,7 @@ export default function WatchedMoviesPage() {
     }
   };
 
-  const handleListUpdate = async (movie: Movie, list: ListType) => {
+  const handleListUpdate = React.useCallback(async (movie: Movie, list: ListType) => {
     let newWatchlist = [...watchlist];
     let newWatching = [...watching];
     let newWatched = [...watched];
@@ -219,12 +219,15 @@ export default function WatchedMoviesPage() {
       updateLocalStorage("watching", newWatching);
       updateLocalStorage("watched", newWatched);
     }
-  };
+  }, [watchlist, watching, watched, user]);
+
+  const headerLists = React.useMemo(() => ({ watchlist, watching, watched }), [watchlist, watching, watched]);
+
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        lists={{ watchlist, watching, watched }}
+        lists={headerLists}
         onListUpdate={handleListUpdate}
         watchedMovies={watched.filter(
           (movie) =>
@@ -232,8 +235,8 @@ export default function WatchedMoviesPage() {
         )}
         setWatchedMovies={setWatched}
         watchedShows={[]}
-        setWatchedShows={() => {}}
-        // user={user}
+        setWatchedShows={() => { }}
+      // user={user}
       />
       <main className="flex-1 space-y-12 py-8">
         <div className="container space-y-4 flex items-center justify-between">

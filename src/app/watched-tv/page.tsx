@@ -81,13 +81,13 @@ export default function WatchedTvShowsPage() {
     loadLists();
   }, [user]);
 
-  const handleMovieClick = (id: number, media_type: MediaType) => {
+  const handleMovieClick = React.useCallback((id: number, media_type: MediaType) => {
     setSelectedItem({ id, media_type: "tv" });
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = React.useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
   const watchedTvShows = React.useMemo(() => {
     let base = watched.filter(
@@ -145,14 +145,14 @@ export default function WatchedTvShowsPage() {
     }
   }, [watched, selectedGenres, sortBy]);
 
-  const isMovieInList = (movieId: number, list: ListType) => {
+  const isMovieInList = React.useCallback((movieId: number, list: ListType) => {
     const listMap = {
       watchlist,
       watching,
       watched,
     };
     return listMap[list].some((m) => m.id === movieId);
-  };
+  }, [watchlist, watching, watched]);
 
   const updateLocalStorage = (key: ListType, data: Movie[]) => {
     if (!user) {
@@ -160,7 +160,7 @@ export default function WatchedTvShowsPage() {
     }
   };
 
-  const handleListUpdate = async (movie: Movie, list: ListType) => {
+  const handleListUpdate = React.useCallback(async (movie: Movie, list: ListType) => {
     let newWatchlist = [...watchlist];
     let newWatching = [...watching];
     let newWatched = [...watched];
@@ -221,15 +221,18 @@ export default function WatchedTvShowsPage() {
     }
     // Refetch lists after update to refresh UI
     await loadLists();
-  };
+  }, [watchlist, watching, watched, user]);
+
+  const headerLists = React.useMemo(() => ({ watchlist, watching, watched }), [watchlist, watching, watched]);
+
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        lists={{ watchlist, watching, watched }}
+        lists={headerLists}
         onListUpdate={handleListUpdate}
         watchedMovies={[]}
-        setWatchedMovies={() => {}}
+        setWatchedMovies={() => { }}
         watchedShows={watched.filter(
           (movie) => movie.media_type === "tv" || movie.name,
         )}
