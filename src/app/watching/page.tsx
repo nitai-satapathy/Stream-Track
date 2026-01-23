@@ -155,7 +155,7 @@ export default function WatchingPage() {
         {watching.length === 0 && (
           <div className="container">
             <p className="text-muted-foreground">
-              You haven't added anything to your currently watching list yet.
+              You haven&apos;t added anything to your currently watching list yet.
             </p>
           </div>
         )}

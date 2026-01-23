@@ -691,13 +691,13 @@ export function Header(props: HeaderProps) {
                       </div>
 
                       <SheetClose asChild>
-                        <button
+                        <Link
+                          href="/profile"
                           className="flex items-center gap-2 text-lg hover:text-foreground transition-colors w-full justify-start py-1"
-                          onClick={() => setIsProfileOpen(true)}
                         >
                           <UserCircle className="h-5 w-5" />
-                          Edit Profile
-                        </button>
+                          Profile
+                        </Link>
                       </SheetClose>
 
                       <Button variant="outline" onClick={logout} className="w-full justify-start">

@@ -73,9 +73,11 @@ export function ProfileMenu({
                     </div>
                 </div>
                 <div className="p-1">
-                    <DropdownMenuItem onClick={onProfile}>
-                        <UserCircle className="mr-2 h-4 w-4" />
-                        <span>Edit Profile</span>
+                    <DropdownMenuItem asChild>
+                        <Link href="/profile" className="cursor-pointer">
+                            <UserCircle className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
+                        </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={onSettings}>
                         <Settings className="mr-2 h-4 w-4" />

@@ -269,7 +269,7 @@ export default function WatchedMoviesPage() {
         ) : (
           <div className="container">
             <p className="text-muted-foreground">
-              You haven't marked any movies as watched yet.
+              You haven&apos;t marked any movies as watched yet.
             </p>
           </div>
         )}

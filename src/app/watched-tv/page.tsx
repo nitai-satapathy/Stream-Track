@@ -269,7 +269,7 @@ export default function WatchedTvShowsPage() {
         ) : (
           <div className="container">
             <p className="text-muted-foreground">
-              You haven't marked any TV shows as watched yet.
+              You haven&apos;t marked any TV shows as watched yet.
             </p>
           </div>
         )}
