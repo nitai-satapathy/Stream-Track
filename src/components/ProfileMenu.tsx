@@ -19,6 +19,7 @@ interface ProfileMenuProps {
   onProfile: () => void;
   onSettings: () => void;
   onChangelog: () => void;
+  onTheme?: () => void;
 }
 
 export function ProfileMenu({
@@ -27,6 +28,7 @@ export function ProfileMenu({
   onProfile,
   onSettings,
   onChangelog,
+  onTheme,
 }: ProfileMenuProps) {
   if (!user) {
     return (
@@ -35,6 +37,12 @@ export function ProfileMenu({
           <Settings className="h-5 w-5" />
           <span className="sr-only">Settings</span>
         </Button>
+        {onTheme && (
+          <Button variant="ghost" size="icon" onClick={onTheme}>
+            <Layers className="h-5 w-5" />
+            <span className="sr-only">Theme</span>
+          </Button>
+        )}
         <Button asChild variant="outline">
           <Link href="/login">Login</Link>
         </Button>
@@ -77,6 +85,12 @@ export function ProfileMenu({
               <span>Profile</span>
             </Link>
           </DropdownMenuItem>
+          {onTheme && (
+            <DropdownMenuItem onClick={onTheme}>
+              <Layers className="mr-2 h-4 w-4" />
+              <span>Appearance</span>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={onSettings}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>

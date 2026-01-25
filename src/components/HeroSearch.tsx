@@ -60,6 +60,7 @@ export function HeroSearch({
             >
                 <Flare.Light
                     flareSize={400}
+                    cssColorVar="var(--flare-rgb)"
                     enabled={focused}
                     className="rounded-[28px]"
                     backgroundClass={cn(

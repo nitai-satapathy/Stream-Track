@@ -51,6 +51,7 @@ import { MovieModal } from "./MovieModal";
 import { NotificationModal } from "./NotificationModal";
 import { SettingsModal } from "./SettingsModal";
 import { ProfileModal } from "./ProfileModal";
+import { ThemeModal } from "./ThemeModal";
 
 import { ProfileMenu } from "./ProfileMenu";
 import { useAuth } from "@/hooks/useAuth";
@@ -230,6 +231,8 @@ export function Header(props: HeaderProps) {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   // Profile Modal State
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+  // Theme Modal State
+  const [isThemeOpen, setIsThemeOpen] = React.useState(false);
 
   return (
     <>
@@ -440,6 +443,10 @@ export function Header(props: HeaderProps) {
               isOpen={isProfileOpen}
               onClose={() => setIsProfileOpen(false)}
             />
+            <ThemeModal
+              isOpen={isThemeOpen}
+              onClose={() => setIsThemeOpen(false)}
+            />
 
             <div className="hidden items-center gap-2 sm:flex">
               <ProfileMenu
@@ -448,6 +455,7 @@ export function Header(props: HeaderProps) {
                 onProfile={() => setIsProfileOpen(true)}
                 onSettings={() => setIsSettingsOpen(true)}
                 onChangelog={() => setIsNotifOpen(true)}
+                onTheme={() => setIsThemeOpen(true)}
               />
             </div>
             <Sheet>
@@ -502,6 +510,15 @@ export function Header(props: HeaderProps) {
                       <HelpCircle className="h-5 w-5" />
                       About & FAQ
                     </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
+                      onClick={() => setIsThemeOpen(true)}
+                    >
+                      <Layers className="h-5 w-5" />
+                      Appearance
+                    </button>
                   </SheetClose>
                   <SheetClose asChild>
                     <button

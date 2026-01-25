@@ -26,14 +26,28 @@ import LightRays from "@/components/LightRays";
 import { HeroSearch } from "@/components/HeroSearch";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/theme-context";
+import { getHeroContent, getRandomPlaceholder } from "@/lib/hero-content";
 
 type ListType = "watchlist" | "watching" | "watched";
 type TabType = "movies" | "tv";
 
 export default function Home() {
   const router = useRouter();
+  const { currentTheme } = useTheme();
   const [activeTab, setActiveTab] = React.useState<TabType>("movies");
   const [searchQuery, setSearchQuery] = React.useState("");
+
+  // Hero Content State
+  const [heroTitle, setHeroTitle] = React.useState("Viva la Stream Track!");
+  const [heroPlaceholder, setHeroPlaceholder] = React.useState("What are you in the mood for?");
+
+  // Initialize dynamic content on mount
+  React.useEffect(() => {
+    const { title } = getHeroContent();
+    setHeroTitle(title);
+    setHeroPlaceholder(getRandomPlaceholder());
+  }, []);
 
   // Instant Search State
   const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
@@ -277,7 +291,8 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col relative bg-black selection:bg-purple-500/30">
+
+    <div className="flex min-h-screen flex-col relative bg-background selection:bg-primary/30">
       <Header lists={headerLists} onListUpdate={handleListUpdate} />
 
       {/* LightRays Background */}
@@ -285,7 +300,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black z-10" />
         <LightRays
           raysOrigin="top-center"
-          raysColor="#4f46e5"
+          raysColor={currentTheme.cssVars?.["--flare-hex"] || "#4f46e5"}
           raysSpeed={1}
           lightSpread={0.5}
           rayLength={3}
@@ -299,14 +314,14 @@ export default function Home() {
         {/* Hero Content */}
         <div className="flex flex-col items-center justify-center pt-16 md:pt-24 pb-8 space-y-6 md:space-y-8 px-4 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/50 animate-in fade-in zoom-in-50 duration-1000 px-4">
-            Viva la Stream Track!
+            {heroTitle}
           </h1>
 
           <HeroSearch
             value={searchQuery}
             onChange={setSearchQuery}
             onSubmit={handleSearchSubmit}
-            placeholder="What are you in the mood for?"
+            placeholder={heroPlaceholder}
             className="w-full max-w-xl px-2 md:px-0"
             searchResults={searchResults}
             isLoading={isSearchLoading}
@@ -320,8 +335,8 @@ export default function Home() {
               className={cn(
                 "px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-lg font-medium transition-all duration-300",
                 activeTab === "movies"
-                  ? "bg-purple-600/20 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
+                  ? "bg-primary/20 text-primary shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               )}
             >
               Movies
@@ -331,8 +346,8 @@ export default function Home() {
               className={cn(
                 "px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-lg font-medium transition-all duration-300",
                 activeTab === "tv"
-                  ? "bg-purple-600/20 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
+                  ? "bg-primary/20 text-primary shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               )}
             >
               TV Shows
