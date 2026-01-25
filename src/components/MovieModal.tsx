@@ -40,7 +40,7 @@ interface MovieModalProps {
   mediaType: "movie" | "tv" | null;
   isOpen: boolean;
   onClose: () => void;
-  onListUpdate: (movie: Movie, list: ListType) => void;
+  onListUpdate: (movie: Movie, list: ListType) => void | Promise<void>;
   isMovieInList: (movieId: number, list: ListType) => boolean;
 }
 

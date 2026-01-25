@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import * as React from "react";
 import {
+  Search,
   TvMinimalPlay,
   Popcorn,
   Clapperboard,
@@ -55,6 +56,7 @@ import { ThemeModal } from "./ThemeModal";
 
 import { ProfileMenu } from "./ProfileMenu";
 import { useAuth } from "@/hooks/useAuth";
+import { GlobalSearchModal } from "./GlobalSearchModal";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
 
@@ -215,7 +217,7 @@ export function Header(props: HeaderProps) {
     watchedMovies,
     watchedShows,
   } = props;
-  // Provide a default no-op if onListUpdate is not provided
+  const pathname = usePathname();
   const safeOnListUpdate = onListUpdate ?? (async () => { });
   const { user, logout } = useAuth();
   const safeWatchedMovies = watchedMovies || [];
@@ -233,6 +235,7 @@ export function Header(props: HeaderProps) {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   // Theme Modal State
   const [isThemeOpen, setIsThemeOpen] = React.useState(false);
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
   return (
     <>
@@ -257,6 +260,20 @@ export function Header(props: HeaderProps) {
             <NavLinks user={user} />
           </div>
           <div className="flex items-center gap-4">
+            {/* Global Search Icon */}
+
+            {/* Global Search Icon (Hidden on Home Page) */}
+            {pathname !== "/" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Search"
+                onClick={() => setIsSearchOpen(true)}
+              >
+                <Search className="h-5 w-5 md:h-6 md:w-6" />
+              </Button>
+            )}
+
             {/* Bulk Add BadgePlus icon */}
             <Button
               variant="ghost"
@@ -446,6 +463,12 @@ export function Header(props: HeaderProps) {
             <ThemeModal
               isOpen={isThemeOpen}
               onClose={() => setIsThemeOpen(false)}
+            />
+            <GlobalSearchModal
+              isOpen={isSearchOpen}
+              onClose={() => setIsSearchOpen(false)}
+              lists={lists}
+              onListUpdate={safeOnListUpdate}
             />
 
             <div className="hidden items-center gap-2 sm:flex">

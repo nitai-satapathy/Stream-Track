@@ -22,6 +22,15 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
   {
+    id: "global-search-update",
+    title: "Global Search & UI Polish",
+    category: "Update",
+    description:
+      "We’ve refined the home page experience to make getting started faster and more intuitive. We also introduced a cleaner, more robust Theme System for better customization. Finally, enjoy our new powerful Global Search, accessible from any page for streamlined navigation.",
+    timestamp: "26/01/2026, 02:27:00",
+    source: "System",
+  },
+  {
     id: "profile-update-1",
     title: "Profile System Overhaul",
     category: "Update",

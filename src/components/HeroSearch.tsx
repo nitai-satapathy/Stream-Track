@@ -29,13 +29,22 @@ export function HeroSearch({
     searchResults = [],
     isLoading = false,
     onResultClick,
-}: HeroSearchProps) {
+    autoFocus = false,
+}: HeroSearchProps & { autoFocus?: boolean }) {
     const [focused, setFocused] = React.useState(false);
 
     const inputRef = React.useRef<HTMLInputElement>(null);
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
+        if (autoFocus && inputRef.current) {
+            // Small timeout to ensure modal animation/render doesn't steal focus
+            setTimeout(() => {
+                inputRef.current?.focus();
+                setFocused(true);
+            }, 100);
+        }
+
         const handleClickOutside = (event: MouseEvent) => {
             if (
                 containerRef.current &&
@@ -46,7 +55,7 @@ export function HeroSearch({
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    }, [autoFocus]);
 
     const shouldShowResults = focused && (searchResults.length > 0 || isLoading);
 
