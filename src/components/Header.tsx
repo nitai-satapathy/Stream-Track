@@ -4,33 +4,27 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import {
-  Search,
   TvMinimalPlay,
   Popcorn,
   Clapperboard,
-  Loader2,
   LogOut,
   Menu,
   ListPlus,
   Sparkles,
   ChevronDown,
   BadgePlus,
-  Bell,
   Settings,
   CheckCircle,
   UserCircle,
   Layers,
   HelpCircle,
-  Box,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -41,15 +35,8 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  PopoverAnchor,
-} from "@/components/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -125,9 +112,8 @@ const NavLinks = ({
             <CheckCircle className="h-4 w-4" />
             Watched
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${
-                isWatchedOpen ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 transition-transform ${isWatchedOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
           {isWatchedOpen && (
@@ -229,7 +215,7 @@ export function Header(props: HeaderProps) {
     watchedShows,
   } = props;
   // Provide a default no-op if onListUpdate is not provided
-  const safeOnListUpdate = onListUpdate ?? (async () => {});
+  const safeOnListUpdate = onListUpdate ?? (async () => { });
   const { user, logout } = useAuth();
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
@@ -244,81 +230,6 @@ export function Header(props: HeaderProps) {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   // Profile Modal State
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
-  // Mobile Search State
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState(false);
-
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-  const [selectedItem, setSelectedItem] = React.useState<{
-    id: number;
-    media_type: MediaType;
-  } | null>(null);
-
-  const { watchlist, watching, watched } = lists;
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-  };
-
-  React.useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      setIsPopoverOpen(false);
-      return;
-    }
-
-    setIsLoading(true);
-    const handler = setTimeout(async () => {
-      try {
-        const results = await searchMulti(searchQuery);
-        setSearchResults(results.slice(0, 7));
-        if (results.length > 0) {
-          setIsPopoverOpen(true);
-        }
-      } catch (error) {
-        console.error("Search failed:", error);
-        setSearchResults([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchQuery]);
-
-  const handleMovieClick = (id: number, media_type: MediaType) => {
-    setSelectedItem({ id, media_type });
-    setIsPopoverOpen(false);
-    setSearchQuery("");
-  };
-
-  const handleCloseModal = () => {
-    setSelectedItem(null);
-  };
-
-  const isMovieInList = (movieId: number, list: ListType) => {
-    const listMap = {
-      watchlist,
-      watching,
-      watched,
-    };
-    return listMap[list].some((m) => m.id === movieId);
-  };
-
-  const handleLegacySearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setIsPopoverOpen(false);
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-    }
-  };
 
   return (
     <>
@@ -459,7 +370,7 @@ export function Header(props: HeaderProps) {
                       let watchedList = [];
                       try {
                         watchedList = stored ? JSON.parse(stored) : [];
-                      } catch {}
+                      } catch { }
                       const watchedMovies = watchedList.filter(
                         (m: Movie) =>
                           m.media_type === "movie" || (!m.media_type && m.title)
@@ -490,12 +401,12 @@ export function Header(props: HeaderProps) {
                       (foundMovies.length
                         ? `Added ${foundMovies.length} movie(s). `
                         : "") +
-                        (foundShows.length
-                          ? `Added ${foundShows.length} show(s). `
-                          : "") +
-                        (notFound.length
-                          ? `Not found: ${notFound.join(", ")}`
-                          : "")
+                      (foundShows.length
+                        ? `Added ${foundShows.length} show(s). `
+                        : "") +
+                      (notFound.length
+                        ? `Not found: ${notFound.join(", ")}`
+                        : "")
                     );
                     setBulkLoading(false);
                     setBulkInput("");
@@ -530,126 +441,6 @@ export function Header(props: HeaderProps) {
               onClose={() => setIsProfileOpen(false)}
             />
 
-            {/* Mobile Search Toggle Icon (Visible when search is closed on mobile) */}
-            <div
-              className={`md:hidden ${isMobileSearchOpen ? "hidden" : "block"}`}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileSearchOpen(true)}
-                aria-label="Open Search"
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-            </div>
-
-            {/* Search Bar Container */}
-            <div
-              className={`${isMobileSearchOpen ? "absolute left-0 top-0 z-50 flex h-16 w-full items-center bg-background px-4 animate-in fade-in slide-in-from-top-2" : "hidden"} md:relative md:flex md:h-auto md:w-auto md:animate-none md:items-start md:bg-transparent md:px-0`}
-            >
-              {/* Back/Close Button for Mobile Search */}
-              <div className="mr-2 md:hidden">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsMobileSearchOpen(false)}
-                >
-                  <ChevronDown className="h-5 w-5 rotate-90" />
-                </Button>
-              </div>
-
-              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <div className="relative w-full flex-1 md:w-auto md:max-w-xs">
-                  <PopoverAnchor asChild>
-                    <form
-                      onSubmit={handleLegacySearchSubmit}
-                      className="relative w-full"
-                    >
-                      <Input
-                        type="search"
-                        placeholder="Search..."
-                        className="w-full pl-10"
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        onFocus={() => {
-                          if (searchQuery.trim()) setIsPopoverOpen(true);
-                        }}
-                        ref={(input) => {
-                          // Auto-focus on mobile when opened
-                          if (
-                            isMobileSearchOpen &&
-                            input &&
-                            !input.matches(":focus")
-                          ) {
-                            input.focus();
-                          }
-                        }}
-                      />
-                      <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    </form>
-                  </PopoverAnchor>
-                  <PopoverContent
-                    className="w-[calc(100vw-32px)] p-2 md:w-[340px]"
-                    align="end"
-                    onOpenAutoFocus={(e) => e.preventDefault()}
-                  >
-                    {isLoading && (
-                      <div className="flex items-center justify-center p-4">
-                        <Loader2 className="animate-spin" />
-                      </div>
-                    )}
-                    {!isLoading && searchResults.length > 0 && (
-                      <div className="space-y-2">
-                        {searchResults.map((item) => (
-                          <div
-                            key={item.id + (item.media_type || "")}
-                            className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-accent"
-                            onClick={() => {
-                              handleMovieClick(
-                                item.id,
-                                item.media_type || "movie"
-                              );
-                              setIsMobileSearchOpen(false); // Close mobile search on selection
-                            }}
-                          >
-                            <div className="relative h-16 w-12 shrink-0">
-                              <Image
-                                src={
-                                  item.poster_path
-                                    ? `${IMAGE_BASE_URL}${item.poster_path}`
-                                    : "https://placehold.co/80x120.png"
-                                }
-                                alt={item.title || item.name || "Poster"}
-                                fill
-                                className="rounded-sm object-cover"
-                                sizes="48px"
-                              />
-                            </div>
-                            <div>
-                              <p className="truncate font-semibold">
-                                {item.title || item.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {item.release_date?.substring(0, 4) ||
-                                  item.first_air_date?.substring(0, 4)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {!isLoading &&
-                      searchResults.length === 0 &&
-                      searchQuery.trim().length > 0 && (
-                        <p className="p-4 text-center text-sm text-muted-foreground">
-                          No results found.
-                        </p>
-                      )}
-                  </PopoverContent>
-                </div>
-              </Popover>
-            </div>
             <div className="hidden items-center gap-2 sm:flex">
               <ProfileMenu
                 user={user}
@@ -768,14 +559,6 @@ export function Header(props: HeaderProps) {
           </div>
         </div>
       </header>
-      <MovieModal
-        movieId={selectedItem?.id ?? null}
-        mediaType={selectedItem?.media_type ?? null}
-        isOpen={!!selectedItem}
-        onClose={handleCloseModal}
-        onListUpdate={safeOnListUpdate}
-        isMovieInList={isMovieInList}
-      />
     </>
   );
 }

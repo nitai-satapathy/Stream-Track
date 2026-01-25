@@ -31,6 +31,10 @@ export function ProfileMenu({
   if (!user) {
     return (
       <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={onSettings}>
+          <Settings className="h-5 w-5" />
+          <span className="sr-only">Settings</span>
+        </Button>
         <Button asChild variant="outline">
           <Link href="/login">Login</Link>
         </Button>

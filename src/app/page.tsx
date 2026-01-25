@@ -19,13 +19,27 @@ import {
 } from "@/lib/tmdb";
 import { fetchTopRatedTvShows } from "@/lib/fetchTopRatedTvShows";
 import type { Movie, MediaType } from "@/lib/types";
-import { getRecommendations } from "@/ai/flows/recommendation-flow";
+
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
+import LightRays from "@/components/LightRays";
+import { HeroSearch } from "@/components/HeroSearch";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 type ListType = "watchlist" | "watching" | "watched";
+type TabType = "movies" | "tv";
 
 export default function Home() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = React.useState<TabType>("movies");
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  // Instant Search State
+  const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
+  const [isSearchLoading, setIsSearchLoading] = React.useState(false);
+
+  // Fetch logic variables
   const [trendingMovies, setTrendingMovies] = React.useState<Movie[]>([]);
   const [trendingTv, setTrendingTv] = React.useState<Movie[]>([]);
   const [isTrendingLoading, setIsTrendingLoading] = React.useState(false);
@@ -41,9 +55,7 @@ export default function Home() {
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
   const [watching, setWatching] = React.useState<Movie[]>([]);
   const [watched, setWatched] = React.useState<Movie[]>([]);
-  const [recommendations, setRecommendations] = React.useState<Movie[]>([]);
-  const [isRecommendationsLoading, setIsRecommendationsLoading] =
-    React.useState(false);
+
 
   React.useEffect(() => {
     const loadLists = async () => {
@@ -67,6 +79,30 @@ export default function Home() {
     };
     loadLists();
   }, [user]);
+
+  // Instant Search Effect
+  React.useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearchLoading(true);
+    const handler = setTimeout(async () => {
+      try {
+        const results = await searchMulti(searchQuery);
+        setSearchResults(results.slice(0, 5)); // Limit to top 5 results
+      } catch (error) {
+        console.error("Search failed:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearchLoading(false);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
 
   // Trending fetch (only today)
   React.useEffect(() => {
@@ -95,48 +131,7 @@ export default function Home() {
       .finally(() => setIsAiringTodayLoading(false));
   }, []);
 
-  React.useEffect(() => {
-    const fetchRecommendations = async () => {
-      if (watched.length === 0 && watching.length === 0) {
-        setRecommendations([]);
-        return;
-      }
-      setIsRecommendationsLoading(true);
-      try {
-        const watchedTitles = watched
-          .map((m) => m.title || m.name)
-          .filter(Boolean) as string[];
-        const watchingTitles = watching
-          .map((m) => m.title || m.name)
-          .filter(Boolean) as string[];
-        const result = await getRecommendations({
-          watched: watchedTitles,
-          watching: watchingTitles,
-        });
-        if (result.recommendations) {
-          const moviePromises = result.recommendations.map(async (rec) => {
-            const searchResults = await searchMulti(rec.title);
-            return (
-              searchResults.find(
-                (item) =>
-                  item.media_type === "movie" || item.media_type === "tv"
-              ) || null
-            );
-          });
-          const recommendedMovies = (await Promise.all(moviePromises)).filter(
-            Boolean
-          ) as Movie[];
-          setRecommendations(recommendedMovies);
-        }
-      } catch (error) {
-        console.error("Failed to fetch recommendations:", error);
-      } finally {
-        setIsRecommendationsLoading(false);
-      }
-    };
-    const timer = setTimeout(fetchRecommendations, 1000);
-    return () => clearTimeout(timer);
-  }, [watched, watching]);
+
 
   const handleMovieClick = React.useCallback(
     (id: number, media_type: MediaType) => {
@@ -275,86 +270,152 @@ export default function Home() {
     []
   );
 
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col relative bg-black selection:bg-purple-500/30">
       <Header lists={headerLists} onListUpdate={handleListUpdate} />
-      <main className="flex-1 space-y-6 py-4 md:space-y-12 md:py-8">
-        {/* Trending Today Section */}
-        <section>
-          <MovieRow
-            title="Trending Movies Today"
-            movies={trendingMovies.map((m) => ({ ...m, media_type: "movie" }))}
-            onMovieClick={handleMovieClick}
-            isLoading={isTrendingLoading}
-            horizontal={true}
-          />
-          <div className="mt-8" />
-          <MovieRow
-            title="Trending TV Shows Today"
-            movies={trendingTv.map((m) => ({ ...m, media_type: "tv" }))}
-            onMovieClick={handleMovieClick}
-            isLoading={isTrendingLoading}
-            horizontal={true}
-          />
-        </section>
-        {/* Popular Movies */}
-        <MovieRow
-          title="Popular Movies"
-          fetchFunction={fetchPopularMoviesCallback}
-          onMovieClick={handleMovieClick}
-          horizontal={true}
-        />
-        {/* Popular TV Shows */}
-        <MovieRow
-          title="Popular TV Shows"
-          movies={popularTv.map((m) => ({ ...m, media_type: "tv" }))}
-          onMovieClick={handleMovieClick}
-          isLoading={isPopularTvLoading}
-          horizontal={true}
-        />
-        {/* Top Rated Movies */}
-        <MovieRow
-          title="Top Rated Movies"
-          fetchFunction={fetchTopRatedMoviesCallback}
-          onMovieClick={handleMovieClick}
-          horizontal={true}
-        />
-        {/* Top Rated TV Shows */}
-        <MovieRow
-          title="Top Rated TV Shows"
-          fetchFunction={fetchTopRatedTvShowsCallback}
-          onMovieClick={handleMovieClick}
-          horizontal={true}
-        />
-        {/* Browse Movies by Genre */}
-        <BrowseSection
-          title="Browse Movies by Genre"
-          mediaType="movie"
-          onMovieClick={handleMovieClick}
-        />
 
-        {/* Browse TV by Genre */}
-        <BrowseSection
-          title="Browse TV Shows by Genre"
-          mediaType="tv"
-          onMovieClick={handleMovieClick}
+      {/* LightRays Background */}
+      <div className="absolute top-0 left-0 w-full h-[600px] md:h-[800px] pointer-events-none z-0 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black z-10" />
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#4f46e5"
+          raysSpeed={1}
+          lightSpread={0.5}
+          rayLength={3}
+          followMouse={true}
+          mouseInfluence={0.1}
         />
+      </div>
 
-        {/* Upcoming Movies */}
-        <MovieRow
-          title="Upcoming Movies"
-          fetchFunction={fetchUpcomingMoviesCallback}
-          onMovieClick={handleMovieClick}
-          horizontal={true}
-        />
-        {/* TV Shows Airing Today */}
-        <MovieRow
-          title="TV Shows Airing Today"
-          movies={airingTodayTv.map((m) => ({ ...m, media_type: "tv" }))}
-          onMovieClick={handleMovieClick}
-          isLoading={isAiringTodayLoading}
-          horizontal={true}
-        />
+      <main className="flex-1 space-y-8 md:space-y-12 py-8 relative z-10">
+
+        {/* Hero Content */}
+        <div className="flex flex-col items-center justify-center pt-16 md:pt-24 pb-8 space-y-6 md:space-y-8 px-4 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/50 animate-in fade-in zoom-in-50 duration-1000 px-4">
+            Viva la Stream Track!
+          </h1>
+
+          <HeroSearch
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onSubmit={handleSearchSubmit}
+            placeholder="What are you in the mood for?"
+            className="w-full max-w-xl px-2 md:px-0"
+            searchResults={searchResults}
+            isLoading={isSearchLoading}
+            onResultClick={handleMovieClick}
+          />
+
+          {/* Tabs */}
+          <div className="flex items-center gap-2 mt-4 md:mt-8 flex-wrap justify-center">
+            <button
+              onClick={() => setActiveTab("movies")}
+              className={cn(
+                "px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-lg font-medium transition-all duration-300",
+                activeTab === "movies"
+                  ? "bg-purple-600/20 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
+                  : "text-gray-400 hover:text-white hover:bg-white/5"
+              )}
+            >
+              Movies
+            </button>
+            <button
+              onClick={() => setActiveTab("tv")}
+              className={cn(
+                "px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-lg font-medium transition-all duration-300",
+                activeTab === "tv"
+                  ? "bg-purple-600/20 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
+                  : "text-gray-400 hover:text-white hover:bg-white/5"
+              )}
+            >
+              TV Shows
+            </button>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="min-h-[500px] animate-in slide-in-from-bottom-8 fade-in duration-700">
+
+          {activeTab === "movies" && (
+            <section className="space-y-6 md:space-y-8">
+              <MovieRow
+                title="Trending Movies"
+                movies={trendingMovies.map((m) => ({ ...m, media_type: "movie" }))}
+                onMovieClick={handleMovieClick}
+                isLoading={isTrendingLoading}
+                horizontal={true}
+              />
+              <MovieRow
+                title="Popular Movies"
+                fetchFunction={fetchPopularMoviesCallback}
+                onMovieClick={handleMovieClick}
+                horizontal={true}
+              />
+              <MovieRow
+                title="Top Rated Movies"
+                fetchFunction={fetchTopRatedMoviesCallback}
+                onMovieClick={handleMovieClick}
+                horizontal={true}
+              />
+              <BrowseSection
+                title="Browse Movies by Genre"
+                mediaType="movie"
+                onMovieClick={handleMovieClick}
+              />
+              <MovieRow
+                title="Upcoming Movies"
+                fetchFunction={fetchUpcomingMoviesCallback}
+                onMovieClick={handleMovieClick}
+                horizontal={true}
+              />
+            </section>
+          )}
+
+          {activeTab === "tv" && (
+            <section className="space-y-6 md:space-y-8">
+              <MovieRow
+                title="Trending TV Shows"
+                movies={trendingTv.map((m) => ({ ...m, media_type: "tv" }))}
+                onMovieClick={handleMovieClick}
+                isLoading={isTrendingLoading}
+                horizontal={true}
+              />
+              <MovieRow
+                title="Popular TV Shows"
+                movies={popularTv.map((m) => ({ ...m, media_type: "tv" }))}
+                onMovieClick={handleMovieClick}
+                isLoading={isPopularTvLoading}
+                horizontal={true}
+              />
+              <MovieRow
+                title="Top Rated TV Shows"
+                fetchFunction={fetchTopRatedTvShowsCallback}
+                onMovieClick={handleMovieClick}
+                horizontal={true}
+              />
+              <BrowseSection
+                title="Browse TV Shows by Genre"
+                mediaType="tv"
+                onMovieClick={handleMovieClick}
+              />
+              <MovieRow
+                title="TV Shows Airing Today"
+                movies={airingTodayTv.map((m) => ({ ...m, media_type: "tv" }))}
+                onMovieClick={handleMovieClick}
+                isLoading={isAiringTodayLoading}
+                horizontal={true}
+              />
+            </section>
+          )}
+        </div>
+
       </main>
       <MovieModal
         movieId={selectedItem?.id ?? null}
