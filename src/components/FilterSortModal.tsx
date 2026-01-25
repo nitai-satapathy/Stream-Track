@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const SORT_OPTIONS = [
   { value: "popularity_desc", label: "Popularity Descending" },
@@ -55,43 +57,52 @@ export function FilterSortModal({
           {/* Sort Section */}
           <div className="w-full">
             <h3 className="font-semibold mb-2">Sort By</h3>
-            <div className="space-y-2">
+            <RadioGroup
+              value={sortBy}
+              onValueChange={setSortBy}
+              className="space-y-2"
+            >
               {SORT_OPTIONS.map((opt) => (
-                <label
+                <div
                   key={opt.value}
-                  className={`flex items-center gap-2 cursor-pointer rounded px-2 py-1 transition-colors ${sortBy === opt.value ? "bg-primary/10 text-primary font-bold" : "hover:bg-muted"}`}
+                  className={`flex items-center space-x-2 rounded px-2 py-1 transition-colors ${sortBy === opt.value ? "bg-primary/10" : "hover:bg-muted/50"}`}
                 >
-                  <input
-                    type="radio"
-                    name="sortBy"
-                    value={opt.value}
-                    checked={sortBy === opt.value}
-                    onChange={() => setSortBy(opt.value)}
-                    className="accent-primary"
-                  />
-                  {opt.label}
-                </label>
+                  <RadioGroupItem value={opt.value} id={opt.value} />
+                  <Label
+                    htmlFor={opt.value}
+                    className={`cursor-pointer w-full ${sortBy === opt.value ? "text-primary font-bold" : "text-foreground"}`}
+                  >
+                    {opt.label}
+                  </Label>
+                </div>
               ))}
-            </div>
+            </RadioGroup>
           </div>
           {/* Filters Section */}
           <div>
             <h3 className="font-semibold mb-2">Filters</h3>
             {/* Release date filter removed */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Genres</label>
+              <label className="block text-sm font-medium mb-2">Genres</label>
               <div className="flex flex-wrap gap-2">
-                <button
-                  className={`px-4 py-1 rounded-full shadow-sm border transition-all duration-150 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 ${selectedGenres.length === 0 ? "bg-primary text-white border-primary" : "bg-muted text-muted-foreground border-muted-foreground hover:bg-primary/10 hover:text-primary"}`}
+                <Button
+                  variant={
+                    selectedGenres.length === 0 ? "default" : "secondary"
+                  }
+                  size="sm"
+                  className="rounded-full h-8"
                   onClick={() => setSelectedGenres([])}
-                  type="button"
                 >
                   All Genres
-                </button>
+                </Button>
                 {genres.map((g) => (
-                  <button
+                  <Button
                     key={g}
-                    className={`px-4 py-1 rounded-full shadow-sm border transition-all duration-150 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 ${selectedGenres.includes(g) ? "bg-primary text-white border-primary" : "bg-muted text-muted-foreground border-muted-foreground hover:bg-primary/10 hover:text-primary"}`}
+                    variant={
+                      selectedGenres.includes(g) ? "default" : "secondary"
+                    }
+                    size="sm"
+                    className="rounded-full h-8"
                     onClick={() =>
                       setSelectedGenres(
                         selectedGenres.includes(g)
@@ -99,10 +110,9 @@ export function FilterSortModal({
                           : [...selectedGenres, g],
                       )
                     }
-                    type="button"
                   >
                     {g}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

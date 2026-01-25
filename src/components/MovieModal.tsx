@@ -230,7 +230,9 @@ export function MovieModal({
                 </Badge>
               ))}
             </div>
-            <p className="text-muted-foreground text-justify">{movie.overview}</p>
+            <p className="text-muted-foreground text-justify">
+              {movie.overview}
+            </p>
 
             <div className="flex flex-wrap gap-2 pt-4">
               {trailer && (

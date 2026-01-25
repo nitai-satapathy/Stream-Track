@@ -14,7 +14,7 @@ const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 export function MovieCard({ movie, onClick }: MovieCardProps) {
   return (
     <Card
-      className="w-[140px] md:w-[200px] shrink-0 cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
+      className="w-[150px] md:w-[200px] shrink-0 cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
       onClick={onClick}
     >
       <CardContent className="p-0">
@@ -37,7 +37,10 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
             {movie.title || movie.name}
           </h3>
           <div className="mt-1 md:mt-2 flex items-center justify-between text-xs md:text-sm text-muted-foreground">
-             <Badge variant="outline" className="flex items-center gap-1 px-1 py-0 h-5 md:h-auto">
+            <Badge
+              variant="outline"
+              className="flex items-center gap-1 px-1 py-0 h-5 md:h-auto"
+            >
               <Star className="h-3 w-3 text-yellow-400" fill="currentColor" />
               <span>{movie.vote_average.toFixed(1)}</span>
             </Badge>

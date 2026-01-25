@@ -178,7 +178,7 @@ export function SettingsModal({ isOpen, onClose, lists }: SettingsModalProps) {
           </div>
         </div>
         <DialogClose asChild>
-          <Button variant="secondary">Close</Button>
+          <Button variant="outline">Close</Button>
         </DialogClose>
       </DialogContent>
     </Dialog>

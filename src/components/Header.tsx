@@ -32,11 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +43,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
@@ -128,8 +125,9 @@ const NavLinks = ({
             <CheckCircle className="h-4 w-4" />
             Watched
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${isWatchedOpen ? "rotate-180" : ""
-                }`}
+              className={`h-4 w-4 transition-transform ${
+                isWatchedOpen ? "rotate-180" : ""
+              }`}
             />
           </button>
           {isWatchedOpen && (
@@ -171,7 +169,10 @@ const NavLinks = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               <DropdownMenuItem asChild>
-                <Link href="/watched-movies" className="flex items-center gap-2">
+                <Link
+                  href="/watched-movies"
+                  className="flex items-center gap-2"
+                >
                   <Clapperboard className="h-4 w-4" />
                   Watched Movies
                 </Link>
@@ -228,7 +229,7 @@ export function Header(props: HeaderProps) {
     watchedShows,
   } = props;
   // Provide a default no-op if onListUpdate is not provided
-  const safeOnListUpdate = onListUpdate ?? (async () => { });
+  const safeOnListUpdate = onListUpdate ?? (async () => {});
   const { user, logout } = useAuth();
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
@@ -243,7 +244,8 @@ export function Header(props: HeaderProps) {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   // Profile Modal State
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
-
+  // Mobile Search State
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState(false);
 
   const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -324,7 +326,13 @@ export function Header(props: HeaderProps) {
         <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/icons/logo.svg" alt="Logo" width={44} height={44} className="w-8 h-8 md:w-11 md:h-11" />
+              <Image
+                src="/icons/logo.svg"
+                alt="Logo"
+                width={44}
+                height={44}
+                className="w-8 h-8 md:w-11 md:h-11"
+              />
               <h1 className="text-2xl font-bold text-foreground">
                 Stream Track
               </h1>
@@ -354,20 +362,13 @@ export function Header(props: HeaderProps) {
                 <label htmlFor="bulk-names" className="font-medium">
                   Paste multiple names (one per line):
                 </label>
-                <textarea
+                <Textarea
                   id="bulk-names"
-                  className="w-full rounded border border-blue-400 bg-blue-200/40 backdrop-blur-md p-2 text-base text-slate-900 placeholder:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  rows={4}
+                  className="w-full min-h-[120px] bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 placeholder:text-blue-400 dark:placeholder:text-blue-500 focus-visible:ring-blue-400"
                   value={bulkInput}
                   onChange={(e) => setBulkInput(e.target.value)}
-                  placeholder="Movie or Show 1, Movie or Show 2"
+                  placeholder="Movie or Show 1&#10;Movie or Show 2"
                   disabled={bulkLoading}
-                  style={{
-                    background: "rgba(59, 130, 246, 0.15)",
-                    color: "#ffffffff", // slate-900
-                    boxShadow: "0 4px 24px 0 rgba(59,130,246,0.10)",
-                    backdropFilter: "blur(8px)",
-                  }}
                 />
                 <Button
                   className="bg-primary text-primary-foreground px-4 py-2 rounded disabled:opacity-50 mt-2"
@@ -459,7 +460,7 @@ export function Header(props: HeaderProps) {
                       let watchedList = [];
                       try {
                         watchedList = stored ? JSON.parse(stored) : [];
-                      } catch { }
+                      } catch {}
                       const watchedMovies = watchedList.filter(
                         (m: Movie) =>
                           m.media_type === "movie" ||
@@ -491,12 +492,12 @@ export function Header(props: HeaderProps) {
                       (foundMovies.length
                         ? `Added ${foundMovies.length} movie(s). `
                         : "") +
-                      (foundShows.length
-                        ? `Added ${foundShows.length} show(s). `
-                        : "") +
-                      (notFound.length
-                        ? `Not found: ${notFound.join(", ")}`
-                        : ""),
+                        (foundShows.length
+                          ? `Added ${foundShows.length} show(s). `
+                          : "") +
+                        (notFound.length
+                          ? `Not found: ${notFound.join(", ")}`
+                          : ""),
                     );
                     setBulkLoading(false);
                     setBulkInput("");
@@ -531,86 +532,126 @@ export function Header(props: HeaderProps) {
               onClose={() => setIsProfileOpen(false)}
             />
 
+            {/* Mobile Search Toggle Icon (Visible when search is closed on mobile) */}
+            <div
+              className={`md:hidden ${isMobileSearchOpen ? "hidden" : "block"}`}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileSearchOpen(true)}
+                aria-label="Open Search"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+            </div>
 
-            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <div className="relative w-full max-w-xs">
-                <PopoverAnchor asChild>
-                  <form
-                    onSubmit={handleLegacySearchSubmit}
-                    className="relative w-full"
-                  >
-                    <Input
-                      type="search"
-                      placeholder="Search movies & TV..."
-                      className="pl-10"
-                      value={searchQuery}
-                      onChange={handleSearchChange}
-                      onFocus={() => {
-                        if (searchQuery.trim()) setIsPopoverOpen(true);
-                      }}
-                    />
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  </form>
-                </PopoverAnchor>
-                <PopoverContent
-                  className="w-[340px] p-2"
-                  align="end"
-                  onOpenAutoFocus={(e) => e.preventDefault()}
+            {/* Search Bar Container */}
+            <div
+              className={`${isMobileSearchOpen ? "flex absolute left-0 top-0 w-full h-16 bg-background px-4 items-center z-50 animate-in fade-in slide-in-from-top-2" : "hidden"} md:flex md:relative md:w-auto md:h-auto md:bg-transparent md:px-0 md:items-start md:animate-none`}
+            >
+              {/* Back/Close Button for Mobile Search */}
+              <div className="md:hidden mr-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileSearchOpen(false)}
                 >
-                  {isLoading && (
-                    <div className="flex items-center justify-center p-4">
-                      <Loader2 className="animate-spin" />
-                    </div>
-                  )}
-                  {!isLoading && searchResults.length > 0 && (
-                    <div className="space-y-2">
-                      {searchResults.map((item) => (
-                        <div
-                          key={item.id + (item.media_type || "")}
-                          className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer"
-                          onClick={() =>
-                            handleMovieClick(
-                              item.id,
-                              item.media_type || "movie",
-                            )
-                          }
-                        >
-                          <div className="w-12 h-16 relative shrink-0">
-                            <Image
-                              src={
-                                item.poster_path
-                                  ? `${IMAGE_BASE_URL}${item.poster_path}`
-                                  : "https://placehold.co/80x120.png"
-                              }
-                              alt={item.title || item.name || "Poster"}
-                              fill
-                              className="rounded-sm object-cover"
-                              sizes="48px"
-                            />
-                          </div>
-                          <div>
-                            <p className="font-semibold truncate">
-                              {item.title || item.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {item.release_date?.substring(0, 4) ||
-                                item.first_air_date?.substring(0, 4)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {!isLoading &&
-                    searchResults.length === 0 &&
-                    searchQuery.trim().length > 0 && (
-                      <p className="text-center text-sm text-muted-foreground p-4">
-                        No results found.
-                      </p>
-                    )}
-                </PopoverContent>
+                  <ChevronDown className="h-5 w-5 rotate-90" />
+                </Button>
               </div>
-            </Popover>
+
+              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                <div className="relative w-full md:w-auto md:max-w-xs flex-1">
+                  <PopoverAnchor asChild>
+                    <form
+                      onSubmit={handleLegacySearchSubmit}
+                      className="relative w-full"
+                    >
+                      <Input
+                        type="search"
+                        placeholder="Search..."
+                        className="pl-10 w-full"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onFocus={() => {
+                          if (searchQuery.trim()) setIsPopoverOpen(true);
+                        }}
+                        ref={(input) => {
+                          // Auto-focus on mobile when opened
+                          if (
+                            isMobileSearchOpen &&
+                            input &&
+                            !input.matches(":focus")
+                          ) {
+                            input.focus();
+                          }
+                        }}
+                      />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    </form>
+                  </PopoverAnchor>
+                  <PopoverContent
+                    className="w-[calc(100vw-32px)] md:w-[340px] p-2"
+                    align="end"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                  >
+                    {isLoading && (
+                      <div className="flex items-center justify-center p-4">
+                        <Loader2 className="animate-spin" />
+                      </div>
+                    )}
+                    {!isLoading && searchResults.length > 0 && (
+                      <div className="space-y-2">
+                        {searchResults.map((item) => (
+                          <div
+                            key={item.id + (item.media_type || "")}
+                            className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer"
+                            onClick={() => {
+                              handleMovieClick(
+                                item.id,
+                                item.media_type || "movie",
+                              );
+                              setIsMobileSearchOpen(false); // Close mobile search on selection
+                            }}
+                          >
+                            <div className="w-12 h-16 relative shrink-0">
+                              <Image
+                                src={
+                                  item.poster_path
+                                    ? `${IMAGE_BASE_URL}${item.poster_path}`
+                                    : "https://placehold.co/80x120.png"
+                                }
+                                alt={item.title || item.name || "Poster"}
+                                fill
+                                className="rounded-sm object-cover"
+                                sizes="48px"
+                              />
+                            </div>
+                            <div>
+                              <p className="font-semibold truncate">
+                                {item.title || item.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {item.release_date?.substring(0, 4) ||
+                                  item.first_air_date?.substring(0, 4)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {!isLoading &&
+                      searchResults.length === 0 &&
+                      searchQuery.trim().length > 0 && (
+                        <p className="text-center text-sm text-muted-foreground p-4">
+                          No results found.
+                        </p>
+                      )}
+                  </PopoverContent>
+                </div>
+              </Popover>
+            </div>
             <div className="hidden sm:flex items-center gap-2">
               <ProfileMenu
                 user={user}
@@ -632,7 +673,12 @@ export function Header(props: HeaderProps) {
                 <div className="flex flex-col gap-6 p-4">
                   <SheetClose asChild>
                     <Link href="/" className="flex items-center gap-2">
-                      <Image src="/icons/logo.svg" alt="Logo" width={34} height={34} />
+                      <Image
+                        src="/icons/logo.svg"
+                        alt="Logo"
+                        width={34}
+                        height={34}
+                      />
                       <h1 className="text-2xl font-bold text-foreground">
                         Stream Track
                       </h1>
@@ -681,12 +727,21 @@ export function Header(props: HeaderProps) {
                     <div className="flex flex-col gap-4 mt-auto border-t pt-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User"} />
-                          <AvatarFallback>{user.displayName?.charAt(0) || "U"}</AvatarFallback>
+                          <AvatarImage
+                            src={user.photoURL || undefined}
+                            alt={user.displayName || "User"}
+                          />
+                          <AvatarFallback>
+                            {user.displayName?.charAt(0) || "U"}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                          <p className="font-medium leading-none">{user.displayName}</p>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <p className="font-medium leading-none">
+                            {user.displayName}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {user.email}
+                          </p>
                         </div>
                       </div>
 
@@ -700,7 +755,11 @@ export function Header(props: HeaderProps) {
                         </Link>
                       </SheetClose>
 
-                      <Button variant="outline" onClick={logout} className="w-full justify-start">
+                      <Button
+                        variant="outline"
+                        onClick={logout}
+                        className="w-full justify-start"
+                      >
                         <LogOut className="mr-2 h-4 w-4" /> Logout
                       </Button>
                     </div>
