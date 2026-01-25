@@ -38,12 +38,14 @@ Follow these instructions to run the project locally.
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/nitai-satapathy/Stream-Track.git
    cd Stream-Track
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```

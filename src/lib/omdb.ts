@@ -6,7 +6,7 @@ const OMDB_BASE_URL = "https://www.omdbapi.com/";
 export async function fetchOmdbData(
   title: string,
   year?: string,
-  type?: "movie" | "series",
+  type?: "movie" | "series"
 ) {
   const params = new URLSearchParams({
     apikey: OMDB_API_KEY,

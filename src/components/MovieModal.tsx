@@ -116,7 +116,7 @@ export function MovieModal({
   }, [movieId, mediaType, onClose, toast]);
 
   const trailer = movie?.videos?.results.find(
-    (video) => video.site === "YouTube" && video.type === "Trailer",
+    (video) => video.site === "YouTube" && video.type === "Trailer"
   );
 
   const handleListButtonClick = (list: ListType) => {
@@ -132,9 +132,9 @@ export function MovieModal({
           <DialogHeader>
             <DialogTitle className="sr-only">Loading movie details</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Skeleton className="h-[450px] md:h-[350px] w-full col-span-1 md:col-span-1" />
-            <div className="space-y-4 col-span-1 md:col-span-2">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <Skeleton className="col-span-1 h-[450px] w-full md:col-span-1 md:h-[350px]" />
+            <div className="col-span-1 space-y-4 md:col-span-2">
               <Skeleton className="h-8 w-3/4" />
               <div className="flex gap-2">
                 <Skeleton className="h-6 w-20" />
@@ -155,14 +155,14 @@ export function MovieModal({
 
     return (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 text-foreground">
+        <div className="grid grid-cols-1 gap-4 text-foreground md:grid-cols-3 md:gap-8">
           <div className="col-span-1 flex justify-center md:block">
             <Image
               src={`${IMAGE_BASE_URL}${movie.poster_path}`}
               alt={movie.title || movie.name || "Poster"}
               width={500}
               height={750}
-              className="rounded-lg shadow-lg max-h-[400px] w-auto h-auto object-contain md:max-h-none"
+              className="h-auto max-h-[400px] w-auto rounded-lg object-contain shadow-lg md:max-h-none"
               data-ai-hint="movie poster"
             />
           </div>
@@ -173,7 +173,7 @@ export function MovieModal({
               </DialogTitle>
             </DialogHeader>
             {/* Ratings Row */}
-            <div className="flex flex-wrap items-center space-x-4 text-sm mb-2">
+            <div className="mb-2 flex flex-wrap items-center space-x-4 text-sm">
               {/* TMDb Rating */}
               <div className="flex items-center gap-1">
                 <SiThemoviedatabase className="h-5 w-5 text-green-600" />
@@ -208,7 +208,7 @@ export function MovieModal({
             </div>
             {/* Box Office and Release Date Row */}
             {(omdb?.BoxOffice && omdb.BoxOffice !== "N/A") || releaseDate ? (
-              <div className="flex items-center space-x-4 text-sm mb-2">
+              <div className="mb-2 flex items-center space-x-4 text-sm">
                 {omdb?.BoxOffice && omdb.BoxOffice !== "N/A" && (
                   <div className="flex items-center gap-1">
                     <Wallet className="h-5 w-5 text-blue-700" />
@@ -230,7 +230,7 @@ export function MovieModal({
                 </Badge>
               ))}
             </div>
-            <p className="text-muted-foreground text-justify">
+            <p className="text-justify text-muted-foreground">
               {movie.overview}
             </p>
 
@@ -240,7 +240,7 @@ export function MovieModal({
                   onClick={() =>
                     window.open(
                       `https://www.youtube.com/watch?v=${trailer.key}`,
-                      "_blank",
+                      "_blank"
                     )
                   }
                   variant="default"
@@ -275,13 +275,13 @@ export function MovieModal({
         </div>
         {/* Cast section full width below */}
         {cast.length > 0 && (
-          <div className="mt-10 col-span-full w-full">
-            <h4 className="font-bold mb-2 text-lg">Cast</h4>
+          <div className="col-span-full mt-10 w-full">
+            <h4 className="mb-2 text-lg font-bold">Cast</h4>
             <div className="flex flex-wrap gap-3">
               {cast.map((member) => (
                 <div
                   key={member.id}
-                  className="flex flex-col items-center text-center w-[90px] mb-2"
+                  className="mb-2 flex w-[90px] flex-col items-center text-center"
                 >
                   {member.profile_path ? (
                     <Image
@@ -292,14 +292,14 @@ export function MovieModal({
                       className="rounded-md object-cover"
                     />
                   ) : (
-                    <div className="w-[70px] h-[90px] bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                    <div className="flex h-[90px] w-[70px] items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
                       No Photo
                     </div>
                   )}
-                  <span className="mt-1 font-medium text-xs truncate w-[70px]">
+                  <span className="mt-1 w-[70px] truncate text-xs font-medium">
                     {member.name}
                   </span>
-                  <span className="text-[10px] text-muted-foreground truncate w-[70px]">
+                  <span className="w-[70px] truncate text-[10px] text-muted-foreground">
                     {member.character}
                   </span>
                 </div>
@@ -313,7 +313,7 @@ export function MovieModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 md:p-8 overflow-y-auto max-h-[90vh]">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:p-8">
         {renderContent()}
       </DialogContent>
     </Dialog>

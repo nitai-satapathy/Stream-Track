@@ -13,7 +13,7 @@ const MovieSchema = new Schema(
     first_air_date: String,
     media_type: String,
   },
-  { _id: false },
+  { _id: false }
 );
 
 const UserSchema = new Schema({

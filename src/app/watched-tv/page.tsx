@@ -57,7 +57,7 @@ export default function WatchedTvShowsPage() {
   const [watched, setWatched] = React.useState<Movie[]>([]);
 
   // Extracted loadLists so it can be reused after updates
-  const loadLists = async () => {
+  const loadLists = React.useCallback(async () => {
     if (user) {
       const { watchlist, watching, watched } = await getLists(user.uid);
       setWatchlist(watchlist);
@@ -75,15 +75,18 @@ export default function WatchedTvShowsPage() {
       if (storedWatching) setWatching(JSON.parse(storedWatching));
       if (storedWatched) setWatched(JSON.parse(storedWatched));
     }
-  };
+  }, [user]);
 
   React.useEffect(() => {
     loadLists();
-  }, [user]);
+  }, [loadLists]); // fixed dependency
 
-  const handleMovieClick = React.useCallback((id: number, media_type: MediaType) => {
-    setSelectedItem({ id, media_type: "tv" });
-  }, []);
+  const handleMovieClick = React.useCallback(
+    (id: number, media_type: MediaType) => {
+      setSelectedItem({ id, media_type: "tv" });
+    },
+    []
+  );
 
   const handleCloseModal = React.useCallback(() => {
     setSelectedItem(null);
@@ -91,7 +94,7 @@ export default function WatchedTvShowsPage() {
 
   const watchedTvShows = React.useMemo(() => {
     let base = watched.filter(
-      (movie) => movie.media_type === "tv" || movie.name,
+      (movie) => movie.media_type === "tv" || movie.name
     );
     if (selectedGenres.length > 0) {
       base = base.filter((show) => {
@@ -110,121 +113,132 @@ export default function WatchedTvShowsPage() {
     switch (sortBy) {
       case "popularity_desc":
         return [...base].sort(
-          (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
+          (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0)
         );
       case "popularity_asc":
         return [...base].sort(
-          (a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0),
+          (a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0)
         );
       case "rating_desc":
         return [...base].sort(
-          (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
+          (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0)
         );
       case "rating_asc":
         return [...base].sort(
-          (a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0),
+          (a, b) => (a.vote_average ?? 0) - (b.vote_average ?? 0)
         );
       case "release_desc":
         return [...base].sort((a, b) =>
-          (b.first_air_date ?? "") > (a.first_air_date ?? "") ? 1 : -1,
+          (b.first_air_date ?? "") > (a.first_air_date ?? "") ? 1 : -1
         );
       case "release_asc":
         return [...base].sort((a, b) =>
-          (a.first_air_date ?? "") > (b.first_air_date ?? "") ? 1 : -1,
+          (a.first_air_date ?? "") > (b.first_air_date ?? "") ? 1 : -1
         );
       case "title_az":
         return [...base].sort((a, b) =>
-          (a.name ?? a.title ?? "").localeCompare(b.name ?? b.title ?? ""),
+          (a.name ?? a.title ?? "").localeCompare(b.name ?? b.title ?? "")
         );
       case "title_za":
         return [...base].sort((a, b) =>
-          (b.name ?? b.title ?? "").localeCompare(a.name ?? a.title ?? ""),
+          (b.name ?? b.title ?? "").localeCompare(a.name ?? a.title ?? "")
         );
       default:
         return base;
     }
   }, [watched, selectedGenres, sortBy]);
 
-  const isMovieInList = React.useCallback((movieId: number, list: ListType) => {
-    const listMap = {
-      watchlist,
-      watching,
-      watched,
-    };
-    return listMap[list].some((m) => m.id === movieId);
-  }, [watchlist, watching, watched]);
+  const isMovieInList = React.useCallback(
+    (movieId: number, list: ListType) => {
+      const listMap = {
+        watchlist,
+        watching,
+        watched,
+      };
+      return listMap[list].some((m) => m.id === movieId);
+    },
+    [watchlist, watching, watched]
+  );
 
-  const updateLocalStorage = (key: ListType, data: Movie[]) => {
+  const updateLocalStorage = React.useCallback((key: ListType, data: Movie[]) => {
     if (!user) {
       localStorage.setItem(key, JSON.stringify(data));
     }
-  };
+  }, [user]);
 
-  const handleListUpdate = React.useCallback(async (movie: Movie, list: ListType) => {
-    let newWatchlist = [...watchlist];
-    let newWatching = [...watching];
-    let newWatched = [...watched];
+  const handleListUpdate = React.useCallback(
+    async (movie: Movie, list: ListType) => {
+      let newWatchlist = [...watchlist];
+      let newWatching = [...watching];
+      let newWatched = [...watched];
 
-    const lists: Record<
-      ListType,
-      { state: Movie[]; setter: React.Dispatch<React.SetStateAction<Movie[]>> }
-    > = {
-      watchlist: { state: newWatchlist, setter: setWatchlist },
-      watching: { state: newWatching, setter: setWatching },
-      watched: { state: newWatched, setter: setWatched },
-    };
+      const lists: Record<
+        ListType,
+        {
+          state: Movie[];
+          setter: React.Dispatch<React.SetStateAction<Movie[]>>;
+        }
+      > = {
+        watchlist: { state: newWatchlist, setter: setWatchlist },
+        watching: { state: newWatching, setter: setWatching },
+        watched: { state: newWatched, setter: setWatched },
+      };
 
-    const otherLists = (Object.keys(lists) as ListType[]).filter(
-      (l) => l !== list,
-    );
-
-    // Remove from other lists
-    otherLists.forEach((listName) => {
-      const updatedList = lists[listName].state.filter(
-        (m) => m.id !== movie.id,
+      const otherLists = (Object.keys(lists) as ListType[]).filter(
+        (l) => l !== list
       );
-      lists[listName].setter(updatedList);
-      if (listName === "watchlist") newWatchlist = updatedList;
-      if (listName === "watching") newWatching = updatedList;
-      if (listName === "watched") newWatched = updatedList;
-    });
 
-    const targetList = lists[list];
-    const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
-
-    if (movieIndex > -1) {
-      // Remove from target list if it's already there (toggle off)
-      const updatedList = targetList.state.filter((m) => m.id !== movie.id);
-      targetList.setter(updatedList);
-      if (list === "watchlist") newWatchlist = updatedList;
-      if (list === "watching") newWatching = updatedList;
-      if (list === "watched") newWatched = updatedList;
-    } else {
-      // Add to target list
-      const updatedList = [...targetList.state, movie];
-      targetList.setter(updatedList);
-      if (list === "watchlist") newWatchlist = updatedList;
-      if (list === "watching") newWatching = updatedList;
-      if (list === "watched") newWatched = updatedList;
-    }
-
-    if (user) {
-      await updateUserLists(user.uid, {
-        watchlist: newWatchlist,
-        watching: newWatching,
-        watched: newWatched,
+      // Remove from other lists
+      otherLists.forEach((listName) => {
+        const updatedList = lists[listName].state.filter(
+          (m) => m.id !== movie.id
+        );
+        lists[listName].setter(updatedList);
+        if (listName === "watchlist") newWatchlist = updatedList;
+        if (listName === "watching") newWatching = updatedList;
+        if (listName === "watched") newWatched = updatedList;
       });
-    } else {
-      updateLocalStorage("watchlist", newWatchlist);
-      updateLocalStorage("watching", newWatching);
-      updateLocalStorage("watched", newWatched);
-    }
-    // Refetch lists after update to refresh UI
-    await loadLists();
-  }, [watchlist, watching, watched, user]);
 
-  const headerLists = React.useMemo(() => ({ watchlist, watching, watched }), [watchlist, watching, watched]);
+      const targetList = lists[list];
+      const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
 
+      if (movieIndex > -1) {
+        // Remove from target list if it's already there (toggle off)
+        const updatedList = targetList.state.filter((m) => m.id !== movie.id);
+        targetList.setter(updatedList);
+        if (list === "watchlist") newWatchlist = updatedList;
+        if (list === "watching") newWatching = updatedList;
+        if (list === "watched") newWatched = updatedList;
+      } else {
+        // Add to target list
+        const updatedList = [...targetList.state, movie];
+        targetList.setter(updatedList);
+        if (list === "watchlist") newWatchlist = updatedList;
+        if (list === "watching") newWatching = updatedList;
+        if (list === "watched") newWatched = updatedList;
+      }
+
+      if (user) {
+        await updateUserLists(user.uid, {
+          watchlist: newWatchlist,
+          watching: newWatching,
+          watched: newWatched,
+        });
+      } else {
+        updateLocalStorage("watchlist", newWatchlist);
+        updateLocalStorage("watching", newWatching);
+        updateLocalStorage("watched", newWatched);
+      }
+      // Refetch lists after update to refresh UI
+      await loadLists();
+    },
+    [watchlist, watching, watched, user, loadLists, updateLocalStorage]
+  );
+
+  const headerLists = React.useMemo(
+    () => ({ watchlist, watching, watched }),
+    [watchlist, watching, watched]
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -234,21 +248,21 @@ export default function WatchedTvShowsPage() {
         watchedMovies={[]}
         setWatchedMovies={() => { }}
         watchedShows={watched.filter(
-          (movie) => movie.media_type === "tv" || movie.name,
+          (movie) => movie.media_type === "tv" || movie.name
         )}
         setWatchedShows={setWatched}
       />
       <main className="flex-1 space-y-12 py-8">
-        <div className="container space-y-4 flex items-center justify-between">
+        <div className="container flex items-center justify-between space-y-4">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
             Watched TV Shows
           </h1>
           <button
-            className="ml-2 p-2 rounded hover:bg-muted transition-colors"
+            className="ml-2 rounded p-2 transition-colors hover:bg-muted"
             aria-label="Filter watched TV shows"
             onClick={() => setFilterModalOpen(true)}
           >
-            <Funnel className="w-6 h-6 text-muted-foreground hover:text-primary transition-colors" />
+            <Funnel className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
           </button>
           <FilterSortModal
             isOpen={filterModalOpen}

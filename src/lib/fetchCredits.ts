@@ -13,10 +13,10 @@ export interface CreditsResponse {
 
 export const fetchCredits = async (
   id: number,
-  mediaType: "movie" | "tv",
+  mediaType: "movie" | "tv"
 ): Promise<CastMember[]> => {
   const response = await tmdbApi.get<CreditsResponse>(
-    `/${mediaType}/${id}/credits`,
+    `/${mediaType}/${id}/credits`
   );
   return response.data.cast;
 };

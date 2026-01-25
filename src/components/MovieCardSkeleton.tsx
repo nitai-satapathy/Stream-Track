@@ -6,7 +6,7 @@ export function MovieCardSkeleton() {
     <Card className="w-[200px] shrink-0">
       <CardContent className="p-0">
         <Skeleton className="h-[300px] w-full rounded-t-lg" />
-        <div className="p-3 space-y-2">
+        <div className="space-y-2 p-3">
           <Skeleton className="h-5 w-4/5" />
           <div className="flex justify-between">
             <Skeleton className="h-4 w-1/4" />

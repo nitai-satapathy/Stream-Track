@@ -8,7 +8,7 @@ import type { Movie } from "@/lib/types";
 export async function registerUser(
   name: string,
   email: string,
-  password: string,
+  password: string
 ) {
   try {
     await connectDB();
@@ -47,7 +47,7 @@ export async function registerUser(
 
 export async function updateUserLists(
   userId: string,
-  lists: { watchlist?: Movie[]; watching?: Movie[]; watched?: Movie[] },
+  lists: { watchlist?: Movie[]; watching?: Movie[]; watched?: Movie[] }
 ) {
   try {
     await connectDB();
@@ -61,7 +61,7 @@ export async function updateUserLists(
 
 export async function updateUserProfile(
   userId: string,
-  data: { name?: string; image?: string },
+  data: { name?: string; image?: string }
 ) {
   try {
     await connectDB();

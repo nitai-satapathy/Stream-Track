@@ -37,7 +37,7 @@ export function SettingsModal({ isOpen, onClose, lists }: SettingsModalProps) {
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute(
       "download",
-      `stream-track-backup-${new Date().toISOString().slice(0, 10)}.json`,
+      `stream-track-backup-${new Date().toISOString().slice(0, 10)}.json`
     );
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
@@ -70,15 +70,15 @@ export function SettingsModal({ isOpen, onClose, lists }: SettingsModalProps) {
         } else {
           localStorage.setItem(
             "watchlist",
-            JSON.stringify(importedLists.watchlist),
+            JSON.stringify(importedLists.watchlist)
           );
           localStorage.setItem(
             "watching",
-            JSON.stringify(importedLists.watching),
+            JSON.stringify(importedLists.watching)
           );
           localStorage.setItem(
             "watched",
-            JSON.stringify(importedLists.watched),
+            JSON.stringify(importedLists.watched)
           );
         }
         setImportStatus("Import successful! Reloading...");
@@ -94,7 +94,7 @@ export function SettingsModal({ isOpen, onClose, lists }: SettingsModalProps) {
   const handleDeleteAll = async () => {
     if (
       !confirm(
-        "Are you sure you want to delete ALL data? This cannot be undone.",
+        "Are you sure you want to delete ALL data? This cannot be undone."
       )
     )
       return;
@@ -119,7 +119,7 @@ export function SettingsModal({ isOpen, onClose, lists }: SettingsModalProps) {
         <div className="flex flex-col gap-6 py-4">
           {/* Export Section */}
           <div className="space-y-2">
-            <h4 className="font-medium flex items-center gap-2">
+            <h4 className="flex items-center gap-2 font-medium">
               <Download className="h-4 w-4" /> Export Data
             </h4>
             <p className="text-sm text-muted-foreground">
@@ -134,7 +134,7 @@ export function SettingsModal({ isOpen, onClose, lists }: SettingsModalProps) {
 
           {/* Import Section */}
           <div className="space-y-2">
-            <h4 className="font-medium flex items-center gap-2">
+            <h4 className="flex items-center gap-2 font-medium">
               <Upload className="h-4 w-4" /> Import Data
             </h4>
             <p className="text-sm text-muted-foreground">
@@ -162,7 +162,7 @@ export function SettingsModal({ isOpen, onClose, lists }: SettingsModalProps) {
 
           {/* Delete All Section */}
           <div className="space-y-2">
-            <h4 className="font-medium text-destructive flex items-center gap-2">
+            <h4 className="flex items-center gap-2 font-medium text-destructive">
               <Trash2 className="h-4 w-4" /> Danger Zone
             </h4>
             <p className="text-sm text-muted-foreground">

@@ -37,7 +37,7 @@ export function GenreFilter({
   return (
     <div className="flex items-center space-x-2">
       {/* Desktop View */}
-      <div className="hidden md:flex items-center space-x-2">
+      <div className="hidden items-center space-x-2 md:flex">
         {visibleGenres.map((genre) => (
           <Button
             key={genre.id}
@@ -48,7 +48,7 @@ export function GenreFilter({
               "rounded-full transition-all",
               selectedGenre === genre.id
                 ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80",
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
             )}
           >
             {genre.name}
@@ -62,7 +62,7 @@ export function GenreFilter({
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center space-x-1 px-3"
+                  className="flex items-center space-x-1 rounded-full bg-primary px-3 text-primary-foreground hover:bg-primary/90"
                 >
                   <span>{selectedOverflowGenre.name}</span>
                   <MoreHorizontal className="h-3 w-3" />
@@ -88,7 +88,7 @@ export function GenreFilter({
                   onClick={() => onSelect(genre.id)}
                   className={cn(
                     selectedGenre === genre.id &&
-                      "bg-accent text-accent-foreground",
+                      "bg-accent text-accent-foreground"
                   )}
                 >
                   {genre.name}
@@ -122,7 +122,7 @@ export function GenreFilter({
                 onClick={() => onSelect(genre.id)}
                 className={cn(
                   selectedGenre === genre.id &&
-                    "bg-accent text-accent-foreground",
+                    "bg-accent text-accent-foreground"
                 )}
               >
                 {genre.name}

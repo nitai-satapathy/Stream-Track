@@ -31,14 +31,14 @@ const WatchlistPage = () => {
       setMovies(
         watchlist.filter(
           (item: Movie) =>
-            item.media_type === "movie" || (!item.media_type && item.title),
-        ),
+            item.media_type === "movie" || (!item.media_type && item.title)
+        )
       );
       setTvShows(
         watchlist.filter(
           (item: Movie) =>
-            item.media_type === "tv" || (!item.media_type && item.name),
-        ),
+            item.media_type === "tv" || (!item.media_type && item.name)
+        )
       );
     } else {
       // fallback to localStorage for guests
@@ -54,13 +54,13 @@ const WatchlistPage = () => {
       setMovies(
         wl.filter(
           (item) =>
-            item.media_type === "movie" || (!item.media_type && item.title),
-        ),
+            item.media_type === "movie" || (!item.media_type && item.title)
+        )
       );
       setTvShows(
         wl.filter(
-          (item) => item.media_type === "tv" || (!item.media_type && item.name),
-        ),
+          (item) => item.media_type === "tv" || (!item.media_type && item.name)
+        )
       );
     }
   }, [user]);
@@ -69,9 +69,12 @@ const WatchlistPage = () => {
     fetchLists();
   }, [fetchLists]);
 
-  const handleMovieClick = useCallback((id: number, media_type: "movie" | "tv") => {
-    setSelectedItem({ id, media_type });
-  }, []);
+  const handleMovieClick = useCallback(
+    (id: number, media_type: "movie" | "tv") => {
+      setSelectedItem({ id, media_type });
+    },
+    []
+  );
 
   const handleCloseModal = useCallback(() => {
     setSelectedItem(null);
@@ -80,88 +83,97 @@ const WatchlistPage = () => {
   // Dummy handlers for now (customize as needed)
   // Copy-paste from main page logic for list management
   type ListType = "watchlist" | "watching" | "watched";
-  const handleListUpdate = useCallback(async (movie: Movie, list: ListType) => {
-    let newWatchlist = [...watchlist];
-    let newWatching = [...watching];
-    let newWatched = [...watched];
+  const handleListUpdate = useCallback(
+    async (movie: Movie, list: ListType) => {
+      let newWatchlist = [...watchlist];
+      let newWatching = [...watching];
+      let newWatched = [...watched];
 
-    const lists: Record<
-      ListType,
-      { state: Movie[]; setter: React.Dispatch<React.SetStateAction<Movie[]>> }
-    > = {
-      watchlist: { state: newWatchlist, setter: setWatchlist },
-      watching: { state: newWatching, setter: setWatching },
-      watched: { state: newWatched, setter: setWatched },
-    };
+      const lists: Record<
+        ListType,
+        {
+          state: Movie[];
+          setter: React.Dispatch<React.SetStateAction<Movie[]>>;
+        }
+      > = {
+        watchlist: { state: newWatchlist, setter: setWatchlist },
+        watching: { state: newWatching, setter: setWatching },
+        watched: { state: newWatched, setter: setWatched },
+      };
 
-    const otherLists = (Object.keys(lists) as ListType[]).filter(
-      (l) => l !== list,
-    );
-
-    // Remove from other lists
-    otherLists.forEach((listName) => {
-      const updatedList = lists[listName].state.filter(
-        (m) => m.id !== movie.id,
+      const otherLists = (Object.keys(lists) as ListType[]).filter(
+        (l) => l !== list
       );
-      lists[listName].setter(updatedList);
-      if (listName === "watchlist") newWatchlist = updatedList;
-      if (listName === "watching") newWatching = updatedList;
-      if (listName === "watched") newWatched = updatedList;
-    });
 
-    const targetList = lists[list];
-    const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
-
-    if (movieIndex > -1) {
-      // Remove from target list if it's already there (toggle off)
-      const updatedList = targetList.state.filter((m) => m.id !== movie.id);
-      targetList.setter(updatedList);
-      if (list === "watchlist") newWatchlist = updatedList;
-      if (list === "watching") newWatching = updatedList;
-      if (list === "watched") newWatched = updatedList;
-    } else {
-      // Add to target list
-      const updatedList = [...targetList.state, movie];
-      targetList.setter(updatedList);
-      if (list === "watchlist") newWatchlist = updatedList;
-      if (list === "watching") newWatching = updatedList;
-      if (list === "watched") newWatched = updatedList;
-    }
-
-    if (user) {
-      await updateUserLists(user.uid, {
-        watchlist: newWatchlist,
-        watching: newWatching,
-        watched: newWatched,
+      // Remove from other lists
+      otherLists.forEach((listName) => {
+        const updatedList = lists[listName].state.filter(
+          (m) => m.id !== movie.id
+        );
+        lists[listName].setter(updatedList);
+        if (listName === "watchlist") newWatchlist = updatedList;
+        if (listName === "watching") newWatching = updatedList;
+        if (listName === "watched") newWatched = updatedList;
       });
-    } else {
-      localStorage.setItem("watchlist", JSON.stringify(newWatchlist));
-      localStorage.setItem("watching", JSON.stringify(newWatching));
-      localStorage.setItem("watched", JSON.stringify(newWatched));
-    }
-    // Refetch lists after update to refresh UI
-    await fetchLists();
-  }, [watchlist, watching, watched, user, fetchLists]);
 
-  const isMovieInList = useCallback((movieId: number, list: ListType) => {
-    const listMap = {
-      watchlist,
-      watching,
-      watched,
-    };
-    return listMap[list].some((m) => m.id === movieId);
-  }, [watchlist, watching, watched]);
+      const targetList = lists[list];
+      const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
 
-  const headerLists = useMemo(() => ({ watchlist, watching, watched }), [watchlist, watching, watched]);
+      if (movieIndex > -1) {
+        // Remove from target list if it's already there (toggle off)
+        const updatedList = targetList.state.filter((m) => m.id !== movie.id);
+        targetList.setter(updatedList);
+        if (list === "watchlist") newWatchlist = updatedList;
+        if (list === "watching") newWatching = updatedList;
+        if (list === "watched") newWatched = updatedList;
+      } else {
+        // Add to target list
+        const updatedList = [...targetList.state, movie];
+        targetList.setter(updatedList);
+        if (list === "watchlist") newWatchlist = updatedList;
+        if (list === "watching") newWatching = updatedList;
+        if (list === "watched") newWatched = updatedList;
+      }
+
+      if (user) {
+        await updateUserLists(user.uid, {
+          watchlist: newWatchlist,
+          watching: newWatching,
+          watched: newWatched,
+        });
+      } else {
+        localStorage.setItem("watchlist", JSON.stringify(newWatchlist));
+        localStorage.setItem("watching", JSON.stringify(newWatching));
+        localStorage.setItem("watched", JSON.stringify(newWatched));
+      }
+      // Refetch lists after update to refresh UI
+      await fetchLists();
+    },
+    [watchlist, watching, watched, user, fetchLists]
+  );
+
+  const isMovieInList = useCallback(
+    (movieId: number, list: ListType) => {
+      const listMap = {
+        watchlist,
+        watching,
+        watched,
+      };
+      return listMap[list].some((m) => m.id === movieId);
+    },
+    [watchlist, watching, watched]
+  );
+
+  const headerLists = useMemo(
+    () => ({ watchlist, watching, watched }),
+    [watchlist, watching, watched]
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header
-        lists={headerLists}
-        onListUpdate={handleListUpdate}
-      />
+      <Header lists={headerLists} onListUpdate={handleListUpdate} />
       <main className="flex-1 p-6">
-        <h1 className="text-3xl font-bold mb-6">Your Watchlist</h1>
+        <h1 className="mb-6 text-3xl font-bold">Your Watchlist</h1>
         {movies.length === 0 && tvShows.length === 0 ? (
           <div className="text-lg text-muted-foreground">
             No movies or shows in Watchlist.
@@ -170,7 +182,7 @@ const WatchlistPage = () => {
           <>
             {movies.length > 0 && (
               <div className="mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Movies</h2>
+                <h2 className="mb-4 text-2xl font-semibold">Movies</h2>
                 <ScrollArea className="w-full whitespace-nowrap rounded-md">
                   <div className="flex gap-4">
                     {movies.map((movie) => (
@@ -187,7 +199,7 @@ const WatchlistPage = () => {
             )}
             {tvShows.length > 0 && (
               <div>
-                <h2 className="text-2xl font-semibold mb-4">TV Shows</h2>
+                <h2 className="mb-4 text-2xl font-semibold">TV Shows</h2>
                 <ScrollArea className="w-full whitespace-nowrap rounded-md">
                   <div className="flex gap-4">
                     {tvShows.map((show) => (

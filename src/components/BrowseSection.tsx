@@ -7,73 +7,76 @@ import { GenreFilter } from "@/components/GenreFilter";
 import { fetchGenres, discoverByGenre } from "@/lib/tmdb";
 
 interface BrowseSectionProps {
-    title: string;
-    mediaType: MediaType;
-    onMovieClick: (id: number, mediaType: MediaType) => void;
+  title: string;
+  mediaType: MediaType;
+  onMovieClick: (id: number, mediaType: MediaType) => void;
 }
 
 export function BrowseSection({
-    title,
-    mediaType,
-    onMovieClick,
+  title,
+  mediaType,
+  onMovieClick,
 }: BrowseSectionProps) {
-    const [genres, setGenres] = React.useState<Genre[]>([]);
-    const [selectedGenre, setSelectedGenre] = React.useState<number | null>(null);
-    const [movies, setMovies] = React.useState<Movie[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
+  const [genres, setGenres] = React.useState<Genre[]>([]);
+  const [selectedGenre, setSelectedGenre] = React.useState<number | null>(null);
+  const [movies, setMovies] = React.useState<Movie[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-    React.useEffect(() => {
-        const loadGenres = async () => {
-            try {
-                const fetchedGenres = await fetchGenres(mediaType);
-                setGenres(fetchedGenres);
-                if (fetchedGenres.length > 0) {
-                    setSelectedGenre(fetchedGenres[0].id);
-                }
-            } catch (error) {
-                console.error(`Failed to fetch ${mediaType} genres:`, error);
-            }
-        };
-        loadGenres();
-    }, [mediaType]);
+  React.useEffect(() => {
+    const loadGenres = async () => {
+      try {
+        const fetchedGenres = await fetchGenres(mediaType);
+        setGenres(fetchedGenres);
+        if (fetchedGenres.length > 0) {
+          setSelectedGenre(fetchedGenres[0].id);
+        }
+      } catch (error) {
+        console.error(`Failed to fetch ${mediaType} genres:`, error);
+      }
+    };
+    loadGenres();
+  }, [mediaType]);
 
-    React.useEffect(() => {
-        if (!selectedGenre) return;
+  React.useEffect(() => {
+    if (!selectedGenre) return;
 
-        const loadContent = async () => {
-            setIsLoading(true);
-            try {
-                const content = await discoverByGenre(mediaType, selectedGenre);
-                setMovies(content);
-            } catch (error) {
-                console.error(`Failed to fetch ${mediaType} content for genre ${selectedGenre}:`, error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const loadContent = async () => {
+      setIsLoading(true);
+      try {
+        const content = await discoverByGenre(mediaType, selectedGenre);
+        setMovies(content);
+      } catch (error) {
+        console.error(
+          `Failed to fetch ${mediaType} content for genre ${selectedGenre}:`,
+          error
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        loadContent();
-    }, [mediaType, selectedGenre]);
+    loadContent();
+  }, [mediaType, selectedGenre]);
 
-    const selectedGenreName = genres.find((g) => g.id === selectedGenre)?.name;
-    const displayTitle = selectedGenreName
-        ? `${selectedGenreName} ${mediaType === "movie" ? "Movies" : "TV Shows"}`
-        : title;
+  const selectedGenreName = genres.find((g) => g.id === selectedGenre)?.name;
+  const displayTitle = selectedGenreName
+    ? `${selectedGenreName} ${mediaType === "movie" ? "Movies" : "TV Shows"}`
+    : title;
 
-    return (
-        <MovieRow
-            title={displayTitle}
-            movies={movies}
-            onMovieClick={onMovieClick}
-            isLoading={isLoading}
-            horizontal={true}
-            headerActions={
-                <GenreFilter
-                    genres={genres}
-                    selectedGenre={selectedGenre}
-                    onSelect={setSelectedGenre}
-                />
-            }
+  return (
+    <MovieRow
+      title={displayTitle}
+      movies={movies}
+      onMovieClick={onMovieClick}
+      isLoading={isLoading}
+      horizontal={true}
+      headerActions={
+        <GenreFilter
+          genres={genres}
+          selectedGenre={selectedGenre}
+          onSelect={setSelectedGenre}
         />
-    );
+      }
+    />
+  );
 }

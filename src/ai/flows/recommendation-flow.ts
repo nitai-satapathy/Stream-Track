@@ -30,14 +30,14 @@ const RecommendationOutputSchema = z.object({
         overview: z
           .string()
           .describe("A brief overview of the recommended movie or TV show."),
-      }),
+      })
     )
     .describe("A list of recommended movies or TV shows."),
 });
 export type RecommendationOutput = z.infer<typeof RecommendationOutputSchema>;
 
 export async function getRecommendations(
-  input: RecommendationInput,
+  input: RecommendationInput
 ): Promise<RecommendationOutput> {
   return recommendationFlow(input);
 }
@@ -76,5 +76,5 @@ const recommendationFlow = ai.defineFlow(
   async (input) => {
     const { output } = await prompt(input);
     return output!;
-  },
+  }
 );

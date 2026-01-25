@@ -36,33 +36,33 @@ export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
         <DialogHeader className="p-4 pb-0">
           <DialogTitle>Changelog</DialogTitle>
         </DialogHeader>
-        <div className="flex items-center justify-between px-4 pt-2 pb-4">
+        <div className="flex items-center justify-between px-4 pb-4 pt-2">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
             Website Updates & Announcements
           </h2>
         </div>
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto px-4 pb-4">
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto px-4 pb-4">
           {notifications.map((note) => (
             <div
               key={note.id}
-              className="bg-blue-400/30 dark:bg-blue-900/30 rounded-md p-4 hover:bg-blue-400/40 dark:hover:bg-blue-900/40 transition backdrop-blur-sm shadow-sm"
+              className="rounded-md bg-blue-400/30 p-4 shadow-sm backdrop-blur-sm transition hover:bg-blue-400/40 dark:bg-blue-900/30 dark:hover:bg-blue-900/40"
               style={{ boxShadow: "0 4px 24px 0 rgba(30, 64, 175, 0.10)" }}
             >
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="text-sm font-medium text-gray-800 dark:text-white truncate">
+              <div className="mb-1 flex items-center justify-between">
+                <h3 className="truncate text-sm font-medium text-gray-800 dark:text-white">
                   {note.title}
                 </h3>
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full text-white ${categoryColors[note.category]}`}
+                  className={`rounded-full px-2 py-0.5 text-xs text-white ${categoryColors[note.category]}`}
                   style={{ backdropFilter: "blur(2px)" }}
                 >
                   {note.category}
                 </span>
               </div>
-              <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-line">
+              <p className="whitespace-pre-line text-sm text-gray-700 dark:text-gray-200">
                 {note.description}
               </p>
-              <div className="flex items-center justify-between mt-2 text-xs text-gray-600 dark:text-gray-300">
+              <div className="mt-2 flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
                 <span>{note.timestamp}</span>
                 <div className="flex items-center space-x-1">
                   <span>{note.source}</span>

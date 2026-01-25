@@ -10,6 +10,57 @@ import { getRecommendations } from "@/ai/flows/recommendation-flow";
 import { searchMulti } from "@/lib/tmdb";
 import type { Movie, MediaType } from "@/lib/types";
 
+// Caching logic for 24h
+const getCacheKey = (section: string) => `rec_cache_${section}`;
+const getCache = (section: string) => {
+  try {
+    const raw = localStorage.getItem(getCacheKey(section));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed.data || !parsed.timestamp) return null;
+    if (Date.now() - parsed.timestamp > 24 * 60 * 60 * 1000) return null;
+    return parsed.data;
+  } catch {
+    return null;
+  }
+};
+const setCache = (section: string, data: Movie[]) => {
+  localStorage.setItem(
+    getCacheKey(section),
+    JSON.stringify({ data, timestamp: Date.now() })
+  );
+};
+const fetchRecs = async (
+  titles: string[],
+  type: MediaType,
+  section: string,
+  force = false
+) => {
+  if (!force) {
+    const cached = getCache(section);
+    if (cached) return cached;
+  }
+  if (titles.length === 0) return [];
+  const result = await getRecommendations({ watched: titles, watching: [] });
+  if (result.recommendations) {
+    const moviePromises = result.recommendations.map(async (rec) => {
+      const searchResults = await searchMulti(rec.title);
+      return (
+        searchResults.find(
+          (item) => item.media_type === "movie" || item.media_type === "tv"
+        ) || null
+      );
+    });
+    // Strictly filter by type here
+    const filtered = (await Promise.all(moviePromises)).filter(
+      (m): m is Movie => !!m && m.media_type === type
+    ) as Movie[];
+    setCache(section, filtered);
+    return filtered;
+  }
+  return [];
+};
+
 const RecommendationPage = () => {
   const { user } = useAuth();
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
@@ -56,68 +107,18 @@ const RecommendationPage = () => {
     loadLists();
   }, [user]);
 
-  // Caching logic for 24h
-  const getCacheKey = (section: string) => `rec_cache_${section}`;
-  const getCache = (section: string) => {
-    try {
-      const raw = localStorage.getItem(getCacheKey(section));
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed.data || !parsed.timestamp) return null;
-      if (Date.now() - parsed.timestamp > 24 * 60 * 60 * 1000) return null;
-      return parsed.data;
-    } catch {
-      return null;
-    }
-  };
-  const setCache = (section: string, data: Movie[]) => {
-    localStorage.setItem(
-      getCacheKey(section),
-      JSON.stringify({ data, timestamp: Date.now() }),
-    );
-  };
-  const fetchRecs = async (
-    titles: string[],
-    type: MediaType,
-    section: string,
-    force = false,
-  ) => {
-    if (!force) {
-      const cached = getCache(section);
-      if (cached) return cached;
-    }
-    if (titles.length === 0) return [];
-    const result = await getRecommendations({ watched: titles, watching: [] });
-    if (result.recommendations) {
-      const moviePromises = result.recommendations.map(async (rec) => {
-        const searchResults = await searchMulti(rec.title);
-        return (
-          searchResults.find(
-            (item) => item.media_type === "movie" || item.media_type === "tv",
-          ) || null
-        );
-      });
-      // Strictly filter by type here
-      const filtered = (await Promise.all(moviePromises)).filter(
-        (m): m is Movie => !!m && m.media_type === type,
-      ) as Movie[];
-      setCache(section, filtered);
-      return filtered;
-    }
-    return [];
-  };
 
   // Initial load: only fetch if no cache or cache expired
   useEffect(() => {
     // Watched Movies
     const watchedMovies = watched.filter(
-      (m) => m.media_type === "movie" || (!m.media_type && m.title),
+      (m) => m.media_type === "movie" || (!m.media_type && m.title)
     );
     setLoadingWatchedMovies(true);
     fetchRecs(
       watchedMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
       "movie",
-      "watchedMovies",
+      "watchedMovies"
     )
       .then(setRecWatchedMovies)
       .finally(() => setLoadingWatchedMovies(false));
@@ -127,35 +128,35 @@ const RecommendationPage = () => {
     fetchRecs(
       watchedTV.map((m) => m.name || m.title).filter(Boolean) as string[],
       "tv",
-      "watchedTV",
+      "watchedTV"
     )
       .then(setRecWatchedTV)
       .finally(() => setLoadingWatchedTV(false));
     // Watchlist Movies
     const watchlistMovies = watchlist.filter(
-      (m) => m.media_type === "movie" || (!m.media_type && m.title),
+      (m) => m.media_type === "movie" || (!m.media_type && m.title)
     );
     setLoadingWatchlistMovies(true);
     fetchRecs(
       watchlistMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
       "movie",
-      "watchlistMovies",
+      "watchlistMovies"
     )
       .then(setRecWatchlistMovies)
       .finally(() => setLoadingWatchlistMovies(false));
     // Watchlist TV Shows
     const watchlistTV = watchlist.filter(
-      (m) => m.media_type === "tv" || m.name,
+      (m) => m.media_type === "tv" || m.name
     );
     setLoadingWatchlistTV(true);
     fetchRecs(
       watchlistTV.map((m) => m.name || m.title).filter(Boolean) as string[],
       "tv",
-      "watchlistTV",
+      "watchlistTV"
     )
       .then(setRecWatchlistTV)
       .finally(() => setLoadingWatchlistTV(false));
-  }, []); // Only run on mount
+  }, [watchlist, watched]); // Added missing dependencies
 
   // Manual refresh handlers
   const handleRefresh = useCallback(
@@ -168,7 +169,7 @@ const RecommendationPage = () => {
       titles: string[],
       type: MediaType,
       setter: (data: Movie[]) => void,
-      setLoading: (b: boolean) => void,
+      setLoading: (b: boolean) => void
     ) => {
       setRefreshing((r) => ({ ...r, [section]: true }));
       setLoading(true);
@@ -177,7 +178,7 @@ const RecommendationPage = () => {
       setLoading(false);
       setRefreshing((r) => ({ ...r, [section]: false }));
     },
-    [fetchRecs],
+    []
   );
 
   const handleMovieClick = useCallback((id: number, media_type: MediaType) => {
@@ -190,78 +191,87 @@ const RecommendationPage = () => {
 
   // List update logic for marking movies
   type ListType = "watchlist" | "watching" | "watched";
-  const isMovieInList = useCallback((movieId: number, list: ListType) => {
-    const listMap = { watchlist, watching, watched };
-    return listMap[list].some((m) => m.id === movieId);
-  }, [watchlist, watching, watched]);
+  const isMovieInList = useCallback(
+    (movieId: number, list: ListType) => {
+      const listMap = { watchlist, watching, watched };
+      return listMap[list].some((m) => m.id === movieId);
+    },
+    [watchlist, watching, watched]
+  );
 
-  const updateLocalStorage = (key: ListType, data: Movie[]) => {
+  const updateLocalStorage = useCallback((key: ListType, data: Movie[]) => {
     if (!user) {
       localStorage.setItem(key, JSON.stringify(data));
     }
-  };
+  }, [user]);
 
-  const handleListUpdate = useCallback(async (movie: Movie, list: ListType) => {
-    let newWatchlist = [...watchlist];
-    let newWatching = [...watching];
-    let newWatched = [...watched];
+  const handleListUpdate = useCallback(
+    async (movie: Movie, list: ListType) => {
+      let newWatchlist = [...watchlist];
+      let newWatching = [...watching];
+      let newWatched = [...watched];
 
-    const lists: Record<
-      ListType,
-      { state: Movie[]; setter: React.Dispatch<React.SetStateAction<Movie[]>> }
-    > = {
-      watchlist: { state: newWatchlist, setter: setWatchlist },
-      watching: { state: newWatching, setter: setWatching },
-      watched: { state: newWatched, setter: setWatched },
-    };
+      const lists: Record<
+        ListType,
+        {
+          state: Movie[];
+          setter: React.Dispatch<React.SetStateAction<Movie[]>>;
+        }
+      > = {
+        watchlist: { state: newWatchlist, setter: setWatchlist },
+        watching: { state: newWatching, setter: setWatching },
+        watched: { state: newWatched, setter: setWatched },
+      };
 
-    const otherLists = (Object.keys(lists) as ListType[]).filter(
-      (l) => l !== list,
-    );
-
-    // Remove from other lists
-    otherLists.forEach((listName) => {
-      const updatedList = lists[listName].state.filter(
-        (m) => m.id !== movie.id,
+      const otherLists = (Object.keys(lists) as ListType[]).filter(
+        (l) => l !== list
       );
-      lists[listName].setter(updatedList);
-      if (listName === "watchlist") newWatchlist = updatedList;
-      if (listName === "watching") newWatching = updatedList;
-      if (listName === "watched") newWatched = updatedList;
-    });
 
-    const targetList = lists[list];
-    const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
-
-    if (movieIndex > -1) {
-      // Remove from target list if it's already there (toggle off)
-      const updatedList = targetList.state.filter((m) => m.id !== movie.id);
-      targetList.setter(updatedList);
-      if (list === "watchlist") newWatchlist = updatedList;
-      if (list === "watching") newWatching = updatedList;
-      if (list === "watched") newWatched = updatedList;
-    } else {
-      // Add to target list
-      const updatedList = [...targetList.state, movie];
-      targetList.setter(updatedList);
-      if (list === "watchlist") newWatchlist = updatedList;
-      if (list === "watching") newWatching = updatedList;
-      if (list === "watched") newWatched = updatedList;
-    }
-
-    if (user) {
-      const { updateUserLists } = await import("@/actions/user");
-      await updateUserLists(user.uid, {
-        watchlist: newWatchlist,
-        watching: newWatching,
-        watched: newWatched,
+      // Remove from other lists
+      otherLists.forEach((listName) => {
+        const updatedList = lists[listName].state.filter(
+          (m) => m.id !== movie.id
+        );
+        lists[listName].setter(updatedList);
+        if (listName === "watchlist") newWatchlist = updatedList;
+        if (listName === "watching") newWatching = updatedList;
+        if (listName === "watched") newWatched = updatedList;
       });
-    } else {
-      updateLocalStorage("watchlist", newWatchlist);
-      updateLocalStorage("watching", newWatching);
-      updateLocalStorage("watched", newWatched);
-    }
-  }, [watchlist, watching, watched, user]);
+
+      const targetList = lists[list];
+      const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
+
+      if (movieIndex > -1) {
+        // Remove from target list if it's already there (toggle off)
+        const updatedList = targetList.state.filter((m) => m.id !== movie.id);
+        targetList.setter(updatedList);
+        if (list === "watchlist") newWatchlist = updatedList;
+        if (list === "watching") newWatching = updatedList;
+        if (list === "watched") newWatched = updatedList;
+      } else {
+        // Add to target list
+        const updatedList = [...targetList.state, movie];
+        targetList.setter(updatedList);
+        if (list === "watchlist") newWatchlist = updatedList;
+        if (list === "watching") newWatching = updatedList;
+        if (list === "watched") newWatched = updatedList;
+      }
+
+      if (user) {
+        const { updateUserLists } = await import("@/actions/user");
+        await updateUserLists(user.uid, {
+          watchlist: newWatchlist,
+          watching: newWatching,
+          watched: newWatched,
+        });
+      } else {
+        updateLocalStorage("watchlist", newWatchlist);
+        updateLocalStorage("watching", newWatching);
+        updateLocalStorage("watched", newWatched);
+      }
+    },
+    [watchlist, watching, watched, user, updateLocalStorage]
+  );
 
   const headerLists = useMemo(
     () => ({ watchlist, watching, watched }),
@@ -276,9 +286,9 @@ const RecommendationPage = () => {
         watchedMovies={watched}
         watchedShows={watching}
       />
-      <div className="container mx-auto py-8 space-y-10">
-        <h1 className="text-3xl font-bold mb-4">Recommendations</h1>
-        <p className="text-lg text-gray-600 mb-8">
+      <div className="container mx-auto space-y-10 py-8">
+        <h1 className="mb-4 text-3xl font-bold">Recommendations</h1>
+        <p className="mb-8 text-lg text-gray-600">
           Get personalized movie and TV show recommendations based on your
           activity.
         </p>
@@ -288,12 +298,12 @@ const RecommendationPage = () => {
           const watchlistIds = new Set(watchlist.map((m) => m.id));
           const filterRecs = (recs: Movie[]) =>
             recs.filter(
-              (m) => !watchedIds.has(m.id) && !watchlistIds.has(m.id),
+              (m) => !watchedIds.has(m.id) && !watchlistIds.has(m.id)
             );
           return (
             <>
               {watched.some(
-                (m) => m.media_type === "movie" || (!m.media_type && m.title),
+                (m) => m.media_type === "movie" || (!m.media_type && m.title)
               ) && (
                   <MovieRow
                     title="Recommendations Based on Watched Movies"
@@ -308,13 +318,13 @@ const RecommendationPage = () => {
                           .filter(
                             (m) =>
                               m.media_type === "movie" ||
-                              (!m.media_type && m.title),
+                              (!m.media_type && m.title)
                           )
                           .map((m) => m.title || m.name)
                           .filter(Boolean) as string[],
                         "movie",
                         setRecWatchedMovies,
-                        setLoadingWatchedMovies,
+                        setLoadingWatchedMovies
                       )
                     }
                     refreshing={refreshing.watchedMovies}
@@ -336,14 +346,14 @@ const RecommendationPage = () => {
                         .filter(Boolean) as string[],
                       "tv",
                       setRecWatchedTV,
-                      setLoadingWatchedTV,
+                      setLoadingWatchedTV
                     )
                   }
                   refreshing={refreshing.watchedTV}
                 />
               )}
               {watchlist.some(
-                (m) => m.media_type === "movie" || (!m.media_type && m.title),
+                (m) => m.media_type === "movie" || (!m.media_type && m.title)
               ) && (
                   <MovieRow
                     title="Recommendations Based on Watchlist Movies"
@@ -358,13 +368,13 @@ const RecommendationPage = () => {
                           .filter(
                             (m) =>
                               m.media_type === "movie" ||
-                              (!m.media_type && m.title),
+                              (!m.media_type && m.title)
                           )
                           .map((m) => m.title || m.name)
                           .filter(Boolean) as string[],
                         "movie",
                         setRecWatchlistMovies,
-                        setLoadingWatchlistMovies,
+                        setLoadingWatchlistMovies
                       )
                     }
                     refreshing={refreshing.watchlistMovies}
@@ -386,7 +396,7 @@ const RecommendationPage = () => {
                         .filter(Boolean) as string[],
                       "tv",
                       setRecWatchlistTV,
-                      setLoadingWatchlistTV,
+                      setLoadingWatchlistTV
                     )
                   }
                   refreshing={refreshing.watchlistTV}

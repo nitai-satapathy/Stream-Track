@@ -67,7 +67,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95%] sm:max-w-[550px] p-6">
+      <DialogContent className="w-[95%] p-6 sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
         </DialogHeader>
@@ -93,10 +93,10 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     "relative rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
                     selectedImage === src
                       ? "ring-4 ring-primary ring-offset-4"
-                      : "ring-1 ring-border opacity-70 hover:opacity-100 hover:ring-2 hover:ring-primary/50",
+                      : "opacity-70 ring-1 ring-border hover:opacity-100 hover:ring-2 hover:ring-primary/50"
                   )}
                 >
-                  <Avatar className="h-16 w-16 sm:h-20 sm:w-20 border-2 border-background">
+                  <Avatar className="h-16 w-16 border-2 border-background sm:h-20 sm:w-20">
                     <AvatarImage
                       src={src}
                       alt="Profile option"

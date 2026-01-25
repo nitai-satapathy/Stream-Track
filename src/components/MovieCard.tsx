@@ -14,11 +14,11 @@ const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 export function MovieCard({ movie, onClick }: MovieCardProps) {
   return (
     <Card
-      className="w-[150px] md:w-[200px] shrink-0 cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
+      className="w-[150px] shrink-0 cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 md:w-[200px]"
       onClick={onClick}
     >
       <CardContent className="p-0">
-        <div className="relative h-[210px] md:h-[300px] w-full">
+        <div className="relative h-[210px] w-full md:h-[300px]">
           <Image
             src={
               movie.poster_path
@@ -33,13 +33,13 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
           />
         </div>
         <div className="p-2 md:p-3">
-          <h3 className="truncate font-semibold text-sm md:text-base">
+          <h3 className="truncate text-sm font-semibold md:text-base">
             {movie.title || movie.name}
           </h3>
-          <div className="mt-1 md:mt-2 flex items-center justify-between text-xs md:text-sm text-muted-foreground">
+          <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground md:mt-2 md:text-sm">
             <Badge
               variant="outline"
-              className="flex items-center gap-1 px-1 py-0 h-5 md:h-auto"
+              className="flex h-5 items-center gap-1 px-1 py-0 md:h-auto"
             >
               <Star className="h-3 w-3 text-yellow-400" fill="currentColor" />
               <span>{movie.vote_average.toFixed(1)}</span>

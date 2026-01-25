@@ -54,7 +54,7 @@ export function ProfileMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" align="end" forceMount>
-        <div className="flex items-center gap-3 p-3 border-b border-border/50">
+        <div className="flex items-center gap-3 border-b border-border/50 p-3">
           <Avatar className="h-10 w-10">
             <AvatarImage src={user.photoURL} alt={user.displayName} />
             <AvatarFallback>
@@ -78,7 +78,7 @@ export function ProfileMenu({
             <span>Settings</span>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/about" className="cursor-pointer w-full">
+            <Link href="/about" className="w-full cursor-pointer">
               <HelpCircle className="mr-2 h-4 w-4" />
               <span>About & FAQ</span>
             </Link>

@@ -24,7 +24,7 @@ function SearchContent() {
   const { user } = useAuth();
 
   const [selectedItem, setSelectedItem] = React.useState<SelectedItem | null>(
-    null,
+    null
   );
   const [watchlist, setWatchlist] = React.useState<Movie[]>([]);
   const [watching, setWatching] = React.useState<Movie[]>([]);
@@ -64,7 +64,7 @@ function SearchContent() {
     (id: number, media_type: MediaType) => {
       setSelectedItem({ id, media_type });
     },
-    [],
+    []
   );
 
   const handleCloseModal = React.useCallback(() => {
@@ -81,14 +81,14 @@ function SearchContent() {
       };
       return listMap[list].some((m) => m.id === movieId);
     },
-    [watchlist, watching, watched],
+    [watchlist, watching, watched]
   );
 
-  const updateLocalStorage = (key: ListType, data: Movie[]) => {
+  const updateLocalStorage = React.useCallback((key: ListType, data: Movie[]) => {
     if (!user) {
       localStorage.setItem(key, JSON.stringify(data));
     }
-  };
+  }, [user]);
 
   const handleListUpdate = React.useCallback(
     async (movie: Movie, list: ListType) => {
@@ -109,13 +109,13 @@ function SearchContent() {
       };
 
       const otherLists = (Object.keys(lists) as ListType[]).filter(
-        (l) => l !== list,
+        (l) => l !== list
       );
 
       // Remove from other lists
       otherLists.forEach((listName) => {
         const updatedList = lists[listName].state.filter(
-          (m) => m.id !== movie.id,
+          (m) => m.id !== movie.id
         );
         lists[listName].setter(updatedList);
         if (listName === "watchlist") newWatchlist = updatedList;
@@ -155,12 +155,12 @@ function SearchContent() {
         updateLocalStorage("watched", newWatched);
       }
     },
-    [watchlist, watching, watched, user],
+    [watchlist, watching, watched, user, updateLocalStorage]
   );
 
   const headerLists = React.useMemo(
     () => ({ watchlist, watching, watched }),
-    [watchlist, watching, watched],
+    [watchlist, watching, watched]
   );
 
   return (
@@ -198,7 +198,7 @@ export default function SearchPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex min-h-screen items-center justify-center">
           Loading search...
         </div>
       }

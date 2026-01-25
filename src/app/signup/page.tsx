@@ -86,7 +86,7 @@ export default function SignupPage() {
         <CardHeader className="text-center">
           <Link
             href="/"
-            className="flex items-center gap-2 justify-center mb-4"
+            className="mb-4 flex items-center justify-center gap-2"
           >
             <Image src="/icons/logo.svg" alt="Logo" width={62} height={62} />
             <h1 className="text-3xl font-bold text-foreground">Stream Track</h1>

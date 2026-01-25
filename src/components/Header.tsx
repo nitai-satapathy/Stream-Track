@@ -105,12 +105,12 @@ const NavLinks = ({
       className={
         isMobile
           ? "flex flex-col gap-4 text-lg"
-          : "hidden md:flex items-center gap-4 text-sm font-medium text-muted-foreground"
+          : "hidden items-center gap-4 text-sm font-medium text-muted-foreground md:flex"
       }
     >
       <Link
         href="/watching"
-        className="hover:text-foreground transition-colors flex items-center gap-2"
+        className="flex items-center gap-2 transition-colors hover:text-foreground"
       >
         <Popcorn className="h-4 w-4" />
         Currently Watching
@@ -120,7 +120,7 @@ const NavLinks = ({
           <button
             type="button"
             onClick={() => setIsWatchedOpen(!isWatchedOpen)}
-            className="hover:text-foreground transition-colors flex items-center gap-2 cursor-pointer focus:outline-none"
+            className="flex cursor-pointer items-center gap-2 transition-colors hover:text-foreground focus:outline-none"
           >
             <CheckCircle className="h-4 w-4" />
             Watched
@@ -131,17 +131,17 @@ const NavLinks = ({
             />
           </button>
           {isWatchedOpen && (
-            <div className="flex flex-col gap-4 pl-6 border-l border-border/50 ml-2 mt-2 animate-in slide-in-from-top-2 fade-in duration-200">
+            <div className="ml-2 mt-2 flex flex-col gap-4 border-l border-border/50 pl-6 duration-200 animate-in fade-in slide-in-from-top-2">
               <Link
                 href="/watched-movies"
-                className="hover:text-foreground transition-colors flex items-center gap-2 text-base text-muted-foreground"
+                className="flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
               >
                 <Clapperboard className="h-4 w-4" />
                 Watched Movies
               </Link>
               <Link
                 href="/watched-tv"
-                className="hover:text-foreground transition-colors flex items-center gap-2 text-base text-muted-foreground"
+                className="flex items-center gap-2 text-base text-muted-foreground transition-colors hover:text-foreground"
               >
                 <TvMinimalPlay className="h-4 w-4" />
                 Watched TV Shows
@@ -157,7 +157,7 @@ const NavLinks = ({
               {/* Use a button for accessibility and to allow focus/active state */}
               <button
                 type="button"
-                className="hover:text-foreground transition-colors flex items-center gap-2 cursor-pointer focus:outline-none"
+                className="flex cursor-pointer items-center gap-2 transition-colors hover:text-foreground focus:outline-none"
                 aria-haspopup="menu"
                 aria-expanded={undefined}
               >
@@ -189,14 +189,14 @@ const NavLinks = ({
       )}
       <Link
         href="/watchlist"
-        className="hover:text-foreground transition-colors flex items-center gap-2"
+        className="flex items-center gap-2 transition-colors hover:text-foreground"
       >
         <ListPlus className="h-4 w-4" />
         Watchlist
       </Link>
       <Link
         href="/recommendation"
-        className="hover:text-foreground transition-colors flex items-center gap-2"
+        className="flex items-center gap-2 transition-colors hover:text-foreground"
       >
         <Sparkles className="h-4 w-4" />
         Recommendations
@@ -331,7 +331,7 @@ export function Header(props: HeaderProps) {
                 alt="Logo"
                 width={44}
                 height={44}
-                className="w-8 h-8 md:w-11 md:h-11"
+                className="h-8 w-8 md:h-11 md:w-11"
               />
               <h1 className="text-2xl font-bold text-foreground">
                 Stream Track
@@ -339,7 +339,7 @@ export function Header(props: HeaderProps) {
             </Link>
           </div>
           {/* Center navigation links */}
-          <div className="hidden md:flex flex-1 justify-center">
+          <div className="hidden flex-1 justify-center md:flex">
             <NavLinks user={user} />
           </div>
           <div className="flex items-center gap-4">
@@ -364,14 +364,14 @@ export function Header(props: HeaderProps) {
                 </label>
                 <Textarea
                   id="bulk-names"
-                  className="w-full min-h-[120px] bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 placeholder:text-blue-400 dark:placeholder:text-blue-500 focus-visible:ring-blue-400"
+                  className="min-h-[120px] w-full border-blue-200 bg-blue-50/50 placeholder:text-blue-400 focus-visible:ring-blue-400 dark:border-blue-800 dark:bg-blue-950/20 dark:placeholder:text-blue-500"
                   value={bulkInput}
                   onChange={(e) => setBulkInput(e.target.value)}
                   placeholder="Movie or Show 1&#10;Movie or Show 2"
                   disabled={bulkLoading}
                 />
                 <Button
-                  className="bg-primary text-primary-foreground px-4 py-2 rounded disabled:opacity-50 mt-2"
+                  className="mt-2 rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
                   onClick={async () => {
                     setBulkStatus(null);
                     setBulkLoading(true);
@@ -431,24 +431,23 @@ export function Header(props: HeaderProps) {
                       const lists = await getLists(user.uid);
                       const watchedMovies = lists.watched.filter(
                         (m: Movie) =>
-                          m.media_type === "movie" ||
-                          (!m.media_type && m.title),
+                          m.media_type === "movie" || (!m.media_type && m.title)
                       );
                       const watchedShows = lists.watched.filter(
-                        (m: Movie) => m.media_type === "tv" || m.name,
+                        (m: Movie) => m.media_type === "tv" || m.name
                       );
                       const mergedMovies = [
                         ...watchedMovies,
                         ...foundMovies.filter(
                           (fm: Movie) =>
-                            !watchedMovies.some((m: Movie) => m.id === fm.id),
+                            !watchedMovies.some((m: Movie) => m.id === fm.id)
                         ),
                       ];
                       const mergedShows = [
                         ...watchedShows,
                         ...foundShows.filter(
                           (fs: Movie) =>
-                            !watchedShows.some((s: Movie) => s.id === fs.id),
+                            !watchedShows.some((s: Movie) => s.id === fs.id)
                         ),
                       ];
                       await updateUserLists(user.uid, {
@@ -463,29 +462,28 @@ export function Header(props: HeaderProps) {
                       } catch {}
                       const watchedMovies = watchedList.filter(
                         (m: Movie) =>
-                          m.media_type === "movie" ||
-                          (!m.media_type && m.title),
+                          m.media_type === "movie" || (!m.media_type && m.title)
                       );
                       const watchedShows = watchedList.filter(
-                        (m: Movie) => m.media_type === "tv" || m.name,
+                        (m: Movie) => m.media_type === "tv" || m.name
                       );
                       const mergedMovies = [
                         ...watchedMovies,
                         ...foundMovies.filter(
                           (fm: Movie) =>
-                            !watchedMovies.some((m: Movie) => m.id === fm.id),
+                            !watchedMovies.some((m: Movie) => m.id === fm.id)
                         ),
                       ];
                       const mergedShows = [
                         ...watchedShows,
                         ...foundShows.filter(
                           (fs: Movie) =>
-                            !watchedShows.some((s: Movie) => s.id === fs.id),
+                            !watchedShows.some((s: Movie) => s.id === fs.id)
                         ),
                       ];
                       localStorage.setItem(
                         "watched",
-                        JSON.stringify([...mergedMovies, ...mergedShows]),
+                        JSON.stringify([...mergedMovies, ...mergedShows])
                       );
                     }
                     setBulkStatus(
@@ -497,7 +495,7 @@ export function Header(props: HeaderProps) {
                           : "") +
                         (notFound.length
                           ? `Not found: ${notFound.join(", ")}`
-                          : ""),
+                          : "")
                     );
                     setBulkLoading(false);
                     setBulkInput("");
@@ -507,7 +505,7 @@ export function Header(props: HeaderProps) {
                   {bulkLoading ? "Adding..." : "Add to Watched"}
                 </Button>
                 {bulkStatus && (
-                  <div className="text-sm text-muted-foreground mt-2">
+                  <div className="mt-2 text-sm text-muted-foreground">
                     {bulkStatus}
                   </div>
                 )}
@@ -548,10 +546,10 @@ export function Header(props: HeaderProps) {
 
             {/* Search Bar Container */}
             <div
-              className={`${isMobileSearchOpen ? "flex absolute left-0 top-0 w-full h-16 bg-background px-4 items-center z-50 animate-in fade-in slide-in-from-top-2" : "hidden"} md:flex md:relative md:w-auto md:h-auto md:bg-transparent md:px-0 md:items-start md:animate-none`}
+              className={`${isMobileSearchOpen ? "absolute left-0 top-0 z-50 flex h-16 w-full items-center bg-background px-4 animate-in fade-in slide-in-from-top-2" : "hidden"} md:relative md:flex md:h-auto md:w-auto md:animate-none md:items-start md:bg-transparent md:px-0`}
             >
               {/* Back/Close Button for Mobile Search */}
-              <div className="md:hidden mr-2">
+              <div className="mr-2 md:hidden">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -562,7 +560,7 @@ export function Header(props: HeaderProps) {
               </div>
 
               <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <div className="relative w-full md:w-auto md:max-w-xs flex-1">
+                <div className="relative w-full flex-1 md:w-auto md:max-w-xs">
                   <PopoverAnchor asChild>
                     <form
                       onSubmit={handleLegacySearchSubmit}
@@ -571,7 +569,7 @@ export function Header(props: HeaderProps) {
                       <Input
                         type="search"
                         placeholder="Search..."
-                        className="pl-10 w-full"
+                        className="w-full pl-10"
                         value={searchQuery}
                         onChange={handleSearchChange}
                         onFocus={() => {
@@ -588,11 +586,11 @@ export function Header(props: HeaderProps) {
                           }
                         }}
                       />
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                     </form>
                   </PopoverAnchor>
                   <PopoverContent
-                    className="w-[calc(100vw-32px)] md:w-[340px] p-2"
+                    className="w-[calc(100vw-32px)] p-2 md:w-[340px]"
                     align="end"
                     onOpenAutoFocus={(e) => e.preventDefault()}
                   >
@@ -606,16 +604,16 @@ export function Header(props: HeaderProps) {
                         {searchResults.map((item) => (
                           <div
                             key={item.id + (item.media_type || "")}
-                            className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer"
+                            className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-accent"
                             onClick={() => {
                               handleMovieClick(
                                 item.id,
-                                item.media_type || "movie",
+                                item.media_type || "movie"
                               );
                               setIsMobileSearchOpen(false); // Close mobile search on selection
                             }}
                           >
-                            <div className="w-12 h-16 relative shrink-0">
+                            <div className="relative h-16 w-12 shrink-0">
                               <Image
                                 src={
                                   item.poster_path
@@ -629,7 +627,7 @@ export function Header(props: HeaderProps) {
                               />
                             </div>
                             <div>
-                              <p className="font-semibold truncate">
+                              <p className="truncate font-semibold">
                                 {item.title || item.name}
                               </p>
                               <p className="text-xs text-muted-foreground">
@@ -644,7 +642,7 @@ export function Header(props: HeaderProps) {
                     {!isLoading &&
                       searchResults.length === 0 &&
                       searchQuery.trim().length > 0 && (
-                        <p className="text-center text-sm text-muted-foreground p-4">
+                        <p className="p-4 text-center text-sm text-muted-foreground">
                           No results found.
                         </p>
                       )}
@@ -652,7 +650,7 @@ export function Header(props: HeaderProps) {
                 </div>
               </Popover>
             </div>
-            <div className="hidden sm:flex items-center gap-2">
+            <div className="hidden items-center gap-2 sm:flex">
               <ProfileMenu
                 user={user}
                 logout={logout}
@@ -689,7 +687,7 @@ export function Header(props: HeaderProps) {
                   </SheetClose>
                   <SheetClose asChild>
                     <button
-                      className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
+                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
                       onClick={() => setIsBulkDialogOpen(true)}
                     >
                       <BadgePlus className="h-5 w-5" />
@@ -698,7 +696,7 @@ export function Header(props: HeaderProps) {
                   </SheetClose>
                   <SheetClose asChild>
                     <button
-                      className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
+                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
                       onClick={() => setIsSettingsOpen(true)}
                     >
                       <Settings className="h-5 w-5" />
@@ -708,7 +706,7 @@ export function Header(props: HeaderProps) {
                   <SheetClose asChild>
                     <Link
                       href="/about"
-                      className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
+                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
                     >
                       <HelpCircle className="h-5 w-5" />
                       About & FAQ
@@ -716,7 +714,7 @@ export function Header(props: HeaderProps) {
                   </SheetClose>
                   <SheetClose asChild>
                     <button
-                      className="flex items-center gap-2 text-lg hover:text-foreground transition-colors"
+                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
                       onClick={() => setIsNotifOpen(true)}
                     >
                       <Layers className="h-5 w-5" />
@@ -724,7 +722,7 @@ export function Header(props: HeaderProps) {
                     </button>
                   </SheetClose>
                   {user && (
-                    <div className="flex flex-col gap-4 mt-auto border-t pt-4">
+                    <div className="mt-auto flex flex-col gap-4 border-t pt-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
                           <AvatarImage
@@ -748,7 +746,7 @@ export function Header(props: HeaderProps) {
                       <SheetClose asChild>
                         <Link
                           href="/profile"
-                          className="flex items-center gap-2 text-lg hover:text-foreground transition-colors w-full justify-start py-1"
+                          className="flex w-full items-center justify-start gap-2 py-1 text-lg transition-colors hover:text-foreground"
                         >
                           <UserCircle className="h-5 w-5" />
                           Profile

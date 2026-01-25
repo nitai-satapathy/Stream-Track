@@ -6,46 +6,62 @@ const Footer = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="w-full border-t border-border/40 bg-background/95 backdrop-blur-sm pt-14 pb-8">
+    <footer className="w-full border-t border-border/40 bg-background/95 pb-8 pt-14 backdrop-blur-sm">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-32 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-32">
           {/* Left Column: Brand & Tagline */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-3 w-fit hover:opacity-80 transition-opacity">
-              <Image src="/icons/logo.svg" alt="Logo" width={32} height={32} className="w-8 h-8" />
-              <span className="font-bold text-xl tracking-tight">Stream Track</span>
+            <Link
+              href="/"
+              className="flex w-fit items-center gap-3 transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="/icons/logo.svg"
+                alt="Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+              />
+              <span className="text-xl font-bold tracking-tight">
+                Stream Track
+              </span>
             </Link>
-            <p className="text-muted-foreground text-sm font-medium leading-relaxed max-w-sm">
-              Track What You Watch. Love What You Watch. Never Forget a Single Show. (っ◔◡◔)っ
+            <p className="max-w-sm text-sm font-medium leading-relaxed text-muted-foreground">
+              Track What You Watch. Love What You Watch. Never Forget a Single
+              Show. (っ◔◡◔)っ
             </p>
           </div>
 
           {/* Right Column: Disclaimer */}
-          <div className="md:text-right space-y-4">
-            <h3 className="font-semibold text-foreground tracking-tight">Disclaimer ¯\_(ツ)_/¯</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-xl ml-auto">
-              Please note: Stream Track does not host any files itself but instead only displays content from third party providers. Legal issues should be taken up with them.
+          <div className="space-y-4 md:text-right">
+            <h3 className="font-semibold tracking-tight text-foreground">
+              Disclaimer ¯\_(ツ)_/¯
+            </h3>
+            <p className="ml-auto max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Please note: Stream Track does not host any files itself but
+              instead only displays content from third party providers. Legal
+              issues should be taken up with them.
             </p>
           </div>
         </div>
 
         {/* Bottom Bar: Socials & Links */}
-        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border/40 gap-6">
+        <div className="flex flex-col items-center justify-between gap-6 border-t border-border/40 pt-8 md:flex-row">
           {/* Left: GitHub */}
           <div className="flex items-center">
             <a
               href="https://github.com/nitai-satapathy/Stream-Track"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium group"
+              className="group flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Github className="h-5 w-5 group-hover:text-foreground transition-colors" />
+              <Github className="h-5 w-5 transition-colors group-hover:text-foreground" />
               <span>GitHub</span>
             </a>
           </div>
 
           {/* Center: Crafted With */}
-          <div className="text-sm text-muted-foreground flex items-center gap-1.5 font-medium">
+          <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
             <span>Crafted with</span>
             <span className="inline-flex items-center justify-center">
               <svg
@@ -90,18 +106,43 @@ const Footer = () => {
                 ></rect>
               </svg>
             </span>
-            <span>by <Link href="https://nitaisatapathy.netlify.app" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors font-medium">Nitai</Link></span>
+            <span>
+              by{" "}
+              <Link
+                href="https://nitaisatapathy.netlify.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium transition-colors hover:text-foreground"
+              >
+                Nitai
+              </Link>
+            </span>
           </div>
 
           {/* Right: Legal & Copyright */}
-          <div className="flex items-center gap-6 text-sm text-muted-foreground w-full md:w-auto justify-between md:justify-end">
-            <Link href="/about" className="hover:text-foreground transition-colors font-medium">
+          <div className="flex w-full items-center justify-between gap-6 text-sm text-muted-foreground md:w-auto md:justify-end">
+            <Link
+              href="/about"
+              className="font-medium transition-colors hover:text-foreground"
+            >
               About
             </Link>
-            <Link href="/legal" className="hover:text-foreground transition-colors font-medium">
+            <Link
+              href="/legal"
+              className="font-medium transition-colors hover:text-foreground"
+            >
               Legal / DMCA
             </Link>
-            <span>&copy; {year} <Link href="/" className="hover:text-foreground transition-colors font-medium">Stream Track</Link>.</span>
+            <span>
+              &copy; {year}{" "}
+              <Link
+                href="/"
+                className="font-medium transition-colors hover:text-foreground"
+              >
+                Stream Track
+              </Link>
+              .
+            </span>
           </div>
         </div>
       </div>

@@ -46,17 +46,17 @@ export function FilterSortModal({
 }: FilterSortModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] sm:max-h-[90vh] overflow-y-auto w-full max-w-2xl sm:max-w-4xl p-4 sm:p-6">
+      <DialogContent className="max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4 sm:max-h-[90vh] sm:max-w-4xl sm:p-6">
         <DialogHeader>
           <DialogTitle>Sort & Filter</DialogTitle>
           <DialogDescription>
             Refine your results by sorting and filtering.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 w-full">
+        <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
           {/* Sort Section */}
           <div className="w-full">
-            <h3 className="font-semibold mb-2">Sort By</h3>
+            <h3 className="mb-2 font-semibold">Sort By</h3>
             <RadioGroup
               value={sortBy}
               onValueChange={setSortBy}
@@ -70,7 +70,7 @@ export function FilterSortModal({
                   <RadioGroupItem value={opt.value} id={opt.value} />
                   <Label
                     htmlFor={opt.value}
-                    className={`cursor-pointer w-full ${sortBy === opt.value ? "text-primary font-bold" : "text-foreground"}`}
+                    className={`w-full cursor-pointer ${sortBy === opt.value ? "font-bold text-primary" : "text-foreground"}`}
                   >
                     {opt.label}
                   </Label>
@@ -80,17 +80,17 @@ export function FilterSortModal({
           </div>
           {/* Filters Section */}
           <div>
-            <h3 className="font-semibold mb-2">Filters</h3>
+            <h3 className="mb-2 font-semibold">Filters</h3>
             {/* Release date filter removed */}
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Genres</label>
+              <label className="mb-2 block text-sm font-medium">Genres</label>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant={
                     selectedGenres.length === 0 ? "default" : "secondary"
                   }
                   size="sm"
-                  className="rounded-full h-8"
+                  className="h-8 rounded-full"
                   onClick={() => setSelectedGenres([])}
                 >
                   All Genres
@@ -102,12 +102,12 @@ export function FilterSortModal({
                       selectedGenres.includes(g) ? "default" : "secondary"
                     }
                     size="sm"
-                    className="rounded-full h-8"
+                    className="h-8 rounded-full"
                     onClick={() =>
                       setSelectedGenres(
                         selectedGenres.includes(g)
                           ? selectedGenres.filter((genre) => genre !== g)
-                          : [...selectedGenres, g],
+                          : [...selectedGenres, g]
                       )
                     }
                   >
@@ -119,7 +119,7 @@ export function FilterSortModal({
             {/* Rating filter removed */}
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 mt-6 w-full">
+        <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row">
           <DialogClose asChild>
             <Button className="w-full sm:w-1/2" variant="default">
               Apply

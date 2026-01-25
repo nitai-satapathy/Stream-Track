@@ -35,7 +35,7 @@ export const fetchUpcomingMovies = async (): Promise<Movie[]> => {
   const maximum = response.data.dates?.maximum;
   if (minimum && maximum) {
     return response.data.results.filter(
-      (movie) => movie.release_date >= minimum && movie.release_date <= maximum,
+      (movie) => movie.release_date >= minimum && movie.release_date <= maximum
     );
   }
   return response.data.results;
@@ -43,7 +43,7 @@ export const fetchUpcomingMovies = async (): Promise<Movie[]> => {
 
 export const fetchMovieDetails = async (
   movieId: number,
-  mediaType: "movie" | "tv",
+  mediaType: "movie" | "tv"
 ): Promise<Movie> => {
   const response = await tmdbApi.get<Movie>(`/${mediaType}/${movieId}`, {
     params: {
@@ -69,7 +69,7 @@ export const searchMulti = async (query: string): Promise<Movie[]> => {
     },
   });
   return response.data.results.filter(
-    (item) => item.media_type === "movie" || item.media_type === "tv",
+    (item) => item.media_type === "movie" || item.media_type === "tv"
   );
 };
 
@@ -83,17 +83,17 @@ const getMediaType = async (id: number): Promise<"movie" | "tv"> => {
 };
 
 export const fetchGenres = async (
-  mediaType: "movie" | "tv",
+  mediaType: "movie" | "tv"
 ): Promise<Genre[]> => {
   const response = await tmdbApi.get<{ genres: Genre[] }>(
-    `/genre/${mediaType}/list`,
+    `/genre/${mediaType}/list`
   );
   return response.data.genres;
 };
 
 export const discoverByGenre = async (
   mediaType: "movie" | "tv",
-  genreId: number,
+  genreId: number
 ): Promise<Movie[]> => {
   const response = await tmdbApi.get<TmdbApiResponse>(
     `/discover/${mediaType}`,
@@ -102,7 +102,10 @@ export const discoverByGenre = async (
         with_genres: genreId,
         sort_by: "popularity.desc",
       },
-    },
+    }
   );
-  return response.data.results.map((item) => ({ ...item, media_type: mediaType }));
+  return response.data.results.map((item) => ({
+    ...item,
+    media_type: mediaType,
+  }));
 };

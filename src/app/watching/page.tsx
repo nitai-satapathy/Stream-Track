@@ -43,108 +43,124 @@ export default function WatchingPage() {
     loadLists();
   }, [user]);
 
-  const handleMovieClick = React.useCallback((id: number, media_type: MediaType) => {
-    setSelectedItem({ id, media_type });
-  }, []);
+  const handleMovieClick = React.useCallback(
+    (id: number, media_type: MediaType) => {
+      setSelectedItem({ id, media_type });
+    },
+    []
+  );
 
   const handleCloseModal = React.useCallback(() => {
     setSelectedItem(null);
   }, []);
 
-  const watchingMovies = React.useMemo(() => watching.filter(
-    (movie) =>
-      movie.media_type === "movie" || (!movie.media_type && movie.title),
-  ), [watching]);
+  const watchingMovies = React.useMemo(
+    () =>
+      watching.filter(
+        (movie) =>
+          movie.media_type === "movie" || (!movie.media_type && movie.title)
+      ),
+    [watching]
+  );
 
-  const watchingTvShows = React.useMemo(() => watching.filter(
-    (movie) => movie.media_type === "tv" || movie.name,
-  ), [watching]);
+  const watchingTvShows = React.useMemo(
+    () => watching.filter((movie) => movie.media_type === "tv" || movie.name),
+    [watching]
+  );
 
-  const isMovieInList = React.useCallback((movieId: number, list: ListType) => {
-    const listMap = {
-      watchlist,
-      watching,
-      watched,
-    };
-    return listMap[list].some((m) => m.id === movieId);
-  }, [watchlist, watching, watched]);
+  const isMovieInList = React.useCallback(
+    (movieId: number, list: ListType) => {
+      const listMap = {
+        watchlist,
+        watching,
+        watched,
+      };
+      return listMap[list].some((m) => m.id === movieId);
+    },
+    [watchlist, watching, watched]
+  );
 
-  const updateLocalStorage = (key: ListType, data: Movie[]) => {
+  const updateLocalStorage = React.useCallback((key: ListType, data: Movie[]) => {
     if (!user) {
       localStorage.setItem(key, JSON.stringify(data));
     }
-  };
+  }, [user]);
 
-  const handleListUpdate = React.useCallback(async (movie: Movie, list: ListType) => {
-    let newWatchlist = [...watchlist];
-    let newWatching = [...watching];
-    let newWatched = [...watched];
+  const handleListUpdate = React.useCallback(
+    async (movie: Movie, list: ListType) => {
+      let newWatchlist = [...watchlist];
+      let newWatching = [...watching];
+      let newWatched = [...watched];
 
-    const lists: Record<
-      ListType,
-      { state: Movie[]; setter: React.Dispatch<React.SetStateAction<Movie[]>> }
-    > = {
-      watchlist: { state: newWatchlist, setter: setWatchlist },
-      watching: { state: newWatching, setter: setWatching },
-      watched: { state: newWatched, setter: setWatched },
-    };
+      const lists: Record<
+        ListType,
+        {
+          state: Movie[];
+          setter: React.Dispatch<React.SetStateAction<Movie[]>>;
+        }
+      > = {
+        watchlist: { state: newWatchlist, setter: setWatchlist },
+        watching: { state: newWatching, setter: setWatching },
+        watched: { state: newWatched, setter: setWatched },
+      };
 
-    const otherLists = (Object.keys(lists) as ListType[]).filter(
-      (l) => l !== list,
-    );
-
-    // Remove from other lists
-    otherLists.forEach((listName) => {
-      const updatedList = lists[listName].state.filter(
-        (m) => m.id !== movie.id,
+      const otherLists = (Object.keys(lists) as ListType[]).filter(
+        (l) => l !== list
       );
-      lists[listName].setter(updatedList);
-      if (listName === "watchlist") newWatchlist = updatedList;
-      if (listName === "watching") newWatching = updatedList;
-      if (listName === "watched") newWatched = updatedList;
-    });
 
-    const targetList = lists[list];
-    const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
-
-    if (movieIndex > -1) {
-      // Remove from target list if it's already there (toggle off)
-      const updatedList = targetList.state.filter((m) => m.id !== movie.id);
-      targetList.setter(updatedList);
-      if (list === "watchlist") newWatchlist = updatedList;
-      if (list === "watching") newWatching = updatedList;
-      if (list === "watched") newWatched = updatedList;
-    } else {
-      // Add to target list
-      const updatedList = [...targetList.state, movie];
-      targetList.setter(updatedList);
-      if (list === "watchlist") newWatchlist = updatedList;
-      if (list === "watching") newWatching = updatedList;
-      if (list === "watched") newWatched = updatedList;
-    }
-
-    if (user) {
-      await updateUserLists(user.uid, {
-        watchlist: newWatchlist,
-        watching: newWatching,
-        watched: newWatched,
+      // Remove from other lists
+      otherLists.forEach((listName) => {
+        const updatedList = lists[listName].state.filter(
+          (m) => m.id !== movie.id
+        );
+        lists[listName].setter(updatedList);
+        if (listName === "watchlist") newWatchlist = updatedList;
+        if (listName === "watching") newWatching = updatedList;
+        if (listName === "watched") newWatched = updatedList;
       });
-    } else {
-      updateLocalStorage("watchlist", newWatchlist);
-      updateLocalStorage("watching", newWatching);
-      updateLocalStorage("watched", newWatched);
-    }
-  }, [watchlist, watching, watched, user]);
 
-  const headerLists = React.useMemo(() => ({ watchlist, watching, watched }), [watchlist, watching, watched]);
+      const targetList = lists[list];
+      const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
 
+      if (movieIndex > -1) {
+        // Remove from target list if it's already there (toggle off)
+        const updatedList = targetList.state.filter((m) => m.id !== movie.id);
+        targetList.setter(updatedList);
+        if (list === "watchlist") newWatchlist = updatedList;
+        if (list === "watching") newWatching = updatedList;
+        if (list === "watched") newWatched = updatedList;
+      } else {
+        // Add to target list
+        const updatedList = [...targetList.state, movie];
+        targetList.setter(updatedList);
+        if (list === "watchlist") newWatchlist = updatedList;
+        if (list === "watching") newWatching = updatedList;
+        if (list === "watched") newWatched = updatedList;
+      }
+
+      if (user) {
+        await updateUserLists(user.uid, {
+          watchlist: newWatchlist,
+          watching: newWatching,
+          watched: newWatched,
+        });
+      } else {
+        updateLocalStorage("watchlist", newWatchlist);
+        updateLocalStorage("watching", newWatching);
+        updateLocalStorage("watched", newWatched);
+      }
+    },
+    [watchlist, watching, watched, user, updateLocalStorage]
+  );
+
+  const headerLists = React.useMemo(
+    () => ({ watchlist, watching, watched }),
+    [watchlist, watching, watched]
+  );
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header
-        lists={headerLists}
-        onListUpdate={handleListUpdate}
-      />
+      <Header lists={headerLists} onListUpdate={handleListUpdate} />
       <main className="flex-1 space-y-8 py-8">
         <div className="container">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
@@ -155,7 +171,8 @@ export default function WatchingPage() {
         {watching.length === 0 && (
           <div className="container">
             <p className="text-muted-foreground">
-              You haven&apos;t added anything to your currently watching list yet.
+              You haven&apos;t added anything to your currently watching list
+              yet.
             </p>
           </div>
         )}

@@ -34,7 +34,7 @@ export function MovieRow({
 }: MovieRowProps) {
   const [movies, setMovies] = React.useState<Movie[]>(initialMovies || []);
   const [isLoading, setIsLoading] = React.useState(
-    !!initialIsLoading || !initialMovies,
+    !!initialIsLoading || !initialMovies
   );
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
@@ -121,9 +121,7 @@ export function MovieRow({
       );
     }
     return (
-      <div
-        className="grid justify-start gap-x-3 gap-y-6 grid-cols-[repeat(auto-fit,minmax(140px,1fr))] md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]"
-      >
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] justify-start gap-x-3 gap-y-6 md:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
         {movies.map((movie, index) => (
           <MovieCard
             key={`${movie.id}-${movie.media_type || ""}-${index}`}
@@ -137,12 +135,12 @@ export function MovieRow({
 
   return (
     <section className="container max-w-screen-2xl">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xl font-bold md:text-2xl">{title}</h2>
         {onRefresh && (
           <button
             onClick={onRefresh}
-            className="ml-2 p-2 rounded hover:bg-muted"
+            className="ml-2 rounded p-2 hover:bg-muted"
             title="Refresh recommendations"
             disabled={!!refreshing}
           >
