@@ -19,6 +19,9 @@ interface MovieRowProps {
   onRefresh?: () => void;
   refreshing?: boolean;
   headerActions?: React.ReactNode;
+  isEditing?: boolean;
+  selectedIds?: number[];
+  onToggleSelect?: (id: number) => void;
 }
 
 export function MovieRow({
@@ -31,6 +34,9 @@ export function MovieRow({
   onRefresh,
   refreshing,
   headerActions,
+  isEditing,
+  selectedIds,
+  onToggleSelect,
 }: MovieRowProps) {
   const [movies, setMovies] = React.useState<Movie[]>(initialMovies || []);
   const [isLoading, setIsLoading] = React.useState(
@@ -113,6 +119,11 @@ export function MovieRow({
                 onClick={() =>
                   onMovieClick(movie.id, movie.media_type || "movie")
                 }
+                isEditing={isEditing}
+                isSelected={selectedIds?.includes(movie.id)}
+                onToggleSelect={() =>
+                  onToggleSelect && onToggleSelect(movie.id)
+                }
               />
             ))}
           </div>
@@ -127,6 +138,9 @@ export function MovieRow({
             key={`${movie.id}-${movie.media_type || ""}-${index}`}
             movie={movie}
             onClick={() => onMovieClick(movie.id, movie.media_type || "movie")}
+            isEditing={isEditing}
+            isSelected={selectedIds?.includes(movie.id)}
+            onToggleSelect={() => onToggleSelect && onToggleSelect(movie.id)}
           />
         ))}
       </div>
