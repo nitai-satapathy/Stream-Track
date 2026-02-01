@@ -47,7 +47,7 @@ export const fetchMovieDetails = async (
 ): Promise<Movie> => {
   const response = await tmdbApi.get<Movie>(`/${mediaType}/${movieId}`, {
     params: {
-      append_to_response: "videos",
+      append_to_response: "videos,recommendations",
     },
   });
   return response.data;
@@ -108,4 +108,13 @@ export const discoverByGenre = async (
     ...item,
     media_type: mediaType,
   }));
+};
+
+export const fetchPersonDetails = async (personId: number): Promise<import("./types").Person> => {
+  const response = await tmdbApi.get<import("./types").Person>(`/person/${personId}`, {
+    params: {
+      append_to_response: "external_ids,combined_credits",
+    },
+  });
+  return response.data;
 };

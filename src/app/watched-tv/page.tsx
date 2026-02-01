@@ -373,6 +373,7 @@ export default function WatchedTvShowsPage() {
         onClose={handleCloseModal}
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
+        onMovieSelect={handleMovieClick}
       />
     </div>
   );

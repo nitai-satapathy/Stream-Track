@@ -372,6 +372,7 @@ export default function WatchedMoviesPage() {
         onClose={handleCloseModal}
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
+        onMovieSelect={handleMovieClick}
       />
     </div>
   );

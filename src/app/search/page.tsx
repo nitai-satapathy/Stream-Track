@@ -189,6 +189,7 @@ function SearchContent() {
         onClose={handleCloseModal}
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
+        onMovieSelect={handleMovieClick}
       />
     </div>
   );

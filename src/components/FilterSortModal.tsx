@@ -81,7 +81,6 @@ export function FilterSortModal({
           {/* Filters Section */}
           <div>
             <h3 className="mb-2 font-semibold">Filters</h3>
-            {/* Release date filter removed */}
             <div className="mb-4">
               <label className="mb-2 block text-sm font-medium">Genres</label>
               <div className="flex flex-wrap gap-2">
@@ -116,7 +115,6 @@ export function FilterSortModal({
                 ))}
               </div>
             </div>
-            {/* Rating filter removed */}
           </div>
         </div>
         <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row">

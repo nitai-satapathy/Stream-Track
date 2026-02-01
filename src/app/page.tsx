@@ -439,6 +439,7 @@ export default function Home() {
         onClose={handleCloseModal}
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
+        onMovieSelect={handleMovieClick}
       />
     </div>
   );

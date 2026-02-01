@@ -301,6 +301,7 @@ const WatchlistPage = () => {
           onClose={handleCloseModal}
           onListUpdate={handleListUpdate}
           isMovieInList={isMovieInList}
+          onMovieSelect={handleMovieClick}
         />
 
         {/* Floating Action Button for Bulk Delete */}

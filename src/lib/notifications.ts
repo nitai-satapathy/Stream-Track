@@ -22,6 +22,15 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
   {
+    id: "modal-navigation-update",
+    title: "Deep Navigation & UI Enhancements",
+    category: "Update",
+    description:
+      "We've supercharged navigation! You can now browse deeply from Movies to Cast to Related content and seamlessly step back with our new History Navigation system. We also polished the 'Known For' section with filters & pagination, optimized mobile layouts for Cast profiles, and did some spring cleaning under the hood.",
+    timestamp: "02/02/2026, 00:45:00",
+    source: "System",
+  },
+  {
     id: "profile-wrapped-update",
     title: "Profile Wrapped & Badges",
     category: "Update",

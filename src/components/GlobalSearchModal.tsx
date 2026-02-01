@@ -152,6 +152,7 @@ export function GlobalSearchModal({ isOpen, onClose, onListUpdate, lists }: Glob
                     onClose={closeModal}
                     onListUpdate={onListUpdate}
                     isMovieInList={isMovieInList}
+                    onMovieSelect={handleResultClick}
                 />
             </div>
         </div>,
