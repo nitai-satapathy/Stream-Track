@@ -22,6 +22,15 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
   {
+    id: "profile-wrapped-update",
+    title: "Profile Wrapped & Badges",
+    category: "Update",
+    description:
+      "Dive deep into your viewing habits with our new 'Wrapped' style profile! Visualize your taste with Radar charts, track your total watch time, and unlock achievement badges as you watch. We've also improved data accuracy for all users.",
+    timestamp: "01/02/2026, 15:30:00",
+    source: "System",
+  },
+  {
     id: "global-search-update",
     title: "Global Search & UI Polish",
     category: "Update",

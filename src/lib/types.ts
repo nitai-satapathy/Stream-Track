@@ -15,6 +15,10 @@ export interface Movie {
     results: Video[];
   };
   media_type?: "movie" | "tv";
+  runtime?: number;
+  number_of_episodes?: number;
+  number_of_seasons?: number;
+  episode_run_time?: number[];
 }
 
 export interface Genre {

@@ -12,6 +12,12 @@ const MovieSchema = new Schema(
     release_date: String,
     first_air_date: String,
     media_type: String,
+    genre_ids: [Number],
+    genres: [{ id: Number, name: String }],
+    runtime: Number,
+    number_of_episodes: Number,
+    number_of_seasons: Number,
+    episode_run_time: [Number],
   },
   { _id: false }
 );
