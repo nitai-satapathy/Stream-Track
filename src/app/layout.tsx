@@ -30,6 +30,9 @@ export const metadata: Metadata = {
     title: "Stream Track",
     description: "Track What You Watch. Love What You Watch. Never Forget a Single Show.",
   },
+  verification: {
+    google: "zDxLKnLUiTry_Rq6eGq00tQcZQqu8Co-ffMzJk56B_U",
+  },
 };
 
 export default function RootLayout({
