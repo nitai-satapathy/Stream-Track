@@ -223,9 +223,11 @@ export function Header(props: HeaderProps) {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const isBackRef = React.useRef(false);
+  const isNavigatingRef = React.useRef(false);
 
   React.useEffect(() => {
     if (isMobileMenuOpen) {
+      isNavigatingRef.current = false;
       window.history.pushState({ mobileMenu: true }, "", window.location.href);
 
       const handlePopState = () => {
@@ -237,13 +239,18 @@ export function Header(props: HeaderProps) {
 
       return () => {
         window.removeEventListener("popstate", handlePopState);
-        if (!isBackRef.current) {
+        if (!isBackRef.current && !isNavigatingRef.current) {
           window.history.back();
         }
         isBackRef.current = false;
       };
     }
   }, [isMobileMenuOpen]);
+
+  const handleMobileNav = () => {
+    isNavigatingRef.current = true;
+    setIsMobileMenuOpen(false);
+  };
 
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
@@ -540,64 +547,44 @@ export function Header(props: HeaderProps) {
                   </Link>
 
                   <div className="flex flex-col gap-4 w-full max-w-sm sm:gap-6">
-                    <SheetClose asChild>
-                      <Link href="/" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
-                        Home
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link href="/watching" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
-                        Watching
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link href="/watched-movies" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
-                        Watched Movies
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link href="/watched-tv" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
-                        Watched TV
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link href="/watchlist" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
-                        Watchlist
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link href="/recommendation" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
-                        For You
-                      </Link>
-                    </SheetClose>
+                    <Link href="/" onClick={handleMobileNav} className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                      Home
+                    </Link>
+                    <Link href="/watching" onClick={handleMobileNav} className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                      Watching
+                    </Link>
+                    <Link href="/watched-movies" onClick={handleMobileNav} className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                      Watched Movies
+                    </Link>
+                    <Link href="/watched-tv" onClick={handleMobileNav} className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                      Watched TV
+                    </Link>
+                    <Link href="/watchlist" onClick={handleMobileNav} className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                      Watchlist
+                    </Link>
+                    <Link href="/recommendation" onClick={handleMobileNav} className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                      For You
+                    </Link>
                   </div>
 
                   <div className="flex flex-wrap justify-center gap-3 mt-4 w-full max-w-xs sm:gap-4 sm:mt-8">
-                    <SheetClose asChild>
-                      <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsBulkDialogOpen(true)}>
-                        <BadgePlus className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="text-[10px] sm:text-xs">Bulk Add</span>
-                      </Button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsSettingsOpen(true)}>
-                        <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="text-[10px] sm:text-xs">Settings</span>
-                      </Button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsThemeOpen(true)}>
-                        <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="text-[10px] sm:text-xs">Theme</span>
-                      </Button>
-                    </SheetClose>
+                    <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsBulkDialogOpen(true)}>
+                      <BadgePlus className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-[10px] sm:text-xs">Bulk Add</span>
+                    </Button>
+                    <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsSettingsOpen(true)}>
+                      <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-[10px] sm:text-xs">Settings</span>
+                    </Button>
+                    <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsThemeOpen(true)}>
+                      <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-[10px] sm:text-xs">Theme</span>
+                    </Button>
                     {user && (
-                      <SheetClose asChild>
-                        <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsProfileOpen(true)}>
-                          <UserCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                          <span className="text-[10px] sm:text-xs">Profile</span>
-                        </Button>
-                      </SheetClose>
+                      <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsProfileOpen(true)}>
+                        <UserCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-[10px] sm:text-xs">Profile</span>
+                      </Button>
                     )}
                   </div>
 
@@ -605,7 +592,10 @@ export function Header(props: HeaderProps) {
                     <div className="mt-4 sm:mt-8">
                       <Button
                         variant="ghost"
-                        onClick={logout}
+                        onClick={() => {
+                          handleMobileNav();
+                          logout();
+                        }}
                         className="text-red-400 hover:text-red-500 hover:bg-red-500/10"
                       >
                         <LogOut className="mr-2 h-4 w-4" /> Log Out
@@ -614,11 +604,9 @@ export function Header(props: HeaderProps) {
                   )}
 
                   {!user && (
-                    <SheetClose asChild>
-                      <Button asChild className="mt-4 rounded-full px-8">
-                        <Link href="/login">Log In / Sign Up</Link>
-                      </Button>
-                    </SheetClose>
+                    <Button asChild className="mt-4 rounded-full px-8" onClick={handleMobileNav}>
+                      <Link href="/login">Log In / Sign Up</Link>
+                    </Button>
                   )}
                 </div>
               </SheetContent>
