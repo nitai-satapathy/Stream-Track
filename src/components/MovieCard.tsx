@@ -1,15 +1,15 @@
 import Image from "next/image";
 import type { Movie } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Star, Check, X } from "lucide-react";
 import { Badge } from "./ui/badge";
+import { TMDB_IMAGE_BASE_URL_W500 } from "@/lib/constants";
 
 interface MovieCardProps {
   movie: Movie;
   onClick: () => void;
 }
 
-const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 export function MovieCard({
   movie,
@@ -44,7 +44,7 @@ export function MovieCard({
             <Image
               src={
                 movie.poster_path
-                  ? `${IMAGE_BASE_URL}${movie.poster_path}`
+                  ? `${TMDB_IMAGE_BASE_URL_W500}${movie.poster_path}`
                   : "https://placehold.co/200x300.png?text=No+Image"
               }
               alt={movie.title || movie.name || "Movie poster"}
@@ -57,17 +57,11 @@ export function MovieCard({
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                 {isSelected ? (
                   <div className="rounded-full bg-white/20 p-2 backdrop-blur-sm">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 opacity-70">
-                      <path d="M18 6L6 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M6 6L18 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <Check className="w-8 h-8 opacity-70 text-white" />
                   </div>
                 ) : (
                   <div className="rounded-full bg-black/20 p-2 backdrop-blur-sm">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 opacity-70">
-                      <path d="M18 6L6 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M6 6L18 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <X className="w-8 h-8 opacity-70 text-white" />
                   </div>
                 )}
               </div>

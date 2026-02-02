@@ -58,7 +58,7 @@ import { ProfileMenu } from "./ProfileMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { GlobalSearchModal } from "./GlobalSearchModal";
 
-const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w200";
+import { TMDB_IMAGE_BASE_URL_W200 } from "@/lib/constants";
 
 type ListType = "watchlist" | "watching" | "watched";
 interface UserLists {
