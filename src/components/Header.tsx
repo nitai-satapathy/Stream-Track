@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import * as React from "react";
 import {
   Search,
@@ -18,7 +18,7 @@ import {
   CheckCircle,
   UserCircle,
   Layers,
-  HelpCircle,
+  X,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -141,7 +141,7 @@ const NavLinks = ({
       ) : (
         <div className="relative">
           {/* Dropdown for Watched */}
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               {/* Use a button for accessibility and to allow focus/active state */}
               <button
@@ -156,7 +156,7 @@ const NavLinks = ({
                 <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
+            <DropdownMenuContent align="start" className="mt-2 w-48 rounded-xl border border-white/10 bg-background/70 p-2 shadow-xl backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2">
               <DropdownMenuItem asChild>
                 <Link
                   href="/watched-movies"
@@ -220,6 +220,31 @@ export function Header(props: HeaderProps) {
   const pathname = usePathname();
   const safeOnListUpdate = onListUpdate ?? (async () => { });
   const { user, logout } = useAuth();
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const isBackRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (isMobileMenuOpen) {
+      window.history.pushState({ mobileMenu: true }, "", window.location.href);
+
+      const handlePopState = () => {
+        isBackRef.current = true;
+        setIsMobileMenuOpen(false);
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+        if (!isBackRef.current) {
+          window.history.back();
+        }
+        isBackRef.current = false;
+      };
+    }
+  }, [isMobileMenuOpen]);
+
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
   // Bulk Add Dialog State
@@ -239,27 +264,27 @@ export function Header(props: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
+      <header className="fixed top-4 left-1/2 z-50 w-[95%] max-w-7xl -translate-x-1/2 rounded-full border border-white/10 bg-background/60 shadow-2xl backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
+        <div className="container flex h-14 items-center justify-between px-4 sm:px-8">
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
               <Image
                 src="/icons/logo.svg"
                 alt="Logo"
                 width={44}
                 height={44}
-                className="h-8 w-8 md:h-11 md:w-11"
+                className="h-8 w-8 md:h-10 md:w-10"
               />
-              <h1 className="text-2xl font-bold text-foreground">
+              <span className="text-lg font-bold tracking-tight md:text-xl">
                 Stream Track
-              </h1>
+              </span>
             </Link>
           </div>
           {/* Center navigation links */}
           <div className="hidden flex-1 justify-center md:flex">
             <NavLinks user={user} />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Global Search Icon */}
 
             {/* Global Search Icon (Hidden on Home Page) */}
@@ -481,117 +506,119 @@ export function Header(props: HeaderProps) {
                 onTheme={() => setIsThemeOpen(true)}
               />
             </div>
-            <Sheet>
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu />
+                  <Menu className="h-6 w-6" />
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right">
+              <SheetContent side="full" className="flex flex-col items-center border-none bg-background/95 backdrop-blur-xl [&>button]:hidden overflow-y-auto">
                 <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-                <div className="flex flex-col gap-6 p-4">
-                  <SheetClose asChild>
-                    <Link href="/" className="flex items-center gap-2">
-                      <Image
-                        src="/icons/logo.svg"
-                        alt="Logo"
-                        width={34}
-                        height={34}
-                      />
-                      <h1 className="text-2xl font-bold text-foreground">
-                        Stream Track
-                      </h1>
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <NavLinks isMobile={true} user={user} />
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <button
-                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
-                      onClick={() => setIsBulkDialogOpen(true)}
-                    >
-                      <BadgePlus className="h-5 w-5" />
-                      Bulk Add
-                    </button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <button
-                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
-                      onClick={() => setIsSettingsOpen(true)}
-                    >
-                      <Settings className="h-5 w-5" />
-                      Settings
-                    </button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link
-                      href="/about"
-                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
-                    >
-                      <HelpCircle className="h-5 w-5" />
-                      About & FAQ
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <button
-                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
-                      onClick={() => setIsThemeOpen(true)}
-                    >
-                      <Layers className="h-5 w-5" />
-                      Appearance
-                    </button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <button
-                      className="flex items-center gap-2 text-lg transition-colors hover:text-foreground"
-                      onClick={() => setIsNotifOpen(true)}
-                    >
-                      <Layers className="h-5 w-5" />
-                      Changelog
-                    </button>
-                  </SheetClose>
-                  {user && (
-                    <div className="mt-auto flex flex-col gap-4 border-t pt-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src={user.photoURL || undefined}
-                            alt={user.displayName || "User"}
-                          />
-                          <AvatarFallback>
-                            {user.displayName?.charAt(0) || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <p className="font-medium leading-none">
-                            {user.displayName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {user.email}
-                          </p>
-                        </div>
-                      </div>
 
+                <div className="absolute top-4 right-4 z-50">
+                  <SheetClose asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10">
+                      <span className="sr-only">Close</span>
+                      <X className="h-6 w-6 sm:h-8 sm:w-8" />
+                    </Button>
+                  </SheetClose>
+                </div>
+
+                <div className="flex min-h-full w-full flex-col items-center justify-center gap-6 p-4 py-12 text-center animate-in fade-in zoom-in-50 duration-500 sm:gap-8">
+                  <Link href="/" className="flex flex-col items-center gap-3 sm:gap-4">
+                    <Image
+                      src="/icons/logo.svg"
+                      alt="Logo"
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 shadow-[0_0_40px_-5px_var(--primary)] rounded-full sm:h-20 sm:w-20"
+                    />
+                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                      Stream Track
+                    </h1>
+                  </Link>
+
+                  <div className="flex flex-col gap-4 w-full max-w-sm sm:gap-6">
+                    <SheetClose asChild>
+                      <Link href="/" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                        Home
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/watching" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                        Watching
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/watched-movies" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                        Watched Movies
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/watched-tv" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                        Watched TV
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/watchlist" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                        Watchlist
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/recommendation" className="text-xl font-medium text-muted-foreground hover:text-foreground transition-all hover:scale-110 sm:text-2xl">
+                        For You
+                      </Link>
+                    </SheetClose>
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-3 mt-4 w-full max-w-xs sm:gap-4 sm:mt-8">
+                    <SheetClose asChild>
+                      <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsBulkDialogOpen(true)}>
+                        <BadgePlus className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-[10px] sm:text-xs">Bulk Add</span>
+                      </Button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsSettingsOpen(true)}>
+                        <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-[10px] sm:text-xs">Settings</span>
+                      </Button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsThemeOpen(true)}>
+                        <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-[10px] sm:text-xs">Theme</span>
+                      </Button>
+                    </SheetClose>
+                    {user && (
                       <SheetClose asChild>
-                        <Link
-                          href="/profile"
-                          className="flex w-full items-center justify-start gap-2 py-1 text-lg transition-colors hover:text-foreground"
-                        >
-                          <UserCircle className="h-5 w-5" />
-                          Profile
-                        </Link>
+                        <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsProfileOpen(true)}>
+                          <UserCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                          <span className="text-[10px] sm:text-xs">Profile</span>
+                        </Button>
                       </SheetClose>
+                    )}
+                  </div>
 
+                  {user && (
+                    <div className="mt-4 sm:mt-8">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         onClick={logout}
-                        className="w-full justify-start"
+                        className="text-red-400 hover:text-red-500 hover:bg-red-500/10"
                       >
-                        <LogOut className="mr-2 h-4 w-4" /> Logout
+                        <LogOut className="mr-2 h-4 w-4" /> Log Out
                       </Button>
                     </div>
+                  )}
+
+                  {!user && (
+                    <SheetClose asChild>
+                      <Button asChild className="mt-4 rounded-full px-8">
+                        <Link href="/login">Log In / Sign Up</Link>
+                      </Button>
+                    </SheetClose>
                   )}
                 </div>
               </SheetContent>

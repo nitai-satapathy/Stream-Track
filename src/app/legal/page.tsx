@@ -82,7 +82,7 @@ export default function LegalPage() {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/30">
-      <div className="container relative mx-auto max-w-7xl px-4 py-12 md:py-20">
+      <div className="container relative mx-auto max-w-7xl px-4 py-12 md:py-20 pt-24 md:pt-32">
         {/* Header Section */}
         <div className="mb-16">
           <Button

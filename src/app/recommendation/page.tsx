@@ -286,7 +286,7 @@ const RecommendationPage = () => {
         watchedMovies={watched}
         watchedShows={watching}
       />
-      <div className="container mx-auto space-y-10 py-8">
+      <div className="container mx-auto space-y-10 py-8 pt-24 md:pt-28">
         <h1 className="mb-4 text-3xl font-bold">Recommendations</h1>
         <p className="mb-8 text-lg text-gray-600">
           Get personalized movie and TV show recommendations based on your

@@ -312,7 +312,7 @@ export default function Home() {
       <main className="flex-1 space-y-8 md:space-y-12 py-8 relative z-10">
 
         {/* Hero Content */}
-        <div className="flex flex-col items-center justify-center pt-16 md:pt-24 pb-8 space-y-6 md:space-y-8 px-4 text-center">
+        <div className="flex flex-col items-center justify-center pt-24 md:pt-32 pb-8 space-y-6 md:space-y-8 px-4 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/50 animate-in fade-in zoom-in-50 duration-1000 px-4">
             {heroTitle}
           </h1>

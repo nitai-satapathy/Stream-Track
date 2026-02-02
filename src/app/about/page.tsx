@@ -230,7 +230,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-background pb-12 text-foreground">
       <Header lists={headerLists} onListUpdate={handleListUpdate} />
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background px-4 py-24 md:px-6 lg:px-8">
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background px-4 pt-32 pb-24 md:px-6 lg:px-8">
         <div className="bg-grid-white/[0.02] absolute inset-0 bg-[length:50px_50px]" />
         <div className="container relative z-10 mx-auto max-w-4xl text-center">
           <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary duration-500 animate-in fade-in slide-in-from-bottom-3">

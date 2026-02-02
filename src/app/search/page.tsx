@@ -166,7 +166,7 @@ function SearchContent() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header lists={headerLists} onListUpdate={handleListUpdate} />
-      <main className="flex-1 space-y-12 py-8">
+      <main className="flex-1 space-y-12 py-8 pt-24 md:pt-28">
         {query ? (
           <MovieRow
             title={`Search Results for "${query}"`}

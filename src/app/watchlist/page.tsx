@@ -223,7 +223,7 @@ const WatchlistPage = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header lists={headerLists} onListUpdate={handleListUpdate} />
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 pt-24 md:pt-28">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Your Watchlist</h1>
           <div className="flex items-center gap-2">

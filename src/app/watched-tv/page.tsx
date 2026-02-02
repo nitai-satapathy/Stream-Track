@@ -293,7 +293,7 @@ export default function WatchedTvShowsPage() {
         )}
         setWatchedShows={setWatched}
       />
-      <main className="flex-1 space-y-12 py-8">
+      <main className="flex-1 space-y-12 py-8 pt-24 md:pt-28">
         <div className="container flex items-center justify-between space-y-4">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
             Watched TV Shows

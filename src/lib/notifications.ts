@@ -22,6 +22,15 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
   {
+    id: "mobile-visual-update",
+    title: "Mobile Redesign & Visual Polish",
+    category: "Update",
+    description:
+      "Experience a fresh new look! We've introduced a stunning 'Floating Island' header and a completely redesigned full-screen mobile menu with glassmorphism. Plus, enjoy buttery smooth page transitions and native-feeling back button support on mobile devices.",
+    timestamp: "02/02/2026, 17:25:00",
+    source: "System",
+  },
+  {
     id: "modal-navigation-update",
     title: "Deep Navigation & UI Enhancements",
     category: "Update",
