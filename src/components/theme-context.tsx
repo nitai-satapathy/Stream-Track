@@ -4,16 +4,12 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { themes as importedThemes, Theme } from "@/lib/themes-data";
 export type { Theme } from "@/lib/themes-data";
 
-// Define the "Default" (Stream-Track original) theme
-// We don"t set any vars so it falls back to globals.css
 const streamTrackDefaultTheme: Theme = {
     id: "default",
     name: "Default",
     cssVars: {},
 };
 
-// Combine all themes
-// Filter out themes that failed generation (all 0s)
 const validImportedThemes = importedThemes.filter(t => t.cssVars["--background"] !== "0 0% 0%");
 
 export const allThemes: Theme[] = [streamTrackDefaultTheme, ...validImportedThemes];
@@ -30,7 +26,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        // Load preference from localStorage
         const savedId = localStorage.getItem("stream-track-theme-id");
         if (savedId) {
             const found = allThemes.find(t => t.id === savedId);
@@ -44,11 +39,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!mounted) return;
 
-        // Apply theme vars
         const root = document.documentElement;
 
         if (currentTheme.id === "default") {
-            // Remove theme overrides to fallback to globals.css
             const keys = Object.keys(validImportedThemes[0]?.cssVars || {});
             keys.forEach(k => root.style.removeProperty(k));
             localStorage.removeItem("stream-track-theme-id");
@@ -58,7 +51,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             });
             localStorage.setItem("stream-track-theme-id", currentTheme.id);
         }
-
     }, [currentTheme, mounted]);
 
     const setTheme = (id: string) => {
@@ -67,9 +59,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             setCurrentTheme(found);
         }
     };
-
-
-
     return (
         <ThemeContext.Provider value={{ currentTheme, setTheme }}>
             {children}

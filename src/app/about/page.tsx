@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import {
   Accordion,
@@ -24,115 +24,18 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
 import type { Movie } from "@/lib/types";
+import { useListManager } from "@/hooks/useListManager";
 
 // Define ListType locally as it's not exported from types
 type ListType = "watchlist" | "watching" | "watched";
 
 export default function AboutPage() {
-  const { user } = useAuth();
-  const [watchlist, setWatchlist] = useState<Movie[]>([]);
-  const [watching, setWatching] = useState<Movie[]>([]);
-  const [watched, setWatched] = useState<Movie[]>([]);
-
-  useEffect(() => {
-    const loadLists = async () => {
-      if (user) {
-        try {
-          const { watchlist, watching, watched } = await getLists(user.uid);
-          setWatchlist(watchlist || []);
-          setWatching(watching || []);
-          setWatched(watched || []);
-        } catch (error) {
-          console.error("Failed to load lists:", error);
-        }
-      } else {
-        // Clear lists if user logs out or load from local storage
-        setWatchlist([]);
-        setWatching([]);
-        setWatched([]);
-        const storedWatchlist = localStorage.getItem("watchlist");
-        const storedWatching = localStorage.getItem("watching");
-        const storedWatched = localStorage.getItem("watched");
-        if (storedWatchlist) setWatchlist(JSON.parse(storedWatchlist));
-        if (storedWatching) setWatching(JSON.parse(storedWatching));
-        if (storedWatched) setWatched(JSON.parse(storedWatched));
-      }
-    };
-    loadLists();
-  }, [user]);
-
-  const updateLocalStorage = useCallback((key: ListType, data: Movie[]) => {
-    if (!user) {
-      localStorage.setItem(key, JSON.stringify(data));
-    }
-  }, [user]);
-
-  const handleListUpdate = useCallback(
-    async (movie: Movie, list: ListType) => {
-      let newWatchlist = [...watchlist];
-      let newWatching = [...watching];
-      let newWatched = [...watched];
-
-      const lists: Record<
-        ListType,
-        {
-          state: Movie[];
-          setter: React.Dispatch<React.SetStateAction<Movie[]>>;
-        }
-      > = {
-        watchlist: { state: newWatchlist, setter: setWatchlist },
-        watching: { state: newWatching, setter: setWatching },
-        watched: { state: newWatched, setter: setWatched },
-      };
-
-      const otherLists = (Object.keys(lists) as ListType[]).filter(
-        (l) => l !== list
-      );
-
-      // Remove from other lists
-      otherLists.forEach((listName) => {
-        const updatedList = lists[listName].state.filter(
-          (m) => m.id !== movie.id
-        );
-        lists[listName].setter(updatedList);
-        if (listName === "watchlist") newWatchlist = updatedList;
-        if (listName === "watching") newWatching = updatedList;
-        if (listName === "watched") newWatched = updatedList;
-      });
-
-      const targetList = lists[list];
-      const movieIndex = targetList.state.findIndex((m) => m.id === movie.id);
-
-      if (movieIndex > -1) {
-        // Remove from target list if it's already there (toggle off)
-        const updatedList = targetList.state.filter((m) => m.id !== movie.id);
-        targetList.setter(updatedList);
-        if (list === "watchlist") newWatchlist = updatedList;
-        if (list === "watching") newWatching = updatedList;
-        if (list === "watched") newWatched = updatedList;
-      } else {
-        // Add to target list
-        const updatedList = [...targetList.state, movie];
-        targetList.setter(updatedList);
-        if (list === "watchlist") newWatchlist = updatedList;
-        if (list === "watching") newWatching = updatedList;
-        if (list === "watched") newWatched = updatedList;
-      }
-
-      if (user) {
-        await updateUserLists(user.uid, {
-          watchlist: newWatchlist,
-          watching: newWatching,
-          watched: newWatched,
-        });
-      } else {
-        updateLocalStorage("watchlist", newWatchlist);
-        updateLocalStorage("watching", newWatching);
-        updateLocalStorage("watched", newWatched);
-      }
-    },
-    [watchlist, watching, watched, user, updateLocalStorage]
-  );
+  const {
+    watchlist,
+    watching,
+    watched,
+    handleListUpdate
+  } = useListManager();
 
   const headerLists = useMemo(
     () => ({ watchlist, watching, watched }),
@@ -275,9 +178,6 @@ export default function AboutPage() {
                 highlight={true}
                 shadow={true}
                 shadowScale={1.05}
-                onEnter={() => console.log("Enter")}
-                onLeave={() => console.log("Leave")}
-                onRotate={(x, y) => console.log("Rotate", x, y)}
               >
                 <Card
                   className={`h-full bg-gradient-to-br ${feature.color} flex flex-col items-center justify-center border-border/50 p-6 text-center backdrop-blur-sm transition-colors hover:border-primary/50`}

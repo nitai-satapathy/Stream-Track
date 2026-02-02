@@ -16,7 +16,6 @@ import Link from "next/link";
 interface ProfileMenuProps {
   user: any;
   logout: () => Promise<void>;
-  onProfile: () => void;
   onSettings: () => void;
   onChangelog: () => void;
   onTheme?: () => void;
@@ -25,7 +24,6 @@ interface ProfileMenuProps {
 export function ProfileMenu({
   user,
   logout,
-  onProfile,
   onSettings,
   onChangelog,
   onTheme,
@@ -54,7 +52,7 @@ export function ProfileMenu({
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">

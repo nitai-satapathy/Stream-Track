@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
-    // ignoreBuildErrors: false,
   },
   eslint: {
-    // ignoreDuringBuilds: false,
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
   images: {
     unoptimized: true,
@@ -34,15 +36,12 @@ const nextConfig: NextConfig = {
       ...config.resolve,
       fallback: {
         ...config.resolve?.fallback,
-        // Fixes "require.extensions is not supported" for handlebars
         "handlebars/runtime": require.resolve("handlebars/runtime"),
       }
     }
 
-    // Ignore require.extensions warning
     config.module.exprContextCritical = false;
 
-    // Handle @genkit-ai/firebase not being found (it's likely an optional peer dep)
     config.externals.push({
       "@genkit-ai/firebase": "commonjs @genkit-ai/firebase"
     });

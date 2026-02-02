@@ -16,8 +16,8 @@ import {
   BadgePlus,
   Settings,
   CheckCircle,
-  UserCircle,
   Layers,
+  HelpCircle,
   X,
 } from "lucide-react";
 import {
@@ -51,7 +51,6 @@ import Image from "next/image";
 import { MovieModal } from "./MovieModal";
 import { NotificationModal } from "./NotificationModal";
 import { SettingsModal } from "./SettingsModal";
-import { ProfileModal } from "./ProfileModal";
 import { ThemeModal } from "./ThemeModal";
 
 import { ProfileMenu } from "./ProfileMenu";
@@ -143,7 +142,6 @@ const NavLinks = ({
           {/* Dropdown for Watched */}
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              {/* Use a button for accessibility and to allow focus/active state */}
               <button
                 type="button"
                 className="flex cursor-pointer items-center gap-2 transition-colors hover:text-foreground focus:outline-none"
@@ -152,7 +150,6 @@ const NavLinks = ({
               >
                 <CheckCircle className="h-4 w-4" />
                 Watched
-                {/* Dropdown icon, rotate when open using data-state attribute */}
                 <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
               </button>
             </DropdownMenuTrigger>
@@ -254,18 +251,12 @@ export function Header(props: HeaderProps) {
 
   const safeWatchedMovies = watchedMovies || [];
   const safeWatchedShows = watchedShows || [];
-  // Bulk Add Dialog State
   const [isBulkDialogOpen, setIsBulkDialogOpen] = React.useState(false);
   const [bulkInput, setBulkInput] = React.useState("");
   const [bulkStatus, setBulkStatus] = React.useState<string | null>(null);
   const [bulkLoading, setBulkLoading] = React.useState(false);
-  // Notification Modal State
   const [isNotifOpen, setIsNotifOpen] = React.useState(false);
-  // Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  // Profile Modal State
-  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
-  // Theme Modal State
   const [isThemeOpen, setIsThemeOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
@@ -287,14 +278,10 @@ export function Header(props: HeaderProps) {
               </span>
             </Link>
           </div>
-          {/* Center navigation links */}
           <div className="hidden flex-1 justify-center md:flex">
             <NavLinks user={user} />
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Global Search Icon */}
-
-            {/* Global Search Icon (Hidden on Home Page) */}
             {pathname !== "/" && (
               <Button
                 variant="ghost"
@@ -305,8 +292,6 @@ export function Header(props: HeaderProps) {
                 <Search className="h-5 w-5 md:h-6 md:w-6" />
               </Button>
             )}
-
-            {/* Bulk Add BadgePlus icon */}
             <Button
               variant="ghost"
               size="icon"
@@ -316,7 +301,6 @@ export function Header(props: HeaderProps) {
             >
               <BadgePlus className="h-6 w-6 md:h-8 md:w-8" />
             </Button>
-            {/* Bulk Add Dialog */}
             <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
               <DialogContent>
                 <DialogHeader>
@@ -488,10 +472,6 @@ export function Header(props: HeaderProps) {
               isOpen={isNotifOpen}
               onClose={() => setIsNotifOpen(false)}
             />
-            <ProfileModal
-              isOpen={isProfileOpen}
-              onClose={() => setIsProfileOpen(false)}
-            />
             <ThemeModal
               isOpen={isThemeOpen}
               onClose={() => setIsThemeOpen(false)}
@@ -507,7 +487,6 @@ export function Header(props: HeaderProps) {
               <ProfileMenu
                 user={user}
                 logout={logout}
-                onProfile={() => setIsProfileOpen(true)}
                 onSettings={() => setIsSettingsOpen(true)}
                 onChangelog={() => setIsNotifOpen(true)}
                 onTheme={() => setIsThemeOpen(true)}
@@ -576,27 +555,43 @@ export function Header(props: HeaderProps) {
                       <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span className="text-[10px] sm:text-xs">Settings</span>
                     </Button>
+                    <Button asChild variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={handleMobileNav}>
+                      <Link href="/about">
+                        <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-[10px] sm:text-xs">About</span>
+                      </Link>
+                    </Button>
                     <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsThemeOpen(true)}>
                       <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span className="text-[10px] sm:text-xs">Theme</span>
                     </Button>
-                    {user && (
-                      <Button variant="outline" className="h-12 w-[calc(50%-0.5rem)] rounded-2xl flex flex-col gap-1 hover:border-primary/50 sm:h-14 sm:w-[calc(50%-0.5rem)]" onClick={() => setIsProfileOpen(true)}>
-                        <UserCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="text-[10px] sm:text-xs">Profile</span>
-                      </Button>
-                    )}
                   </div>
 
                   {user && (
-                    <div className="mt-4 sm:mt-8">
+                    <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+                      <div className="h-[1px] w-full bg-border/50" />
+                      <Link
+                        href="/profile"
+                        onClick={handleMobileNav}
+                        className="flex items-center gap-4 w-full p-2 rounded-xl bg-white/5 border border-white/10 transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
+                      >
+                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border border-white/10">
+                          <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User"} />
+                          <AvatarFallback>{user.displayName?.charAt(0) || "U"}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col text-left overflow-hidden">
+                          <span className="font-semibold text-sm sm:text-base truncate">{user.displayName || "User"}</span>
+                          <span className="text-xs text-muted-foreground truncate">{user.email}</span>
+                        </div>
+                      </Link>
+
                       <Button
                         variant="ghost"
                         onClick={() => {
                           handleMobileNav();
                           logout();
                         }}
-                        className="text-red-400 hover:text-red-500 hover:bg-red-500/10"
+                        className="text-red-400 hover:text-red-500 hover:bg-red-500/10 w-full"
                       >
                         <LogOut className="mr-2 h-4 w-4" /> Log Out
                       </Button>

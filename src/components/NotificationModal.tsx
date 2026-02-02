@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,12 +15,7 @@ interface NotificationModalProps {
 }
 
 export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
-  // Use static notifications for now
   const notifications = staticNotifications;
-
-  useEffect(() => {
-    // No-op for now
-  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

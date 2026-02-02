@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { getLists } from "@/actions/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -113,10 +114,18 @@ export default function ProfilePage() {
 
     if (!user) {
         return (
-            <div className="container py-20 text-center">
+            <div className="container flex min-h-[50vh] flex-col items-center justify-center gap-4 py-20 text-center">
                 <h1 className="text-2xl font-bold">
                     Please log in to view your profile.
                 </h1>
+                <div className="flex gap-4">
+                    <Button asChild variant="outline">
+                        <Link href="/">Go Home</Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/login">Log In</Link>
+                    </Button>
+                </div>
             </div>
         );
     }
