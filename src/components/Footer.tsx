@@ -1,6 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Github } from "lucide-react";
+import { FaDiscord } from "react-icons/fa";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Footer = () => {
   const year = new Date().getFullYear();
@@ -48,7 +55,7 @@ const Footer = () => {
         {/* Bottom Bar: Socials & Links */}
         <div className="flex flex-col items-center justify-between gap-6 border-t border-border/40 pt-8 md:flex-row">
           {/* Left: GitHub */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-6">
             <a
               href="https://github.com/nitai-satapathy/Stream-Track"
               target="_blank"
@@ -58,6 +65,24 @@ const Footer = () => {
               <Github className="h-5 w-5 transition-colors group-hover:text-foreground" />
               <span>GitHub</span>
             </a>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a
+                    href="https://discord.gg/HFbKK8CnyY"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-[#5865F2]"
+                  >
+                    <FaDiscord className="h-5 w-5 transition-colors group-hover:text-[#5865F2]" />
+                    <span>Discord</span>
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Join our Community</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           {/* Center: Crafted With */}
