@@ -76,7 +76,7 @@ export default function LegalPage() {
         "For legal matters related to specific content, please contact the hosting websites directly as they have control over their files.",
         "Stream Track operates within legal boundaries and cooperates with legitimate requests when technically feasible.",
       ],
-      email: "",
+      email: "streamtrack1@gmail.com",
     },
   ];
 
