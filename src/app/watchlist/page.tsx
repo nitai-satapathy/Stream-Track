@@ -22,7 +22,8 @@ const WatchlistPage = () => {
     setWatched,
     handleListUpdate,
     isMovieInList,
-    refreshLists
+    refreshLists,
+    updateMovieProgress
   } = useListManager();
 
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -104,7 +105,7 @@ const WatchlistPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header lists={headerLists} onListUpdate={handleListUpdate} />
+      <Header lists={headerLists} onListUpdate={handleListUpdate} updateMovieProgress={updateMovieProgress} />
       <main className="flex-1 p-6 pt-24 md:pt-28">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Your Watchlist</h1>
@@ -184,6 +185,12 @@ const WatchlistPage = () => {
           onListUpdate={handleListUpdate}
           isMovieInList={isMovieInList}
           onMovieSelect={handleMovieClick}
+          userMovie={
+            watching.find((m) => m.id === selectedItem?.id) ||
+            watched.find((m) => m.id === selectedItem?.id) ||
+            watchlist.find((m) => m.id === selectedItem?.id)
+          }
+          updateMovieProgress={updateMovieProgress}
         />
 
         {/* Floating Action Button for Bulk Delete */}

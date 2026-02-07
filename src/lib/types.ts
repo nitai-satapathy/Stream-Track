@@ -23,7 +23,23 @@ export interface Movie {
   runtime?: number;
   number_of_episodes?: number;
   number_of_seasons?: number;
+  seasons?: Season[];
   episode_run_time?: number[];
+  watched_episodes?: WatchedEpisode[];
+}
+export interface WatchedEpisode {
+  season_number: number;
+  episode_number: number;
+}
+
+export interface Season {
+  air_date: string;
+  episode_count: number;
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string;
+  season_number: number;
 }
 
 export interface Genre {

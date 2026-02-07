@@ -16,6 +16,7 @@ export interface ListManager {
     handleListUpdate: (movie: Movie, list: ListType) => Promise<void>;
     isMovieInList: (movieId: number, list: ListType) => boolean;
     refreshLists: () => Promise<void>;
+    updateMovieProgress: (movie: Movie) => Promise<void>;
 }
 
 export function useListManager(): ListManager {
@@ -124,12 +125,37 @@ export function useListManager(): ListManager {
         async (movie: Movie, list: ListType) => {
             // Helper to remove movie from a list
             const removeFromList = (l: Movie[]) => l.filter((m) => m.id !== movie.id);
+
+            // Smart "Add to Watched" Logic
+            let movieToSave = { ...movie };
+            if (list === "watched" && (movie.media_type === "tv" || movie.name)) {
+                try {
+                    // Import dynamically to avoid circular deps if possible, or just use the imported function
+                    const { enrichTVShowWithEpisodes } = await import("@/lib/tmdb");
+                    movieToSave = await enrichTVShowWithEpisodes(movie.id, movie);
+
+                    if (movieToSave.watched_episodes && movieToSave.watched_episodes.length > 0) {
+                        toast({
+                            title: "Marked as Watched",
+                            description: `All ${movieToSave.watched_episodes.length} episodes of ${movie.name || movie.title} marked as watched.`,
+                        });
+                    }
+                } catch (error) {
+                    console.error("Failed to auto-mark episodes", error);
+                }
+            }
+
             // Helper to add movie to a list
-            const addToList = (l: Movie[]) => [...l, movie];
+            const addToList = (l: Movie[]) => {
+                // If it exists, update it. If not, add it.
+                const exists = l.some(m => m.id === movie.id);
+                if (exists) {
+                    return l.map(m => m.id === movie.id ? movieToSave : m);
+                }
+                return [...l, movieToSave];
+            };
 
             // Calculate new states
-            // If target list contains movie, remove it else, add it.
-            // For all other lists, remove the movie.
             const newWatchlist = list === "watchlist"
                 ? (watchlist.some(m => m.id === movie.id) ? removeFromList(watchlist) : addToList(watchlist))
                 : removeFromList(watchlist);
@@ -159,7 +185,7 @@ export function useListManager(): ListManager {
                 updateLocalStorage("watched", newWatched);
             }
         },
-        [watchlist, watching, watched, user, updateLocalStorage]
+        [watchlist, watching, watched, user, updateLocalStorage, toast]
     );
 
     const isMovieInList = useCallback(
@@ -174,6 +200,35 @@ export function useListManager(): ListManager {
         [watchlist, watching, watched]
     );
 
+    const updateMovieProgress = useCallback(
+        async (updatedMovie: Movie) => {
+            const updateList = (list: Movie[]) =>
+                list.map((m) => (m.id === updatedMovie.id ? updatedMovie : m));
+
+            // Update local state for all lists where the movie might exist
+            const newWatchlist = updateList(watchlist);
+            const newWatching = updateList(watching);
+            const newWatched = updateList(watched);
+
+            setWatchlist(newWatchlist);
+            setWatching(newWatching);
+            setWatched(newWatched);
+
+            if (user) {
+                await updateUserLists(user.uid, {
+                    watchlist: newWatchlist,
+                    watching: newWatching,
+                    watched: newWatched,
+                });
+            } else {
+                updateLocalStorage("watchlist", newWatchlist);
+                updateLocalStorage("watching", newWatching);
+                updateLocalStorage("watched", newWatched);
+            }
+        },
+        [watchlist, watching, watched, user, updateLocalStorage]
+    );
+
     return {
         watchlist,
         watching,
@@ -183,6 +238,7 @@ export function useListManager(): ListManager {
         setWatched,
         handleListUpdate,
         isMovieInList,
-        refreshLists: fetchLists
+        refreshLists: fetchLists,
+        updateMovieProgress
     };
 }

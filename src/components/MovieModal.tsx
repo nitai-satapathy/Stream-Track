@@ -36,8 +36,15 @@ import {
 } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 import { FcCalendar } from "react-icons/fc";
-
-type ListType = "watchlist" | "watching" | "watched";
+import { fetchSeasonDetails } from "@/lib/tmdb";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { ListType } from "@/hooks/useListManager";
 
 interface MovieModalProps {
   movieId: number | null;
@@ -47,6 +54,8 @@ interface MovieModalProps {
   onListUpdate: (movie: Movie, list: ListType) => void | Promise<void>;
   isMovieInList: (movieId: number, list: ListType) => boolean;
   onMovieSelect?: (id: number, mediaType: "movie" | "tv") => void;
+  userMovie?: Movie;
+  updateMovieProgress?: (movie: Movie) => Promise<void>;
 }
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
@@ -59,6 +68,8 @@ export function MovieModal({
   onListUpdate,
   isMovieInList,
   onMovieSelect,
+  userMovie,
+  updateMovieProgress
 }: MovieModalProps) {
   const [movie, setMovie] = React.useState<Movie | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -67,10 +78,32 @@ export function MovieModal({
   const [selectedPersonId, setSelectedPersonId] = React.useState<number | null>(null);
   const [history, setHistory] = React.useState<{ movieId: number; mediaType: "movie" | "tv"; personId: number | null }[]>([]);
   const restoringPersonId = React.useRef<number | null>(null);
+  const prevMovieIdRef = React.useRef<number | null>(null);
+
+  // Episode Tracking State
+  const [seasons, setSeasons] = React.useState<any[]>([]);
+  const [selectedSeason, setSelectedSeason] = React.useState<number>(1);
+  const [currentSeasonEpisodes, setCurrentSeasonEpisodes] = React.useState<any[]>([]);
+  const [loadingEpisodes, setLoadingEpisodes] = React.useState(false);
+  // Tab State with Persistence
+  const [activeTab, setActiveTabState] = React.useState("overview");
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem("movieModalActiveTab", tab);
+    }
+  };
+
   const { toast } = useToast();
 
   React.useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      const savedTab = sessionStorage.getItem("movieModalActiveTab");
+      if (savedTab) {
+        setActiveTabState(savedTab);
+      }
+    } else {
       setHistory([]);
       setSelectedPersonId(null);
     }
@@ -85,6 +118,14 @@ export function MovieModal({
     }
 
     if (movieId && mediaType) {
+      if (prevMovieIdRef.current !== movieId) {
+        setActiveTabState("overview");
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem("movieModalActiveTab", "overview");
+        }
+        prevMovieIdRef.current = movieId;
+      }
+
       const getMovieDetails = async () => {
         setIsLoading(true);
         setOmdb(null);
@@ -131,13 +172,185 @@ export function MovieModal({
         }
       };
       getMovieDetails();
-    } else {
       setMovie(null);
       setOmdb(null);
       setCast([]);
       setSelectedPersonId(null);
+      setSeasons([]);
+      setSelectedSeason(1);
+      setCurrentSeasonEpisodes([]);
     }
   }, [movieId, mediaType, onClose, toast]);
+
+  // Fetch seasons/episodes when movie/mediaType changes or tab selected
+  React.useEffect(() => {
+    if (movie && mediaType === 'tv') {
+      // Populate seasons dropdown
+      if (movie.number_of_seasons) {
+        const s = Array.from({ length: movie.number_of_seasons }, (_, i) => i + 1);
+        setSeasons(s);
+      }
+    }
+  }, [movie, mediaType]);
+
+  // Fetch episodes for selected season
+  React.useEffect(() => {
+    const getEpisodes = async () => {
+      if (
+        movieId &&
+        mediaType === 'tv' &&
+        selectedSeason &&
+        movie &&
+        movie.number_of_seasons &&
+        selectedSeason <= movie.number_of_seasons
+      ) {
+        setLoadingEpisodes(true);
+        try {
+          const seasonData = await fetchSeasonDetails(movieId, selectedSeason);
+          setCurrentSeasonEpisodes(seasonData.episodes || []);
+        } catch (error) {
+          console.error("Failed to fetch episodes", error);
+        } finally {
+          setLoadingEpisodes(false);
+        }
+      }
+    };
+    getEpisodes();
+  }, [movieId, mediaType, selectedSeason, movie]);
+
+  const handleEpisodeToggle = async (seasonNum: number, episodeNum: number) => {
+    console.log("Toggle Episode:", seasonNum, episodeNum);
+
+    if (!userMovie) {
+      console.log("User movie not found");
+      toast({
+        title: "Add to Watching",
+        description: "Please add this show to your Watching list to track episodes.",
+      });
+      return;
+    }
+
+    if (!updateMovieProgress) {
+      console.log("updateMovieProgress not found");
+      return;
+    }
+
+    let newWatchedEpisodes = [...(userMovie.watched_episodes || [])];
+    const existingIndex = newWatchedEpisodes.findIndex(
+      e => e.season_number === seasonNum && e.episode_number === episodeNum
+    );
+
+    if (existingIndex > -1) {
+      newWatchedEpisodes.splice(existingIndex, 1);
+    } else {
+      newWatchedEpisodes.push({ season_number: seasonNum, episode_number: episodeNum });
+    }
+
+    const updatedMovie: Movie = {
+      ...userMovie,
+      watched_episodes: newWatchedEpisodes
+    };
+
+    try {
+      await updateMovieProgress(updatedMovie);
+      console.log("Progress updated successfully");
+    } catch (e) {
+      console.error("Failed to update progress", e);
+      toast({
+        title: "Error",
+        description: "Failed to update episode progress.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleMarkSeasonWatched = async () => {
+    if (!userMovie || !updateMovieProgress || !currentSeasonEpisodes.length) return;
+
+    const newWatchedEpisodes = [...(userMovie.watched_episodes || [])];
+    let addedCount = 0;
+
+    currentSeasonEpisodes.forEach(episode => {
+      const exists = newWatchedEpisodes.some(
+        e => e.season_number === episode.season_number && e.episode_number === episode.episode_number
+      );
+
+      if (!exists) {
+        newWatchedEpisodes.push({
+          season_number: episode.season_number,
+          episode_number: episode.episode_number
+        });
+        addedCount++;
+      }
+    });
+
+    if (addedCount === 0) {
+      toast({
+        title: "No new episodes",
+        description: "All episodes in this season are already watched.",
+      });
+      return;
+    }
+
+    const updatedMovie: Movie = {
+      ...userMovie,
+      watched_episodes: newWatchedEpisodes
+    };
+
+    try {
+      await updateMovieProgress(updatedMovie);
+      toast({
+        title: "Season Watched",
+        description: `Marked ${addedCount} episodes as watched.`,
+      });
+    } catch (e) {
+      console.error("Failed to update season progress", e);
+      toast({
+        title: "Error",
+        description: "Failed to update season progress.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleClearSeasonWatched = async () => {
+    if (!userMovie || !updateMovieProgress || !currentSeasonEpisodes.length) return;
+
+    // Filter out episodes from the current season
+    const newWatchedEpisodes = (userMovie.watched_episodes || []).filter(
+      e => e.season_number !== selectedSeason
+    );
+
+    const removedCount = (userMovie.watched_episodes || []).length - newWatchedEpisodes.length;
+
+    if (removedCount === 0) {
+      toast({
+        title: "No episodes watched",
+        description: "No episodes to clear for this season.",
+      });
+      return;
+    }
+
+    const updatedMovie: Movie = {
+      ...userMovie,
+      watched_episodes: newWatchedEpisodes
+    };
+
+    try {
+      await updateMovieProgress(updatedMovie);
+      toast({
+        title: "Season Cleared",
+        description: `Cleared progress for ${removedCount} episodes.`,
+      });
+    } catch (e) {
+      console.error("Failed to clear season progress", e);
+      toast({
+        title: "Error",
+        description: "Failed to clear season progress.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const trailer = movie?.videos?.results.find(
     (video) => video.site === "YouTube" && video.type === "Trailer"
@@ -253,12 +466,15 @@ export function MovieModal({
               </DialogTitle>
             </DialogHeader>
 
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="cast">Cast</TabsTrigger>
-                <TabsTrigger value="videos">Videos</TabsTrigger>
-                <TabsTrigger value="related">Related</TabsTrigger>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className={`grid w-full h-auto mb-4 ${mediaType === 'tv' ? 'grid-cols-5' : 'grid-cols-4'}`}>
+                <TabsTrigger value="overview" className="text-[13px] sm:text-sm px-1 py-2 h-auto sm:py-1.5">Overview</TabsTrigger>
+                {mediaType === 'tv' && (
+                  <TabsTrigger value="episodes" className="text-[13px] sm:text-sm px-1 py-2 h-auto sm:py-1.5">Episodes</TabsTrigger>
+                )}
+                <TabsTrigger value="cast" className="text-[13px] sm:text-sm px-1 py-2 h-auto sm:py-1.5">Cast</TabsTrigger>
+                <TabsTrigger value="videos" className="text-[13px] sm:text-sm px-1 py-2 h-auto sm:py-1.5">Videos</TabsTrigger>
+                <TabsTrigger value="related" className="text-[13px] sm:text-sm px-1 py-2 h-auto sm:py-1.5">Related</TabsTrigger>
               </TabsList>
 
               {/* OVERVIEW TAB */}
@@ -368,6 +584,84 @@ export function MovieModal({
                   </Button>
                 </div>
               </TabsContent>
+
+              {/* EPISODES TAB */}
+              {mediaType === 'tv' && (
+                <TabsContent value="episodes" className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="flex items-center justify-between gap-4">
+                    <Select
+                      value={selectedSeason.toString()}
+                      onValueChange={(val) => setSelectedSeason(parseInt(val))}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select Season" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {seasons.map((s) => (
+                          <SelectItem key={s} value={s.toString()}>
+                            Season {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleClearSeasonWatched}
+                        disabled={!userMovie || loadingEpisodes || currentSeasonEpisodes.length === 0}
+                      >
+                        Clear
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={handleMarkSeasonWatched}
+                        disabled={!userMovie || loadingEpisodes || currentSeasonEpisodes.length === 0}
+                      >
+                        Mark All
+                      </Button>
+                    </div>
+                  </div>
+
+                  <ScrollArea className="h-[400px] w-full pr-4">
+                    {loadingEpisodes ? (
+                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                        {Array.from({ length: 20 }).map((_, i) => (
+                          <Skeleton key={i} className="aspect-square w-full rounded-md" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                        {currentSeasonEpisodes.map((episode) => {
+                          const isWatched = userMovie?.watched_episodes?.some(
+                            e => e.season_number === episode.season_number && e.episode_number === episode.episode_number
+                          );
+
+                          return (
+                            <button
+                              key={episode.id}
+                              onClick={() => handleEpisodeToggle(episode.season_number, episode.episode_number)}
+                              title={`${episode.episode_number}. ${episode.name}`}
+                              className={`
+                                aspect-square flex items-center justify-center rounded-md text-sm font-medium transition-all
+                                hover:scale-105 active:scale-95 border
+                                ${isWatched
+                                  ? 'bg-green-600 border-green-700 text-white hover:bg-green-500'
+                                  : 'bg-secondary/50 border-transparent hover:bg-secondary hover:border-primary/20 text-foreground'
+                                }
+                              `}
+                            >
+                              {episode.episode_number}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+              )}
 
               {/* CAST TAB */}
               <TabsContent value="cast" className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">

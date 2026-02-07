@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import { Header } from "@/components/Header";
 import { Plus, Funnel } from "lucide-react";
 import { FilterSortModal } from "@/components/FilterSortModal";
@@ -61,7 +62,8 @@ export default function WatchedTvShowsPage() {
     setWatched,
     handleListUpdate,
     isMovieInList,
-    refreshLists // used in bulk delete
+    refreshLists,
+    updateMovieProgress
   } = useListManager();
 
   const [selectedItem, setSelectedItem] = React.useState<{
@@ -186,6 +188,7 @@ export default function WatchedTvShowsPage() {
       <Header
         lists={headerLists}
         onListUpdate={handleListUpdate}
+        updateMovieProgress={updateMovieProgress}
         watchedMovies={[]}
         setWatchedMovies={() => { }}
         watchedShows={watched.filter(
@@ -254,14 +257,57 @@ export default function WatchedTvShowsPage() {
         )}
 
         {/* Floating Action Button for Bulk Delete */}
+        {/* Floating Action Button for Bulk Delete */}
         {isEditing && baseSelectedIds.length > 0 && (
-          <div className="fixed bottom-8 right-8 z-50">
+          <div className="fixed bottom-8 right-8 z-50 flex gap-4">
+            <button
+              onClick={async () => {
+                let updatedWatched = [...watched];
+
+                // Show loading toast? Or just do it.
+
+                const processUpdates = baseSelectedIds.map(async (id) => {
+                  const movieIndex = updatedWatched.findIndex(m => m.id === id);
+                  if (movieIndex === -1) return;
+
+                  const movie = updatedWatched[movieIndex];
+                  if (movie.media_type !== 'tv' && !movie.name) return;
+
+                  try {
+                    const { enrichTVShowWithEpisodes } = await import("@/lib/tmdb");
+                    const enriched = await enrichTVShowWithEpisodes(id, movie);
+                    updatedWatched[movieIndex] = enriched;
+                  } catch (e) {
+                    console.error("Failed to update", movie.name, e);
+                  }
+                });
+
+                await Promise.all(processUpdates);
+
+                setWatched(updatedWatched);
+                if (user) {
+                  await updateUserLists(user.uid, { watchlist, watching, watched: updatedWatched });
+                } else {
+                  localStorage.setItem("watched", JSON.stringify(updatedWatched));
+                }
+
+                setIsEditing(false);
+                setBaseSelectedIds([]);
+                // await refreshLists(); // Optional, local state is already updated
+              }}
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-transform hover:scale-110 active:scale-95"
+              aria-label="Mark Selected as Watched"
+              title="Mark selected as fully watched"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
+            </button>
+
             <button
               onClick={handleBulkDelete}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-lg transition-transform hover:scale-110 active:scale-95"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-transform hover:scale-110 active:scale-95"
               aria-label="Confirm Delete"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check"><path d="M20 6 9 17l-5-5" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
             </button>
           </div>
         )}
@@ -274,6 +320,12 @@ export default function WatchedTvShowsPage() {
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
         onMovieSelect={handleMovieClick}
+        userMovie={
+          watching.find((m) => m.id === selectedItem?.id) ||
+          watched.find((m) => m.id === selectedItem?.id) ||
+          watchlist.find((m) => m.id === selectedItem?.id)
+        }
+        updateMovieProgress={updateMovieProgress}
       />
     </div>
   );

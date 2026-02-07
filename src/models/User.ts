@@ -18,6 +18,14 @@ const MovieSchema = new Schema(
     number_of_episodes: Number,
     number_of_seasons: Number,
     episode_run_time: [Number],
+    watched_episodes: [
+      {
+        season_number: Number,
+        episode_number: Number,
+        _id: false,
+      },
+    ],
+
   },
   { _id: false }
 );

@@ -45,12 +45,18 @@ export const fetchMovieDetails = async (
   movieId: number,
   mediaType: "movie" | "tv"
 ): Promise<Movie> => {
-  const response = await tmdbApi.get<Movie>(`/${mediaType}/${movieId}`, {
+  const response = await tmdbApi.get<any>(`/${mediaType}/${movieId}`, {
     params: {
       append_to_response: "videos,recommendations",
     },
   });
-  return response.data;
+
+  const data = response.data;
+  return data;
+};
+
+export const fetchTVShowDetails = async (tvId: number): Promise<Movie> => {
+  return fetchMovieDetails(tvId, "tv");
 };
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
@@ -117,4 +123,47 @@ export const fetchPersonDetails = async (personId: number): Promise<import("./ty
     },
   });
   return response.data;
+};
+
+export const fetchSeasonDetails = async (
+  tvId: number,
+  seasonNumber: number
+): Promise<any> => {
+  try {
+    const response = await tmdbApi.get(`/tv/${tvId}/season/${seasonNumber}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching season details for TV ID: ${tvId}, Season: ${seasonNumber}`, error);
+    throw error;
+  }
+};
+// Helper to auto-mark all episodes as watched
+export const enrichTVShowWithEpisodes = async (
+  showId: number,
+  baseMovie: Movie
+): Promise<Movie> => {
+  try {
+    const fullDetails = await fetchTVShowDetails(showId);
+    if (fullDetails.seasons) {
+      const allWatchedEpisodes: { season_number: number; episode_number: number }[] = [];
+      fullDetails.seasons.forEach((season: any) => {
+        if (season.season_number > 0 && season.episode_count) {
+          for (let i = 1; i <= season.episode_count; i++) {
+            allWatchedEpisodes.push({
+              season_number: season.season_number,
+              episode_number: i,
+            });
+          }
+        }
+      });
+      return {
+        ...baseMovie,
+        ...fullDetails,
+        watched_episodes: allWatchedEpisodes,
+      };
+    }
+  } catch (e) {
+    console.error("Failed to enrich TV show", e);
+  }
+  return baseMovie;
 };

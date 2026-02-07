@@ -59,7 +59,8 @@ export default function WatchedMoviesPage() {
     setWatching,
     setWatched,
     handleListUpdate,
-    isMovieInList
+    isMovieInList,
+    updateMovieProgress
   } = useListManager();
 
   const [selectedItem, setSelectedItem] = React.useState<{
@@ -183,6 +184,7 @@ export default function WatchedMoviesPage() {
       <Header
         lists={headerLists}
         onListUpdate={handleListUpdate}
+        updateMovieProgress={updateMovieProgress}
         watchedMovies={watched.filter(
           (movie) =>
             movie.media_type === "movie" || (!movie.media_type && movie.title)
@@ -275,6 +277,12 @@ export default function WatchedMoviesPage() {
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
         onMovieSelect={handleMovieClick}
+        userMovie={
+          watching.find((m) => m.id === selectedItem?.id) ||
+          watched.find((m) => m.id === selectedItem?.id) ||
+          watchlist.find((m) => m.id === selectedItem?.id)
+        }
+        updateMovieProgress={updateMovieProgress}
       />
     </div>
   );

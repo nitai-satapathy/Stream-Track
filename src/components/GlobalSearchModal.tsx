@@ -17,6 +17,7 @@ interface GlobalSearchModalProps {
     isOpen: boolean;
     onClose: () => void;
     onListUpdate: (movie: Movie, list: ListType) => Promise<void>;
+    updateMovieProgress?: (movie: Movie) => Promise<void>;
     lists?: {
         watchlist: Movie[];
         watching: Movie[];
@@ -24,8 +25,9 @@ interface GlobalSearchModalProps {
     };
 }
 
-export function GlobalSearchModal({ isOpen, onClose, onListUpdate, lists }: GlobalSearchModalProps) {
+export function GlobalSearchModal({ isOpen, onClose, onListUpdate, updateMovieProgress, lists }: GlobalSearchModalProps) {
     const router = useRouter();
+    // ... existing state ...
     const [searchQuery, setSearchQuery] = React.useState("");
     const [searchResults, setSearchResults] = React.useState<Movie[]>([]);
     const [isSearchLoading, setIsSearchLoading] = React.useState(false);
@@ -109,6 +111,14 @@ export function GlobalSearchModal({ isOpen, onClose, onListUpdate, lists }: Glob
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isOpen, closeModal]);
 
+    // Derive userMovie
+    const userMovie = React.useMemo(() => {
+        if (!selectedItem || !lists) return undefined;
+        return lists.watching.find(m => m.id === selectedItem.id) ||
+            lists.watched.find(m => m.id === selectedItem.id) ||
+            lists.watchlist.find(m => m.id === selectedItem.id);
+    }, [selectedItem, lists]);
+
     if (!isOpen || !mounted) return null;
 
     return createPortal(
@@ -153,6 +163,8 @@ export function GlobalSearchModal({ isOpen, onClose, onListUpdate, lists }: Glob
                     onListUpdate={onListUpdate}
                     isMovieInList={isMovieInList}
                     onMovieSelect={handleResultClick}
+                    userMovie={userMovie}
+                    updateMovieProgress={updateMovieProgress}
                 />
             </div>
         </div>,

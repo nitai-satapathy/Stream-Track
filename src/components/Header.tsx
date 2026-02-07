@@ -27,6 +27,7 @@ interface UserLists {
 interface HeaderProps {
   lists: UserLists;
   onListUpdate?: (movie: Movie, list: ListType) => Promise<void>;
+  updateMovieProgress?: (movie: Movie) => Promise<void>;
   onBulkAdd?: (added: {
     movies: Movie[];
     shows: Movie[];
@@ -42,6 +43,7 @@ export function Header(props: HeaderProps) {
   const {
     lists,
     onListUpdate,
+    updateMovieProgress,
     setWatchedMovies,
     setWatchedShows,
     watchedMovies,
@@ -130,6 +132,7 @@ export function Header(props: HeaderProps) {
               onClose={() => setIsSearchOpen(false)}
               lists={lists}
               onListUpdate={safeOnListUpdate}
+              updateMovieProgress={updateMovieProgress}
             />
 
             <div className="hidden items-center gap-2 sm:flex">

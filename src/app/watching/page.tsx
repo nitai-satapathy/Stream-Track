@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+
+
 import { Header } from "@/components/Header";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
@@ -9,11 +11,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
 import { EmptyState } from "@/components/EmptyState";
 import { useListManager } from "@/hooks/useListManager";
+import { useToast } from "@/hooks/use-toast";
 
 type ListType = "watchlist" | "watching" | "watched";
 
 export default function WatchingPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const {
     watchlist,
     watching,
@@ -22,7 +26,8 @@ export default function WatchingPage() {
     setWatching,
     setWatched,
     handleListUpdate,
-    isMovieInList
+    isMovieInList,
+    updateMovieProgress
   } = useListManager();
 
   const [selectedItem, setSelectedItem] = React.useState<{
@@ -104,7 +109,7 @@ export default function WatchingPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header lists={headerLists} onListUpdate={handleListUpdate} />
+      <Header lists={headerLists} onListUpdate={handleListUpdate} updateMovieProgress={updateMovieProgress} />
       <main className="flex-1 space-y-8 py-8 pt-24 md:pt-28">
         <div className="container flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
@@ -160,13 +165,77 @@ export default function WatchingPage() {
 
         {/* Floating Action Button for Bulk Delete */}
         {isEditing && baseSelectedIds.length > 0 && (
-          <div className="fixed bottom-8 right-8 z-50">
+          <div className="fixed bottom-8 right-8 z-50 flex gap-4">
+            <button
+              onClick={async () => {
+
+
+                // We are moving FROM watching TO watched
+                let newWatching = [...watching];
+                let newWatched = [...watched];
+
+                const processUpdates = baseSelectedIds.map(async (id) => {
+                  // Find in watching list
+                  const movieIndex = newWatching.findIndex(m => m.id === id);
+                  if (movieIndex === -1) return;
+
+                  const movie = newWatching[movieIndex];
+                  // Remove from watching
+                  // Note: We need to filter later or handle index shifts. 
+                  // Easier to just get the movie object here and filter later.
+
+                  if (movie.media_type !== 'tv' && !movie.name) {
+                    // If not TV, just move it? Or ignore?
+                    // Let's assume just move it for now, but focus on TV smarts
+                    newWatched.push(movie);
+                    return;
+                  }
+
+                  try {
+                    const { enrichTVShowWithEpisodes } = await import("@/lib/tmdb");
+                    const enriched = await enrichTVShowWithEpisodes(id, movie);
+                    newWatched.push(enriched);
+                  } catch (e) {
+                    console.error("Failed to update", movie.name, e);
+                    newWatched.push(movie); // Fallback: move even if fetch fails
+                  }
+                });
+
+                await Promise.all(processUpdates);
+
+                // Remove processed IDs from Watching
+                newWatching = newWatching.filter(m => !baseSelectedIds.includes(m.id));
+
+                setWatching(newWatching);
+                setWatched(newWatched);
+
+                if (user) {
+                  await updateUserLists(user.uid, { watchlist, watching: newWatching, watched: newWatched });
+                } else {
+                  localStorage.setItem("watching", JSON.stringify(newWatching));
+                  localStorage.setItem("watched", JSON.stringify(newWatched));
+                }
+
+                setIsEditing(false);
+                setBaseSelectedIds([]);
+                toast({
+                  title: "Moved to Watched",
+                  description: `${baseSelectedIds.length} items moved to Watched history.`,
+                });
+              }}
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-transform hover:scale-110 active:scale-95"
+              aria-label="Mark Selected as Watched"
+              title="Move selected to Watched"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle-2"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
+            </button>
+
             <button
               onClick={handleBulkDelete}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-lg transition-transform hover:scale-110 active:scale-95"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-transform hover:scale-110 active:scale-95"
               aria-label="Confirm Delete"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check"><path d="M20 6 9 17l-5-5" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
             </button>
           </div>
         )}
@@ -179,6 +248,12 @@ export default function WatchingPage() {
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
         onMovieSelect={handleMovieClick}
+        userMovie={
+          watching.find((m) => m.id === selectedItem?.id) ||
+          watched.find((m) => m.id === selectedItem?.id) ||
+          watchlist.find((m) => m.id === selectedItem?.id)
+        }
+        updateMovieProgress={updateMovieProgress}
       />
     </div>
   );

@@ -75,7 +75,8 @@ export default function Home() {
     setWatching,
     setWatched,
     handleListUpdate,
-    isMovieInList
+    isMovieInList,
+    updateMovieProgress
   } = useListManager();
 
   // Instant Search Effect
@@ -192,7 +193,7 @@ export default function Home() {
   return (
 
     <div className="flex min-h-screen flex-col relative bg-background selection:bg-primary/30">
-      <Header lists={headerLists} onListUpdate={handleListUpdate} />
+      <Header lists={headerLists} onListUpdate={handleListUpdate} updateMovieProgress={updateMovieProgress} />
 
       {/* LightRays Background */}
       <div className="absolute top-0 left-0 w-full h-[600px] md:h-[800px] pointer-events-none z-0 overflow-hidden">
@@ -339,6 +340,12 @@ export default function Home() {
         onListUpdate={handleListUpdate}
         isMovieInList={isMovieInList}
         onMovieSelect={handleMovieClick}
+        userMovie={
+          watching.find((m) => m.id === selectedItem?.id) ||
+          watched.find((m) => m.id === selectedItem?.id) ||
+          watchlist.find((m) => m.id === selectedItem?.id)
+        }
+        updateMovieProgress={updateMovieProgress}
       />
     </div>
   );

@@ -66,8 +66,17 @@ export function BulkAddModal({
                         if (!watchedMovies.some((m) => m.id === item.id))
                             foundMovies.push(item);
                     } else if (item.media_type === "tv" || item.name) {
-                        if (!watchedShows.some((s) => s.id === item.id))
-                            foundShows.push(item);
+                        if (!watchedShows.some((s) => s.id === item.id)) {
+                            // Smart Logic: Fetch details and mark all episodes
+                            try {
+                                const { enrichTVShowWithEpisodes } = await import("@/lib/tmdb");
+                                const enriched = await enrichTVShowWithEpisodes(item.id, item);
+                                foundShows.push(enriched);
+                            } catch (e) {
+                                console.error("Failed to fetch details for smart add", item.name, e);
+                                foundShows.push(item);
+                            }
+                        }
                     } else {
                         notFound.push(title);
                     }

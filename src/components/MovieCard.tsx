@@ -1,4 +1,5 @@
 import Image from "next/image";
+import * as React from "react";
 import type { Movie } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, Check, X } from "lucide-react";
