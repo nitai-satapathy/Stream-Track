@@ -74,6 +74,10 @@ const RecommendationPage = () => {
   const [loadingWatchedTV, setLoadingWatchedTV] = useState(false);
   const [loadingWatchlistMovies, setLoadingWatchlistMovies] = useState(false);
   const [loadingWatchlistTV, setLoadingWatchlistTV] = useState(false);
+  const [errorWatchedMovies, setErrorWatchedMovies] = useState<string | null>(null);
+  const [errorWatchedTV, setErrorWatchedTV] = useState<string | null>(null);
+  const [errorWatchlistMovies, setErrorWatchlistMovies] = useState<string | null>(null);
+  const [errorWatchlistTV, setErrorWatchlistTV] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState({
     watchedMovies: false,
     watchedTV: false,
@@ -114,48 +118,92 @@ const RecommendationPage = () => {
     const watchedMovies = watched.filter(
       (m) => m.media_type === "movie" || (!m.media_type && m.title)
     );
-    setLoadingWatchedMovies(true);
-    fetchRecs(
-      watchedMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
-      "movie",
-      "watchedMovies"
-    )
-      .then(setRecWatchedMovies)
-      .finally(() => setLoadingWatchedMovies(false));
+    if (watchedMovies.length > 0) {
+      setLoadingWatchedMovies(true);
+      setErrorWatchedMovies(null);
+      fetchRecs(
+        watchedMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
+        "movie",
+        "watchedMovies"
+      )
+        .then((recs) => {
+          setRecWatchedMovies(recs);
+          setErrorWatchedMovies(null);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch recommendations for watched movies:", error);
+          setErrorWatchedMovies("Unable to generate recommendations. Please try again later.");
+          setRecWatchedMovies([]);
+        })
+        .finally(() => setLoadingWatchedMovies(false));
+    }
     // Watched TV Shows
     const watchedTV = watched.filter((m) => m.media_type === "tv" || m.name);
-    setLoadingWatchedTV(true);
-    fetchRecs(
-      watchedTV.map((m) => m.name || m.title).filter(Boolean) as string[],
-      "tv",
-      "watchedTV"
-    )
-      .then(setRecWatchedTV)
-      .finally(() => setLoadingWatchedTV(false));
+    if (watchedTV.length > 0) {
+      setLoadingWatchedTV(true);
+      setErrorWatchedTV(null);
+      fetchRecs(
+        watchedTV.map((m) => m.name || m.title).filter(Boolean) as string[],
+        "tv",
+        "watchedTV"
+      )
+        .then((recs) => {
+          setRecWatchedTV(recs);
+          setErrorWatchedTV(null);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch recommendations for watched TV:", error);
+          setErrorWatchedTV("Unable to generate recommendations. Please try again later.");
+          setRecWatchedTV([]);
+        })
+        .finally(() => setLoadingWatchedTV(false));
+    }
     // Watchlist Movies
     const watchlistMovies = watchlist.filter(
       (m) => m.media_type === "movie" || (!m.media_type && m.title)
     );
-    setLoadingWatchlistMovies(true);
-    fetchRecs(
-      watchlistMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
-      "movie",
-      "watchlistMovies"
-    )
-      .then(setRecWatchlistMovies)
-      .finally(() => setLoadingWatchlistMovies(false));
+    if (watchlistMovies.length > 0) {
+      setLoadingWatchlistMovies(true);
+      setErrorWatchlistMovies(null);
+      fetchRecs(
+        watchlistMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
+        "movie",
+        "watchlistMovies"
+      )
+        .then((recs) => {
+          setRecWatchlistMovies(recs);
+          setErrorWatchlistMovies(null);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch recommendations for watchlist movies:", error);
+          setErrorWatchlistMovies("Unable to generate recommendations. Please try again later.");
+          setRecWatchlistMovies([]);
+        })
+        .finally(() => setLoadingWatchlistMovies(false));
+    }
     // Watchlist TV Shows
     const watchlistTV = watchlist.filter(
       (m) => m.media_type === "tv" || m.name
     );
-    setLoadingWatchlistTV(true);
-    fetchRecs(
-      watchlistTV.map((m) => m.name || m.title).filter(Boolean) as string[],
-      "tv",
-      "watchlistTV"
-    )
-      .then(setRecWatchlistTV)
-      .finally(() => setLoadingWatchlistTV(false));
+    if (watchlistTV.length > 0) {
+      setLoadingWatchlistTV(true);
+      setErrorWatchlistTV(null);
+      fetchRecs(
+        watchlistTV.map((m) => m.name || m.title).filter(Boolean) as string[],
+        "tv",
+        "watchlistTV"
+      )
+        .then((recs) => {
+          setRecWatchlistTV(recs);
+          setErrorWatchlistTV(null);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch recommendations for watchlist TV:", error);
+          setErrorWatchlistTV("Unable to generate recommendations. Please try again later.");
+          setRecWatchlistTV([]);
+        })
+        .finally(() => setLoadingWatchlistTV(false));
+    }
   }, [watchlist, watched]); // Added missing dependencies
 
   // Manual refresh handlers
@@ -310,6 +358,29 @@ const RecommendationPage = () => {
                     movies={filterRecs(recWatchedMovies)}
                     onMovieClick={handleMovieClick}
                     isLoading={loadingWatchedMovies}
+                    error={errorWatchedMovies}
+                    onRetry={() => {
+                      const watchedMovies = watched.filter(
+                        (m) => m.media_type === "movie" || (!m.media_type && m.title)
+                      );
+                      setLoadingWatchedMovies(true);
+                      setErrorWatchedMovies(null);
+                      fetchRecs(
+                        watchedMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
+                        "movie",
+                        "watchedMovies",
+                        true
+                      )
+                        .then((recs) => {
+                          setRecWatchedMovies(recs);
+                          setErrorWatchedMovies(null);
+                        })
+                        .catch((error) => {
+                          console.error("Failed to fetch recommendations:", error);
+                          setErrorWatchedMovies("Unable to generate recommendations. Please try again later.");
+                        })
+                        .finally(() => setLoadingWatchedMovies(false));
+                    }}
                     horizontal={true}
                     onRefresh={() =>
                       handleRefresh(
@@ -336,6 +407,27 @@ const RecommendationPage = () => {
                   movies={filterRecs(recWatchedTV)}
                   onMovieClick={handleMovieClick}
                   isLoading={loadingWatchedTV}
+                  error={errorWatchedTV}
+                  onRetry={() => {
+                    const watchedTV = watched.filter((m) => m.media_type === "tv" || m.name);
+                    setLoadingWatchedTV(true);
+                    setErrorWatchedTV(null);
+                    fetchRecs(
+                      watchedTV.map((m) => m.name || m.title).filter(Boolean) as string[],
+                      "tv",
+                      "watchedTV",
+                      true
+                    )
+                      .then((recs) => {
+                        setRecWatchedTV(recs);
+                        setErrorWatchedTV(null);
+                      })
+                      .catch((error) => {
+                        console.error("Failed to fetch recommendations:", error);
+                        setErrorWatchedTV("Unable to generate recommendations. Please try again later.");
+                      })
+                      .finally(() => setLoadingWatchedTV(false));
+                  }}
                   horizontal={true}
                   onRefresh={() =>
                     handleRefresh(
@@ -360,6 +452,29 @@ const RecommendationPage = () => {
                     movies={filterRecs(recWatchlistMovies)}
                     onMovieClick={handleMovieClick}
                     isLoading={loadingWatchlistMovies}
+                    error={errorWatchlistMovies}
+                    onRetry={() => {
+                      const watchlistMovies = watchlist.filter(
+                        (m) => m.media_type === "movie" || (!m.media_type && m.title)
+                      );
+                      setLoadingWatchlistMovies(true);
+                      setErrorWatchlistMovies(null);
+                      fetchRecs(
+                        watchlistMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
+                        "movie",
+                        "watchlistMovies",
+                        true
+                      )
+                        .then((recs) => {
+                          setRecWatchlistMovies(recs);
+                          setErrorWatchlistMovies(null);
+                        })
+                        .catch((error) => {
+                          console.error("Failed to fetch recommendations:", error);
+                          setErrorWatchlistMovies("Unable to generate recommendations. Please try again later.");
+                        })
+                        .finally(() => setLoadingWatchlistMovies(false));
+                    }}
                     horizontal={true}
                     onRefresh={() =>
                       handleRefresh(
@@ -386,6 +501,29 @@ const RecommendationPage = () => {
                   movies={filterRecs(recWatchlistTV)}
                   onMovieClick={handleMovieClick}
                   isLoading={loadingWatchlistTV}
+                  error={errorWatchlistTV}
+                  onRetry={() => {
+                    const watchlistTV = watchlist.filter(
+                      (m) => m.media_type === "tv" || m.name
+                    );
+                    setLoadingWatchlistTV(true);
+                    setErrorWatchlistTV(null);
+                    fetchRecs(
+                      watchlistTV.map((m) => m.name || m.title).filter(Boolean) as string[],
+                      "tv",
+                      "watchlistTV",
+                      true
+                    )
+                      .then((recs) => {
+                        setRecWatchlistTV(recs);
+                        setErrorWatchlistTV(null);
+                      })
+                      .catch((error) => {
+                        console.error("Failed to fetch recommendations:", error);
+                        setErrorWatchlistTV("Unable to generate recommendations. Please try again later.");
+                      })
+                      .finally(() => setLoadingWatchlistTV(false));
+                  }}
                   horizontal={true}
                   onRefresh={() =>
                     handleRefresh(

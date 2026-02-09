@@ -14,6 +14,7 @@ import {
 
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
+import { SimpleLoading } from "@/components/SimpleLoading";
 import { FilterSortModal } from "@/components/FilterSortModal";
 import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,7 +61,8 @@ export default function WatchedMoviesPage() {
     setWatched,
     handleListUpdate,
     isMovieInList,
-    updateMovieProgress
+    updateMovieProgress,
+    isLoading
   } = useListManager();
 
   const [selectedItem, setSelectedItem] = React.useState<{
@@ -243,7 +245,9 @@ export default function WatchedMoviesPage() {
             )}
           </div>
         </div>
-        {watchedMovies.length > 0 ? (
+        {isLoading ? (
+          <SimpleLoading message="Loading your watched movies..." />
+        ) : watchedMovies.length > 0 ? (
           <MovieRow
             movies={watchedMovies}
             onMovieClick={handleMovieClick}

@@ -7,6 +7,7 @@ import { getLists } from "@/actions/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Clapperboard, TvMinimalPlay, ListPlus, Edit } from "lucide-react";
 import { ProfileModal } from "@/components/ProfileModal";
 import { GenreChart } from "@/components/profile/GenreChart";
@@ -163,52 +164,71 @@ export default function ProfilePage() {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                Watched Movies
-                            </CardTitle>
-                            <Clapperboard className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {isLoadingStats ? "-" : watchedMoviesCount}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Lifetime movies watched
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                Watched TV Shows
-                            </CardTitle>
-                            <TvMinimalPlay className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {isLoadingStats ? "-" : watchedTvCount}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Lifetime shows watched
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Watchlist</CardTitle>
-                            <ListPlus className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {isLoadingStats ? "-" : watchlistCount}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Items in your watchlist
-                            </p>
-                        </CardContent>
-                    </Card>
+                    {isLoadingStats ? (
+                        <>
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <Card key={i}>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <Skeleton className="h-4 w-32" />
+                                        <Skeleton className="h-4 w-4 rounded" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Skeleton className="mb-2 h-8 w-16" />
+                                        <Skeleton className="h-3 w-40" />
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </>
+                    ) : (
+                        <>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">
+                                        Watched Movies
+                                    </CardTitle>
+                                    <Clapperboard className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">
+                                        {watchedMoviesCount}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Lifetime movies watched
+                                    </p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">
+                                        Watched TV Shows
+                                    </CardTitle>
+                                    <TvMinimalPlay className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">
+                                        {watchedTvCount}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Lifetime shows watched
+                                    </p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">Watchlist</CardTitle>
+                                    <ListPlus className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">
+                                        {watchlistCount}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Items in your watchlist
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        </>
+                    )}
                 </div>
 
                 {/* Badges Section */}
@@ -218,16 +238,37 @@ export default function ProfilePage() {
                 />
 
                 {/* Charts & Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <GenreChart
-                        watchedMovies={lists.watched.filter((m) => m.media_type === "movie" || (!m.media_type && m.title))}
-                        watchedShows={lists.watched.filter((m) => m.media_type === "tv" || m.name)}
-                    />
-                    <TimeStats
-                        watchedMovies={lists.watched.filter((m) => m.media_type === "movie" || (!m.media_type && m.title))}
-                        watchedShows={lists.watched.filter((m) => m.media_type === "tv" || m.name)}
-                    />
-                </div>
+                {isLoadingStats ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <Card className="min-h-[400px]">
+                            <CardHeader>
+                                <Skeleton className="h-6 w-48" />
+                            </CardHeader>
+                            <CardContent>
+                                <Skeleton className="h-[300px] w-full" />
+                            </CardContent>
+                        </Card>
+                        <Card className="min-h-[400px]">
+                            <CardHeader>
+                                <Skeleton className="h-6 w-48" />
+                            </CardHeader>
+                            <CardContent>
+                                <Skeleton className="h-[300px] w-full" />
+                            </CardContent>
+                        </Card>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <GenreChart
+                            watchedMovies={lists.watched.filter((m) => m.media_type === "movie" || (!m.media_type && m.title))}
+                            watchedShows={lists.watched.filter((m) => m.media_type === "tv" || m.name)}
+                        />
+                        <TimeStats
+                            watchedMovies={lists.watched.filter((m) => m.media_type === "movie" || (!m.media_type && m.title))}
+                            watchedShows={lists.watched.filter((m) => m.media_type === "tv" || m.name)}
+                        />
+                    </div>
+                )}
 
                 <ProfileModal
                     isOpen={isEditModalOpen}

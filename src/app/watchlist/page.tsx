@@ -6,6 +6,7 @@ import { getLists, updateUserLists } from "@/actions/user";
 import type { Movie } from "@/lib/types";
 import { useListManager } from "@/hooks/useListManager";
 import { MovieCard } from "@/components/MovieCard";
+import { SimpleLoading } from "@/components/SimpleLoading";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Header } from "@/components/Header";
 import { MovieModal } from "@/components/MovieModal";
@@ -23,7 +24,8 @@ const WatchlistPage = () => {
     handleListUpdate,
     isMovieInList,
     refreshLists,
-    updateMovieProgress
+    updateMovieProgress,
+    isLoading
   } = useListManager();
 
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -131,7 +133,9 @@ const WatchlistPage = () => {
             )}
           </div>
         </div>
-        {movies.length === 0 && tvShows.length === 0 ? (
+        {isLoading ? (
+          <SimpleLoading message="Loading your watchlist..." />
+        ) : movies.length === 0 && tvShows.length === 0 ? (
           <EmptyState />
         ) : (
           <>

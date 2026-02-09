@@ -58,10 +58,13 @@ export default function Home() {
   const [trendingMovies, setTrendingMovies] = React.useState<Movie[]>([]);
   const [trendingTv, setTrendingTv] = React.useState<Movie[]>([]);
   const [isTrendingLoading, setIsTrendingLoading] = React.useState(false);
+  const [trendingError, setTrendingError] = React.useState<string | null>(null);
   const [popularTv, setPopularTv] = React.useState<Movie[]>([]);
   const [airingTodayTv, setAiringTodayTv] = React.useState<Movie[]>([]);
   const [isPopularTvLoading, setIsPopularTvLoading] = React.useState(false);
+  const [popularTvError, setPopularTvError] = React.useState<string | null>(null);
   const [isAiringTodayLoading, setIsAiringTodayLoading] = React.useState(false);
+  const [airingTodayError, setAiringTodayError] = React.useState<string | null>(null);
   const { user } = useAuth();
   const [selectedItem, setSelectedItem] = React.useState<{
     id: number;
@@ -106,15 +109,18 @@ export default function Home() {
   // Trending fetch (only today)
   React.useEffect(() => {
     setIsTrendingLoading(true);
+    setTrendingError(null);
     Promise.all([fetchTrendingMovies("day"), fetchTrendingTv("day")])
       .then(([movies, tv]) => {
         setTrendingMovies(movies);
         setTrendingTv(tv);
+        setTrendingError(null);
       })
       .catch((error) => {
         console.error("Failed to fetch trending content:", error);
         setTrendingMovies([]);
         setTrendingTv([]);
+        setTrendingError("Unable to load trending content. Please check your connection and try again.");
       })
       .finally(() => setIsTrendingLoading(false));
   }, []);
@@ -122,11 +128,16 @@ export default function Home() {
   // Popular TV fetch
   React.useEffect(() => {
     setIsPopularTvLoading(true);
+    setPopularTvError(null);
     fetchPopularTvShows()
-      .then(setPopularTv)
+      .then((shows) => {
+        setPopularTv(shows);
+        setPopularTvError(null);
+      })
       .catch((error) => {
         console.error("Failed to fetch popular TV shows:", error);
         setPopularTv([]);
+        setPopularTvError("Unable to load popular TV shows. Please check your connection and try again.");
       })
       .finally(() => setIsPopularTvLoading(false));
   }, []);
@@ -134,11 +145,16 @@ export default function Home() {
   // Airing Today TV fetch
   React.useEffect(() => {
     setIsAiringTodayLoading(true);
+    setAiringTodayError(null);
     fetchAiringTodayTvShows()
-      .then(setAiringTodayTv)
+      .then((shows) => {
+        setAiringTodayTv(shows);
+        setAiringTodayError(null);
+      })
       .catch((error) => {
         console.error("Failed to fetch airing today TV shows:", error);
         setAiringTodayTv([]);
+        setAiringTodayError("Unable to load TV shows airing today. Please check your connection and try again.");
       })
       .finally(() => setIsAiringTodayLoading(false));
   }, []);
@@ -278,6 +294,22 @@ export default function Home() {
                 movies={trendingMovies.map((m) => ({ ...m, media_type: "movie" }))}
                 onMovieClick={handleMovieClick}
                 isLoading={isTrendingLoading}
+                error={trendingError}
+                onRetry={() => {
+                  setTrendingError(null);
+                  setIsTrendingLoading(true);
+                  Promise.all([fetchTrendingMovies("day"), fetchTrendingTv("day")])
+                    .then(([movies, tv]) => {
+                      setTrendingMovies(movies);
+                      setTrendingTv(tv);
+                      setTrendingError(null);
+                    })
+                    .catch((error) => {
+                      console.error("Failed to fetch trending content:", error);
+                      setTrendingError("Unable to load trending content. Please check your connection and try again.");
+                    })
+                    .finally(() => setIsTrendingLoading(false));
+                }}
                 horizontal={true}
               />
               <MovieRow
@@ -313,6 +345,22 @@ export default function Home() {
                 movies={trendingTv.map((m) => ({ ...m, media_type: "tv" }))}
                 onMovieClick={handleMovieClick}
                 isLoading={isTrendingLoading}
+                error={trendingError}
+                onRetry={() => {
+                  setTrendingError(null);
+                  setIsTrendingLoading(true);
+                  Promise.all([fetchTrendingMovies("day"), fetchTrendingTv("day")])
+                    .then(([movies, tv]) => {
+                      setTrendingMovies(movies);
+                      setTrendingTv(tv);
+                      setTrendingError(null);
+                    })
+                    .catch((error) => {
+                      console.error("Failed to fetch trending content:", error);
+                      setTrendingError("Unable to load trending content. Please check your connection and try again.");
+                    })
+                    .finally(() => setIsTrendingLoading(false));
+                }}
                 horizontal={true}
               />
               <MovieRow
@@ -320,6 +368,21 @@ export default function Home() {
                 movies={popularTv.map((m) => ({ ...m, media_type: "tv" }))}
                 onMovieClick={handleMovieClick}
                 isLoading={isPopularTvLoading}
+                error={popularTvError}
+                onRetry={() => {
+                  setPopularTvError(null);
+                  setIsPopularTvLoading(true);
+                  fetchPopularTvShows()
+                    .then((shows) => {
+                      setPopularTv(shows);
+                      setPopularTvError(null);
+                    })
+                    .catch((error) => {
+                      console.error("Failed to fetch popular TV shows:", error);
+                      setPopularTvError("Unable to load popular TV shows. Please check your connection and try again.");
+                    })
+                    .finally(() => setIsPopularTvLoading(false));
+                }}
                 horizontal={true}
               />
               <MovieRow
@@ -338,6 +401,21 @@ export default function Home() {
                 movies={airingTodayTv.map((m) => ({ ...m, media_type: "tv" }))}
                 onMovieClick={handleMovieClick}
                 isLoading={isAiringTodayLoading}
+                error={airingTodayError}
+                onRetry={() => {
+                  setAiringTodayError(null);
+                  setIsAiringTodayLoading(true);
+                  fetchAiringTodayTvShows()
+                    .then((shows) => {
+                      setAiringTodayTv(shows);
+                      setAiringTodayError(null);
+                    })
+                    .catch((error) => {
+                      console.error("Failed to fetch airing today TV shows:", error);
+                      setAiringTodayError("Unable to load TV shows airing today. Please check your connection and try again.");
+                    })
+                    .finally(() => setIsAiringTodayLoading(false));
+                }}
                 horizontal={true}
               />
             </section>

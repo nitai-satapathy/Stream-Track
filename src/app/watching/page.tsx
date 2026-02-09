@@ -6,6 +6,7 @@ import * as React from "react";
 import { Header } from "@/components/Header";
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
+import { SimpleLoading } from "@/components/SimpleLoading";
 import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
@@ -27,7 +28,8 @@ export default function WatchingPage() {
     setWatched,
     handleListUpdate,
     isMovieInList,
-    updateMovieProgress
+    updateMovieProgress,
+    isLoading
   } = useListManager();
 
   const [selectedItem, setSelectedItem] = React.useState<{
@@ -138,11 +140,13 @@ export default function WatchingPage() {
           </div>
         </div>
 
-        {watching.length === 0 && (
+        {isLoading ? (
+          <SimpleLoading message="Loading your currently watching list..." />
+        ) : watching.length === 0 ? (
           <EmptyState />
-        )}
-
-        {watchingMovies.length > 0 && (
+        ) : (
+          <>
+            {watchingMovies.length > 0 && (
           <MovieRow
             title="Movies"
             movies={watchingMovies}
@@ -152,15 +156,17 @@ export default function WatchingPage() {
             onToggleSelect={handleToggleSelect}
           />
         )}
-        {watchingTvShows.length > 0 && (
-          <MovieRow
-            title="TV Shows"
-            movies={watchingTvShows}
-            onMovieClick={handleMovieClick}
-            isEditing={isEditing}
-            selectedIds={baseSelectedIds}
-            onToggleSelect={handleToggleSelect}
-          />
+            {watchingTvShows.length > 0 && (
+              <MovieRow
+                title="TV Shows"
+                movies={watchingTvShows}
+                onMovieClick={handleMovieClick}
+                isEditing={isEditing}
+                selectedIds={baseSelectedIds}
+                onToggleSelect={handleToggleSelect}
+              />
+            )}
+          </>
         )}
 
         {/* Floating Action Button for Bulk Delete */}

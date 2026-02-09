@@ -16,6 +16,7 @@ import {
 
 import { MovieRow } from "@/components/MovieRow";
 import { MovieModal } from "@/components/MovieModal";
+import { SimpleLoading } from "@/components/SimpleLoading";
 import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
@@ -63,7 +64,8 @@ export default function WatchedTvShowsPage() {
     handleListUpdate,
     isMovieInList,
     refreshLists,
-    updateMovieProgress
+    updateMovieProgress,
+    isLoading
   } = useListManager();
 
   const [selectedItem, setSelectedItem] = React.useState<{
@@ -243,7 +245,9 @@ export default function WatchedTvShowsPage() {
             setSortBy={setSortBy}
           />
         </div>
-        {watchedTvShows.length > 0 ? (
+        {isLoading ? (
+          <SimpleLoading message="Loading your watched TV shows..." />
+        ) : watchedTvShows.length > 0 ? (
           <MovieRow
             movies={watchedTvShows}
             onMovieClick={handleMovieClick}

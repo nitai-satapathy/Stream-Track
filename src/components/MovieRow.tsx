@@ -8,6 +8,7 @@ import { MovieCardSkeleton } from "./MovieCardSkeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import { DataError } from "@/components/DataError";
 
 interface MovieRowProps {
   title: string;
@@ -22,6 +23,8 @@ interface MovieRowProps {
   isEditing?: boolean;
   selectedIds?: number[];
   onToggleSelect?: (id: number) => void;
+  error?: string | null;
+  onRetry?: () => void;
 }
 
 export function MovieRow({
@@ -37,6 +40,8 @@ export function MovieRow({
   isEditing,
   selectedIds,
   onToggleSelect,
+  error: externalError,
+  onRetry,
 }: MovieRowProps) {
   const [movies, setMovies] = React.useState<Movie[]>(initialMovies || []);
   const [isLoading, setIsLoading] = React.useState(
@@ -44,6 +49,9 @@ export function MovieRow({
   );
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Use external error if provided, otherwise use internal error
+  const displayError = externalError !== undefined ? externalError : error;
 
   React.useEffect(() => {
     if (fetchFunction) {
@@ -98,13 +106,36 @@ export function MovieRow({
       );
     }
 
-    if (error) {
+    if (displayError) {
       return (
-        <Alert variant="destructive" className="w-auto max-w-xl">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <DataError
+          title="Failed to load content"
+          message={displayError}
+          onRetry={onRetry || (() => {
+            if (fetchFunction) {
+              const loadMovies = async () => {
+                try {
+                  setIsLoading(true);
+                  setError(null);
+                  const fetchedMovies = await fetchFunction();
+                  setMovies(fetchedMovies);
+                } catch (err: any) {
+                  let errorMessage = "An unknown error occurred.";
+                  if (err.message.includes("401")) {
+                    errorMessage =
+                      "Invalid API Key. Please check your .env.local file.";
+                  } else if (err.message) {
+                    errorMessage = err.message;
+                  }
+                  setError(errorMessage);
+                } finally {
+                  setIsLoading(false);
+                }
+              };
+              loadMovies();
+            }
+          })}
+        />
       );
     }
 

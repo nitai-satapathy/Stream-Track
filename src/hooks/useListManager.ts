@@ -17,6 +17,7 @@ export interface ListManager {
     isMovieInList: (movieId: number, list: ListType) => boolean;
     refreshLists: () => Promise<void>;
     updateMovieProgress: (movie: Movie) => Promise<void>;
+    isLoading: boolean;
 }
 
 export function useListManager(): ListManager {
@@ -26,21 +27,27 @@ export function useListManager(): ListManager {
     const [watching, setWatching] = useState<Movie[]>([]);
     const [watched, setWatched] = useState<Movie[]>([]);
     const [isSyncing, setIsSyncing] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchLists = useCallback(async () => {
-        if (user) {
-            if (isSyncing) return;
-            const lists = await getLists(user.uid);
-            setWatchlist(lists.watchlist);
-            setWatching(lists.watching);
-            setWatched(lists.watched);
-        } else {
-            const storedWatchlist = localStorage.getItem("watchlist");
-            const storedWatching = localStorage.getItem("watching");
-            const storedWatched = localStorage.getItem("watched");
-            if (storedWatchlist) setWatchlist(JSON.parse(storedWatchlist));
-            if (storedWatching) setWatching(JSON.parse(storedWatching));
-            if (storedWatched) setWatched(JSON.parse(storedWatched));
+        setIsLoading(true);
+        try {
+            if (user) {
+                if (isSyncing) return;
+                const lists = await getLists(user.uid);
+                setWatchlist(lists.watchlist);
+                setWatching(lists.watching);
+                setWatched(lists.watched);
+            } else {
+                const storedWatchlist = localStorage.getItem("watchlist");
+                const storedWatching = localStorage.getItem("watching");
+                const storedWatched = localStorage.getItem("watched");
+                if (storedWatchlist) setWatchlist(JSON.parse(storedWatchlist));
+                if (storedWatching) setWatching(JSON.parse(storedWatching));
+                if (storedWatched) setWatched(JSON.parse(storedWatched));
+            }
+        } finally {
+            setIsLoading(false);
         }
     }, [user, isSyncing]);
 
@@ -239,6 +246,7 @@ export function useListManager(): ListManager {
         handleListUpdate,
         isMovieInList,
         refreshLists: fetchLists,
-        updateMovieProgress
+        updateMovieProgress,
+        isLoading
     };
 }
