@@ -3,6 +3,18 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const credentialsSchema = z.object({
+  email: z
+    .string()
+    .email()
+    .max(255),
+  password: z
+    .string()
+    .min(6)
+    .max(128),
+});
 
 const handler = NextAuth({
   providers: [
@@ -13,24 +25,27 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing email or password");
+        const parsed = credentialsSchema.safeParse(credentials);
+
+        if (!parsed.success) {
+          // Do not reveal which part failed to avoid user enumeration.
+          throw new Error("Invalid credentials");
         }
+
+        const { email, password } = parsed.data;
 
         await connectDB();
-        const user = await User.findOne({ email: credentials.email });
+        const user = await User.findOne({ email });
 
         if (!user) {
-          throw new Error("User not found");
+          // Generic message to avoid leaking whether a user exists.
+          throw new Error("Invalid credentials");
         }
 
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        const isValid = await bcrypt.compare(password, user.password);
 
         if (!isValid) {
-          throw new Error("Invalid password");
+          throw new Error("Invalid credentials");
         }
 
         return {

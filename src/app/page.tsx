@@ -111,6 +111,11 @@ export default function Home() {
         setTrendingMovies(movies);
         setTrendingTv(tv);
       })
+      .catch((error) => {
+        console.error("Failed to fetch trending content:", error);
+        setTrendingMovies([]);
+        setTrendingTv([]);
+      })
       .finally(() => setIsTrendingLoading(false));
   }, []);
 
@@ -119,6 +124,10 @@ export default function Home() {
     setIsPopularTvLoading(true);
     fetchPopularTvShows()
       .then(setPopularTv)
+      .catch((error) => {
+        console.error("Failed to fetch popular TV shows:", error);
+        setPopularTv([]);
+      })
       .finally(() => setIsPopularTvLoading(false));
   }, []);
 
@@ -127,6 +136,10 @@ export default function Home() {
     setIsAiringTodayLoading(true);
     fetchAiringTodayTvShows()
       .then(setAiringTodayTv)
+      .catch((error) => {
+        console.error("Failed to fetch airing today TV shows:", error);
+        setAiringTodayTv([]);
+      })
       .finally(() => setIsAiringTodayLoading(false));
   }, []);
 
