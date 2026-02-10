@@ -15,10 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PersonDetails } from "./PersonDetails";
 import type { Movie } from "@/lib/types";
-import { fetchCredits, CastMember } from "@/lib/fetchCredits";
-import { fetchMovieDetails } from "@/lib/tmdb";
-import { fetchOmdbData } from "@/lib/omdb";
-import type { OmdbData } from "@/lib/omdb.types";
+import { fetchMovieDetails, fetchSeasonDetails, fetchCredits, CastMember } from "@/lib/tmdb";
+import { fetchOmdbData, OmdbData } from "@/lib/omdb";
 import {
   Popcorn,
   ListPlus,
@@ -36,7 +34,7 @@ import {
 } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 import { FcCalendar } from "react-icons/fc";
-import { fetchSeasonDetails } from "@/lib/tmdb";
+
 import {
   Select,
   SelectContent,
@@ -159,7 +157,6 @@ export function MovieModal({
             setCast([]);
           }
         } catch (error) {
-          console.error("Failed to fetch movie details:", error);
           toast({
             title: "Error",
             description:
@@ -209,7 +206,6 @@ export function MovieModal({
           const seasonData = await fetchSeasonDetails(movieId, selectedSeason);
           setCurrentSeasonEpisodes(seasonData.episodes || []);
         } catch (error) {
-          console.error("Failed to fetch episodes", error);
         } finally {
           setLoadingEpisodes(false);
         }
@@ -219,19 +215,16 @@ export function MovieModal({
   }, [movieId, mediaType, selectedSeason, movie]);
 
   const handleEpisodeToggle = async (seasonNum: number, episodeNum: number) => {
-    console.log("Toggle Episode:", seasonNum, episodeNum);
-
     if (!userMovie) {
-      console.log("User movie not found");
       toast({
         title: "Add to Watching",
         description: "Please add this show to your Watching list to track episodes.",
+        variant: "destructive",
       });
       return;
     }
 
     if (!updateMovieProgress) {
-      console.log("updateMovieProgress not found");
       return;
     }
 
@@ -253,9 +246,7 @@ export function MovieModal({
 
     try {
       await updateMovieProgress(updatedMovie);
-      console.log("Progress updated successfully");
     } catch (e) {
-      console.error("Failed to update progress", e);
       toast({
         title: "Error",
         description: "Failed to update episode progress.",
@@ -304,7 +295,6 @@ export function MovieModal({
         description: `Marked ${addedCount} episodes as watched.`,
       });
     } catch (e) {
-      console.error("Failed to update season progress", e);
       toast({
         title: "Error",
         description: "Failed to update season progress.",
@@ -343,7 +333,6 @@ export function MovieModal({
         description: `Cleared progress for ${removedCount} episodes.`,
       });
     } catch (e) {
-      console.error("Failed to clear season progress", e);
       toast({
         title: "Error",
         description: "Failed to clear season progress.",

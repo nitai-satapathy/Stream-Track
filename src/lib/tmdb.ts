@@ -167,3 +167,60 @@ export const enrichTVShowWithEpisodes = async (
   }
   return baseMovie;
 };
+
+// fetchCredits
+export interface CastMember {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  character: string;
+}
+
+export interface CreditsResponse {
+  cast: CastMember[];
+}
+
+export const fetchCredits = async (
+  id: number,
+  mediaType: "movie" | "tv"
+): Promise<CastMember[]> => {
+  const response = await tmdbApi.get<CreditsResponse>(
+    `/${mediaType}/${id}/credits`
+  );
+  return response.data.cast;
+};
+
+// fetchTopRatedTvShows
+export const fetchTopRatedTvShows = async (): Promise<Movie[]> => {
+  const response = await tmdbApi.get<TmdbApiResponse>("/tv/top_rated");
+  return response.data.results.map((show) => ({ ...show, media_type: "tv" }));
+};
+
+// fetchTvAndTrending
+export const fetchTrendingMovies = async (
+  timeWindow: "day" | "week" = "day"
+): Promise<Movie[]> => {
+  const response = await tmdbApi.get<TmdbApiResponse>(
+    `/trending/movie/${timeWindow}`
+  );
+  return response.data.results;
+};
+
+export const fetchTrendingTv = async (
+  timeWindow: "day" | "week" = "day"
+): Promise<Movie[]> => {
+  const response = await tmdbApi.get<TmdbApiResponse>(
+    `/trending/tv/${timeWindow}`
+  );
+  return response.data.results;
+};
+
+export const fetchPopularTvShows = async (): Promise<Movie[]> => {
+  const response = await tmdbApi.get<TmdbApiResponse>("/tv/popular");
+  return response.data.results;
+};
+
+export const fetchAiringTodayTvShows = async (): Promise<Movie[]> => {
+  const response = await tmdbApi.get<TmdbApiResponse>("/tv/airing_today");
+  return response.data.results;
+};

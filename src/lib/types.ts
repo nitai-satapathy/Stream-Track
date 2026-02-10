@@ -26,6 +26,9 @@ export interface Movie {
   seasons?: Season[];
   episode_run_time?: number[];
   watched_episodes?: WatchedEpisode[];
+  status?: string;
+  last_air_date?: string;
+  next_episode_to_air?: any;
 }
 export interface WatchedEpisode {
   season_number: number;

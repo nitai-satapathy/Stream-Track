@@ -7,9 +7,10 @@ import { Search, BadgePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Movie } from "@/lib/types";
 import Image from "next/image";
-import { NotificationModal } from "./NotificationModal";
+import { ChangelogModal } from "./ChangelogModal";
 import { SettingsModal } from "./SettingsModal";
 import { ThemeModal } from "./ThemeModal";
+import { EpisodeNotificationsPanel } from "./notifications/EpisodeNotificationsPanel";
 import { ProfileMenu } from "./ProfileMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { GlobalSearchModal } from "./GlobalSearchModal";
@@ -104,6 +105,11 @@ export function Header(props: HeaderProps) {
               <BadgePlus className="h-6 w-6 md:h-8 md:w-8" />
             </Button>
 
+            {/* episode notifications */}
+            {user && (
+              <EpisodeNotificationsPanel />
+            )}
+
             <BulkAddModal
               isOpen={isBulkDialogOpen}
               onOpenChange={setIsBulkDialogOpen}
@@ -119,7 +125,7 @@ export function Header(props: HeaderProps) {
               onClose={() => setIsSettingsOpen(false)}
               lists={lists}
             />
-            <NotificationModal
+            <ChangelogModal
               isOpen={isNotifOpen}
               onClose={() => setIsNotifOpen(false)}
             />

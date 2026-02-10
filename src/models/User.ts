@@ -38,7 +38,35 @@ const UserSchema = new Schema({
   watchlist: [MovieSchema],
   watching: [MovieSchema],
   watched: [MovieSchema],
+  notifications: [
+    new Schema(
+      {
+        id: { type: String, required: true },
+        tvShowId: { type: Number, required: true },
+        tvShowTitle: String,
+        tvShowPoster: String,
+        seasonNumber: Number,
+        episodeNumber: Number,
+        episodeTitle: String,
+        episodeAirDate: String,
+        seasonAirDate: String,
+        isWatched: Boolean,
+        createdAt: { type: Date, default: Date.now },
+        read: { type: Boolean, default: false },
+      },
+      { _id: false }
+    ),
+  ],
   createdAt: { type: Date, default: Date.now },
+  lastEpisodeCheck: { type: Date, default: null },
+  notificationPreferences: {
+    enabled: { type: Boolean, default: true },
+    notifyForWatching: { type: Boolean, default: true },
+    notifyForWatchlist: { type: Boolean, default: false },
+    notifyForWatched: { type: Boolean, default: true },
+    notifyDaysAhead: { type: Number, default: 7 },
+    onlyNotifyUnwatched: { type: Boolean, default: false },
+  },
 });
 
 const User = models.User || model("User", UserSchema);

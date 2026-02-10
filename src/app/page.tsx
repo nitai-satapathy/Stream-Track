@@ -10,14 +10,12 @@ import {
   fetchTrendingTv,
   fetchPopularTvShows,
   fetchAiringTodayTvShows,
-} from "@/lib/fetchTvAndTrending";
-import {
   fetchPopularMovies,
   fetchTopRatedMovies,
   fetchUpcomingMovies,
   searchMulti,
+  fetchTopRatedTvShows,
 } from "@/lib/tmdb";
-import { fetchTopRatedTvShows } from "@/lib/fetchTopRatedTvShows";
 import type { Movie, MediaType } from "@/lib/types";
 
 import { useAuth } from "@/hooks/useAuth";

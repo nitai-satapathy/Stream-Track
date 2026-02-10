@@ -22,6 +22,15 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
   {
+    id: "notification-system-v2",
+    title: "New Episodes Notification System",
+    category: "Update",
+    description:
+      "Introducing the new episode notification system! You can now receive notifications for new episodes of your favorite shows and movies. We've also added a new feature that allows you to mark episodes as watched directly from the notification.",
+    timestamp: "10/02/2026, 21:15:00",
+    source: "System",
+  },
+  {
     id: "mobile-visual-update",
     title: "Mobile Redesign & Visual Polish",
     category: "Update",

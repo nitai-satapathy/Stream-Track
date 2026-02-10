@@ -7,14 +7,14 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { staticNotifications, categoryColors } from "@/lib/notifications";
+import { staticNotifications, categoryColors } from "@/lib/changelog";
 
 interface NotificationModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function NotificationModal({ isOpen, onClose }: NotificationModalProps) {
+export function ChangelogModal({ isOpen, onClose }: NotificationModalProps) {
   const notifications = staticNotifications;
 
   return (
