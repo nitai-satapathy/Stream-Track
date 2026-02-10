@@ -146,16 +146,27 @@ export const enrichTVShowWithEpisodes = async (
     const fullDetails = await fetchTVShowDetails(showId);
     if (fullDetails.seasons) {
       const allWatchedEpisodes: { season_number: number; episode_number: number }[] = [];
-      fullDetails.seasons.forEach((season: any) => {
-        if (season.season_number > 0 && season.episode_count) {
-          for (let i = 1; i <= season.episode_count; i++) {
-            allWatchedEpisodes.push({
-              season_number: season.season_number,
-              episode_number: i,
-            });
-          }
+      const today = new Date().toISOString().split('T')[0];
+
+      const seasonPromises = fullDetails.seasons
+        .filter((season: any) => season.season_number > 0)
+        .map((season: any) => fetchSeasonDetails(showId, season.season_number));
+
+      const seasonsDetails = await Promise.all(seasonPromises);
+
+      seasonsDetails.forEach((seasonDetail: any) => {
+        if (seasonDetail.episodes) {
+          seasonDetail.episodes.forEach((episode: any) => {
+            if (episode.air_date && episode.air_date <= today) {
+              allWatchedEpisodes.push({
+                season_number: episode.season_number,
+                episode_number: episode.episode_number,
+              });
+            }
+          });
         }
       });
+
       return {
         ...baseMovie,
         ...fullDetails,

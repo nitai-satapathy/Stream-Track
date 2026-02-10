@@ -261,7 +261,14 @@ export function MovieModal({
     const newWatchedEpisodes = [...(userMovie.watched_episodes || [])];
     let addedCount = 0;
 
+    const today = new Date().toISOString().split('T')[0];
+
     currentSeasonEpisodes.forEach(episode => {
+      // release date check
+      if (episode.air_date && episode.air_date > today) {
+        return;
+      }
+
       const exists = newWatchedEpisodes.some(
         e => e.season_number === episode.season_number && e.episode_number === episode.episode_number
       );
