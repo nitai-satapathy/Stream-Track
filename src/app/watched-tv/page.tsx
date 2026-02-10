@@ -197,6 +197,7 @@ export default function WatchedTvShowsPage() {
           (movie) => movie.media_type === "tv" || movie.name
         )}
         setWatchedShows={setWatched}
+        setWatched={setWatched}
       />
       <main className="flex-1 space-y-12 py-8 pt-24 md:pt-28">
         <div className="container flex items-center justify-between space-y-4">
@@ -261,14 +262,11 @@ export default function WatchedTvShowsPage() {
         )}
 
         {/* Floating Action Button for Bulk Delete */}
-        {/* Floating Action Button for Bulk Delete */}
         {isEditing && baseSelectedIds.length > 0 && (
           <div className="fixed bottom-8 right-8 z-50 flex gap-4">
             <button
               onClick={async () => {
                 let updatedWatched = [...watched];
-
-                // Show loading toast? Or just do it.
 
                 const processUpdates = baseSelectedIds.map(async (id) => {
                   const movieIndex = updatedWatched.findIndex(m => m.id === id);

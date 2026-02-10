@@ -220,7 +220,7 @@ export default function Home() {
   return (
 
     <div className="flex min-h-screen flex-col relative bg-background selection:bg-primary/30">
-      <Header lists={headerLists} onListUpdate={handleListUpdate} updateMovieProgress={updateMovieProgress} />
+      <Header lists={headerLists} onListUpdate={handleListUpdate} updateMovieProgress={updateMovieProgress} setWatched={setWatched} />
 
       {/* LightRays Background */}
       <div className="absolute top-0 left-0 w-full h-[600px] md:h-[800px] pointer-events-none z-0 overflow-hidden">

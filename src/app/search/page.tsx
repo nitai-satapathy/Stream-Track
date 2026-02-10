@@ -33,7 +33,8 @@ function SearchContent() {
     watched,
     handleListUpdate,
     isMovieInList,
-    updateMovieProgress
+    updateMovieProgress,
+    setWatched
   } = useListManager();
 
   const fetchSearchResults = React.useCallback(() => {
@@ -61,7 +62,7 @@ function SearchContent() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header lists={headerLists} onListUpdate={handleListUpdate} updateMovieProgress={updateMovieProgress} />
+      <Header lists={headerLists} onListUpdate={handleListUpdate} updateMovieProgress={updateMovieProgress} setWatched={setWatched} />
       <main className="flex-1 space-y-12 py-8 pt-24 md:pt-28">
         {query ? (
           <MovieRow

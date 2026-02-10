@@ -21,6 +21,8 @@ interface BulkAddModalProps {
     setWatchedMovies?: (movies: Movie[]) => void;
     setWatchedShows?: (shows: Movie[]) => void;
     user: any;
+    fullWatchedList?: Movie[];
+    setFullWatchedList?: (list: Movie[]) => void;
 }
 
 export function BulkAddModal({
@@ -31,6 +33,8 @@ export function BulkAddModal({
     setWatchedMovies,
     setWatchedShows,
     user,
+    fullWatchedList,
+    setFullWatchedList,
 }: BulkAddModalProps) {
     const [bulkInput, setBulkInput] = React.useState("");
     const [bulkStatus, setBulkStatus] = React.useState<string | null>(null);
@@ -94,11 +98,20 @@ export function BulkAddModal({
 
         if (foundMovies.length) {
             newMovies = [...watchedMovies, ...foundMovies];
-            if (setWatchedMovies) setWatchedMovies(newMovies);
+            if (setWatchedMovies && !setFullWatchedList) setWatchedMovies(newMovies);
         }
         if (foundShows.length) {
             newShows = [...watchedShows, ...foundShows];
-            if (setWatchedShows) setWatchedShows(newShows);
+            if (setWatchedShows && !setFullWatchedList) setWatchedShows(newShows);
+        }
+
+        if (setFullWatchedList && fullWatchedList) {
+            const newFullList = [
+                ...fullWatchedList,
+                ...foundMovies.filter(fm => !fullWatchedList.some(m => m.id === fm.id)),
+                ...foundShows.filter(fs => !fullWatchedList.some(s => s.id === fs.id))
+            ];
+            setFullWatchedList(newFullList);
         }
 
         if (user) {

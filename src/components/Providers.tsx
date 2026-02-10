@@ -5,7 +5,7 @@ import { ThemeProvider } from "./theme-context";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchOnWindowFocus={false}>
       <ThemeProvider>{children}</ThemeProvider>
     </SessionProvider>
   );

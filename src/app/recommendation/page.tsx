@@ -331,8 +331,7 @@ const RecommendationPage = () => {
       <Header
         lists={headerLists}
         onListUpdate={handleListUpdate}
-        watchedMovies={watched}
-        watchedShows={watching}
+        setWatched={setWatched}
       />
       <div className="container mx-auto space-y-10 py-8 pt-24 md:pt-28">
         <h1 className="mb-4 text-3xl font-bold">Recommendations</h1>

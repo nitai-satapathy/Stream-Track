@@ -65,20 +65,38 @@ export function SettingsModal({ isOpen, onClose, lists }: SettingsModalProps) {
           return;
         }
 
+        const merge = (current: Movie[], imported: Movie[]) => {
+          const map = new Map();
+          imported.forEach(m => map.set(m.id, m));
+          current.forEach(m => map.set(m.id, m));
+          imported.forEach(m => {
+            if (!map.has(m.id)) {
+              map.set(m.id, m);
+            }
+          });
+          return Array.from(map.values()) as Movie[];
+        };
+
+        const mergedLists = {
+          watchlist: merge(lists.watchlist, importedLists.watchlist),
+          watching: merge(lists.watching, importedLists.watching),
+          watched: merge(lists.watched, importedLists.watched),
+        };
+
         if (user) {
-          await updateUserLists(user.uid, importedLists);
+          await updateUserLists(user.uid, mergedLists);
         } else {
           localStorage.setItem(
             "watchlist",
-            JSON.stringify(importedLists.watchlist)
+            JSON.stringify(mergedLists.watchlist)
           );
           localStorage.setItem(
             "watching",
-            JSON.stringify(importedLists.watching)
+            JSON.stringify(mergedLists.watching)
           );
           localStorage.setItem(
             "watched",
-            JSON.stringify(importedLists.watched)
+            JSON.stringify(mergedLists.watched)
           );
         }
         setImportStatus("Import successful! Reloading...");

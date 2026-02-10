@@ -133,7 +133,7 @@ export default function ProfilePage() {
 
     return (
         <div className="flex min-h-screen flex-col">
-            <Header lists={lists} />
+            <Header lists={lists} setWatched={(newWatched) => setLists(prev => ({ ...prev, watched: newWatched as Movie[] }))} />
             <div className="container max-w-4xl space-y-8 py-10 pt-24 md:pt-32">
                 {/* Header Section */}
                 <div className="flex flex-col items-center gap-6 rounded-2xl border border-border/50 bg-card p-6 shadow-sm md:flex-row">

@@ -38,6 +38,7 @@ interface HeaderProps {
   setWatchedShows?: (shows: Movie[]) => void;
   watchedMovies?: Movie[];
   watchedShows?: Movie[];
+  setWatched?: (list: Movie[]) => void;
 }
 
 export function Header(props: HeaderProps) {
@@ -118,6 +119,8 @@ export function Header(props: HeaderProps) {
               setWatchedMovies={setWatchedMovies}
               setWatchedShows={setWatchedShows}
               user={user}
+              fullWatchedList={lists.watched}
+              setFullWatchedList={props.setWatched}
             />
 
             <SettingsModal

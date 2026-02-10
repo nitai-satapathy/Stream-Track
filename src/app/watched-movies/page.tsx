@@ -194,6 +194,7 @@ export default function WatchedMoviesPage() {
         setWatchedMovies={setWatched}
         watchedShows={[]}
         setWatchedShows={() => { }}
+        setWatched={setWatched}
       // user={user}
       />
       <main className="flex-1 space-y-12 py-8 pt-24 md:pt-28">
