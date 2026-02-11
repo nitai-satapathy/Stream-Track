@@ -22,6 +22,15 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
   {
+    id: "ai-recommendation-upgrade",
+    title: "AI Recommendations & Quick Actions",
+    category: "Update",
+    description:
+      "We've completely overhauled the 'For You' page! Enjoy smarter, context-aware AI recommendations with clear explanations. We also added 'Quick Actions' to movie cards (hover to Dismiss, Add to Watchlist, or Mark as Watched) and fixed layout jitters for a smoother experience.",
+    timestamp: "12/02/2026, 00:34:00",
+    source: "System",
+  },
+  {
     id: "notification-system-v2",
     title: "New Episodes Notification System",
     category: "Update",

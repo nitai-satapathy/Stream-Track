@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosRetry from "axios-retry";
 import type { Movie, TmdbApiResponse, Genre } from "./types";
 
 const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
@@ -12,6 +13,20 @@ export const tmdbApi = axios.create({
   params: {
     api_key: apiKey,
     language: "en-US",
+  },
+  timeout: 10000,
+});
+
+// retry Logic
+axiosRetry(tmdbApi, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (error) => {
+    return (
+      axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+      error.code === "ECONNRESET" ||
+      error.code === "ETIMEDOUT"
+    );
   },
 });
 
@@ -234,4 +249,38 @@ export const fetchPopularTvShows = async (): Promise<Movie[]> => {
 export const fetchAiringTodayTvShows = async (): Promise<Movie[]> => {
   const response = await tmdbApi.get<TmdbApiResponse>("/tv/airing_today");
   return response.data.results;
+};
+
+export const fetchHiddenGems = async (
+  mediaType: "movie" | "tv",
+  genreId?: number
+): Promise<Movie[]> => {
+  const currentDate = new Date().toISOString().split("T")[0];
+  const response = await tmdbApi.get<TmdbApiResponse>(
+    `/discover/${mediaType}`,
+    {
+      params: {
+        sort_by: "vote_average.desc",
+        "vote_count.gte": 100,
+        "vote_count.lte": 2000,
+        "vote_average.gte": 7.0,
+        with_genres: genreId,
+        "primary_release_date.lte": currentDate,
+        "air_date.lte": currentDate,
+        with_original_language: "en",
+        page: 1,
+      },
+    }
+  );
+  return response.data.results.map((item) => ({ ...item, media_type: mediaType }));
+};
+
+export const fetchSimilar = async (
+  mediaType: "movie" | "tv",
+  id: number
+): Promise<Movie[]> => {
+  const response = await tmdbApi.get<TmdbApiResponse>(
+    `/${mediaType}/${id}/similar`
+  );
+  return response.data.results.map((item) => ({ ...item, media_type: mediaType }));
 };

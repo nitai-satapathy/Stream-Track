@@ -25,6 +25,7 @@ import {
   Youtube,
   Wallet,
   ArrowLeft,
+  Sparkles,
 } from "lucide-react";
 import { LiaImdb } from "react-icons/lia";
 import {
@@ -54,6 +55,7 @@ interface MovieModalProps {
   onMovieSelect?: (id: number, mediaType: "movie" | "tv") => void;
   userMovie?: Movie;
   updateMovieProgress?: (movie: Movie) => Promise<void>;
+  aiExplanation?: string;
 }
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
@@ -67,7 +69,8 @@ export function MovieModal({
   isMovieInList,
   onMovieSelect,
   userMovie,
-  updateMovieProgress
+  updateMovieProgress,
+  aiExplanation,
 }: MovieModalProps) {
   const [movie, setMovie] = React.useState<Movie | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -475,6 +478,19 @@ export function MovieModal({
 
               {/* OVERVIEW TAB */}
               <TabsContent value="overview" className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                {/* AI Explanation */}
+                {aiExplanation && (
+                  <div className="mb-6 rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 border-l-4 border-primary shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="h-4 w-4 text-primary fill-primary/20 animate-pulse" />
+                      <span className="text-xs font-bold text-primary tracking-wider uppercase">Why we recommend this</span>
+                    </div>
+                    <p className="text-sm text-foreground/90 leading-relaxed font-medium italic">
+                      &quot;{aiExplanation}&quot;
+                    </p>
+                  </div>
+                )}
+
                 {/* Ratings */}
                 <div className="flex flex-wrap items-center space-x-4 text-sm">
                   <div className="flex items-center gap-1">

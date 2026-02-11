@@ -29,6 +29,7 @@ export interface Movie {
   status?: string;
   last_air_date?: string;
   next_episode_to_air?: any;
+  ai_explanation?: string;
 }
 export interface WatchedEpisode {
   season_number: number;

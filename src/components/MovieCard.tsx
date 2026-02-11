@@ -2,13 +2,21 @@ import Image from "next/image";
 import * as React from "react";
 import type { Movie } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, Check, X } from "lucide-react";
+import { Star, Check, X, Plus, Eye } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { TMDB_IMAGE_BASE_URL_W500 } from "@/lib/constants";
+import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MovieCardProps {
   movie: Movie;
   onClick: () => void;
+  // Quick Actions (only for Recommendation Page)
+  onDismiss?: (e: React.MouseEvent) => void;
+  onQuickAdd?: (e: React.MouseEvent) => void;
+  onQuickWatched?: (e: React.MouseEvent) => void;
+  isInWatchlist?: boolean;
+  isWatched?: boolean;
 }
 
 
@@ -18,6 +26,11 @@ export function MovieCard({
   isEditing,
   isSelected,
   onToggleSelect,
+  onDismiss,
+  onQuickAdd,
+  onQuickWatched,
+  isInWatchlist,
+  isWatched,
 }: MovieCardProps & {
   isEditing?: boolean;
   isSelected?: boolean;
@@ -33,8 +46,10 @@ export function MovieCard({
     }
   };
 
+  const hasQuickActions = onDismiss || onQuickAdd || onQuickWatched;
+
   return (
-    <div className="relative">
+    <div className="relative group">
       <Card
         className={`w-[150px] shrink-0 cursor-pointer overflow-hidden transition-all duration-300 md:w-[200px] ${isEditing ? "animate-shake hover:none" : "hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
           }`}
@@ -54,6 +69,68 @@ export function MovieCard({
               data-ai-hint="movie poster"
               sizes="(max-width: 768px) 140px, 200px"
             />
+
+            {hasQuickActions && !isEditing && (
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-2 z-10">
+                <div className="flex justify-between items-start">
+                  {onQuickAdd && (
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`h-8 w-8 rounded-full bg-black/40 backdrop-blur-md hover:bg-primary hover:text-white ${isInWatchlist ? 'text-primary' : 'text-white'}`}
+                            onClick={(e) => { e.stopPropagation(); onQuickAdd(e); }}
+                          >
+                            {isInWatchlist ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right"><p>{isInWatchlist ? "In Watchlist" : "Add to Watchlist"}</p></TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  {onDismiss && (
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full bg-black/40 backdrop-blur-md hover:bg-destructive hover:text-white text-white/80"
+                            onClick={(e) => { e.stopPropagation(); onDismiss(e); }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left"><p>Dismiss</p></TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+
+                <div className="flex justify-end">
+                  {onQuickWatched && (
+                    <TooltipProvider delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`h-8 w-8 rounded-full bg-black/40 backdrop-blur-md hover:bg-primary hover:text-white ${isWatched ? 'text-primary' : 'text-white'}`}
+                            onClick={(e) => { e.stopPropagation(); onQuickWatched(e); }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left"><p>{isWatched ? "Watched" : "Mark as Watched"}</p></TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              </div>
+            )}
+
             {isEditing && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                 {isSelected ? (

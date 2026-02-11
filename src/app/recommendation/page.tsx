@@ -9,9 +9,13 @@ import { getLists } from "@/actions/user";
 import { getRecommendations } from "@/ai/flows/recommendation-flow";
 import { searchMulti } from "@/lib/tmdb";
 import type { Movie, MediaType } from "@/lib/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sparkles, Film, Tv } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 // Caching logic for 24h
-const getCacheKey = (section: string) => `rec_cache_${section}`;
+const getCacheKey = (section: string) => `rec_cache_v2_${section}`;
 const getCache = (section: string) => {
   try {
     const raw = localStorage.getItem(getCacheKey(section));
@@ -19,7 +23,7 @@ const getCache = (section: string) => {
     const parsed = JSON.parse(raw);
     if (!parsed.data || !parsed.timestamp) return null;
     if (Date.now() - parsed.timestamp > 24 * 60 * 60 * 1000) return null;
-    return parsed.data;
+    return parsed.data as Movie[];
   } catch {
     return null;
   }
@@ -30,33 +34,84 @@ const setCache = (section: string, data: Movie[]) => {
     JSON.stringify({ data, timestamp: Date.now() })
   );
 };
+
+const mapToContext = (m: Movie) => ({
+  id: m.id,
+  title: m.title || m.name || "",
+  media_type: (m.media_type || "movie") as "movie" | "tv",
+  genres: m.genres?.map((g) => g.name) || [],
+  release_date: m.release_date || m.first_air_date || "",
+  vote_average: m.vote_average,
+});
+
 const fetchRecs = async (
-  titles: string[],
-  type: MediaType,
+  items: Movie[],
+  contextType: "watched" | "watching" | "watchlist",
   section: string,
+  forcedMediaType?: "movie" | "tv",
   force = false
-) => {
+): Promise<Movie[]> => {
   if (!force) {
     const cached = getCache(section);
     if (cached) return cached;
   }
-  if (titles.length === 0) return [];
-  const result = await getRecommendations({ watched: titles, watching: [] });
-  if (result.recommendations) {
-    const moviePromises = result.recommendations.map(async (rec) => {
-      const searchResults = await searchMulti(rec.title);
-      return (
-        searchResults.find(
-          (item) => item.media_type === "movie" || item.media_type === "tv"
-        ) || null
-      );
-    });
-    // Strictly filter by type here
-    const filtered = (await Promise.all(moviePromises)).filter(
-      (m): m is Movie => !!m && m.media_type === type
-    ) as Movie[];
-    setCache(section, filtered);
-    return filtered;
+  if (items.length === 0) return [];
+
+  try {
+    const input = {
+      watched: contextType === "watched" ? items.map(mapToContext) : [],
+      watching: contextType === "watching" ? items.map(mapToContext) : [],
+      watchlist: contextType === "watchlist" ? items.map(mapToContext) : [],
+      forcedMediaType,
+    };
+
+    const result = await getRecommendations(input);
+
+    if (result.recommendations) {
+      const moviePromises = result.recommendations.map(async (rec): Promise<Movie | null> => {
+        try {
+          let movie: Movie | null = null;
+
+          if (rec.tmdb_id) {
+            const searchResults = await searchMulti(rec.title);
+            movie = searchResults.find(m => m.id === rec.tmdb_id) || searchResults[0];
+          } else {
+            const searchResults = await searchMulti(rec.title);
+            if (forcedMediaType) {
+              movie = searchResults.find(m => m.media_type === forcedMediaType) || null;
+              if (!movie && searchResults.length > 0) {
+                const candidate = searchResults[0];
+                if (candidate.media_type === forcedMediaType) movie = candidate;
+              }
+            } else {
+              movie = searchResults[0];
+            }
+          }
+
+          if (movie) {
+            return {
+              ...movie,
+              ai_explanation: rec.reason,
+              overview: rec.reason
+            };
+          }
+        } catch (e) {
+          console.error("Error fetching details for rec:", rec.title, e);
+        }
+        return null;
+      });
+
+      const resolved = (await Promise.all(moviePromises)).filter((m): m is Movie => !!m);
+
+      const inputIds = new Set(items.map(i => i.id));
+      const filtered = resolved.filter(m => !inputIds.has(m.id));
+
+      setCache(section, filtered);
+      return filtered;
+    }
+  } catch (error) {
+    console.error("Error in fetchRecs:", error);
+    throw error;
   }
   return [];
 };
@@ -87,6 +142,7 @@ const RecommendationPage = () => {
   const [selectedItem, setSelectedItem] = React.useState<{
     id: number;
     media_type: MediaType;
+    ai_explanation?: string;
   } | null>(null);
 
   React.useEffect(() => {
@@ -121,11 +177,7 @@ const RecommendationPage = () => {
     if (watchedMovies.length > 0) {
       setLoadingWatchedMovies(true);
       setErrorWatchedMovies(null);
-      fetchRecs(
-        watchedMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
-        "movie",
-        "watchedMovies"
-      )
+      fetchRecs(watchedMovies, "watched", "watchedMovies", "movie")
         .then((recs) => {
           setRecWatchedMovies(recs);
           setErrorWatchedMovies(null);
@@ -142,11 +194,7 @@ const RecommendationPage = () => {
     if (watchedTV.length > 0) {
       setLoadingWatchedTV(true);
       setErrorWatchedTV(null);
-      fetchRecs(
-        watchedTV.map((m) => m.name || m.title).filter(Boolean) as string[],
-        "tv",
-        "watchedTV"
-      )
+      fetchRecs(watchedTV, "watched", "watchedTV", "tv")
         .then((recs) => {
           setRecWatchedTV(recs);
           setErrorWatchedTV(null);
@@ -158,6 +206,7 @@ const RecommendationPage = () => {
         })
         .finally(() => setLoadingWatchedTV(false));
     }
+
     // Watchlist Movies
     const watchlistMovies = watchlist.filter(
       (m) => m.media_type === "movie" || (!m.media_type && m.title)
@@ -165,11 +214,7 @@ const RecommendationPage = () => {
     if (watchlistMovies.length > 0) {
       setLoadingWatchlistMovies(true);
       setErrorWatchlistMovies(null);
-      fetchRecs(
-        watchlistMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
-        "movie",
-        "watchlistMovies"
-      )
+      fetchRecs(watchlistMovies, "watchlist", "watchlistMovies", "movie")
         .then((recs) => {
           setRecWatchlistMovies(recs);
           setErrorWatchlistMovies(null);
@@ -181,6 +226,7 @@ const RecommendationPage = () => {
         })
         .finally(() => setLoadingWatchlistMovies(false));
     }
+
     // Watchlist TV Shows
     const watchlistTV = watchlist.filter(
       (m) => m.media_type === "tv" || m.name
@@ -188,11 +234,7 @@ const RecommendationPage = () => {
     if (watchlistTV.length > 0) {
       setLoadingWatchlistTV(true);
       setErrorWatchlistTV(null);
-      fetchRecs(
-        watchlistTV.map((m) => m.name || m.title).filter(Boolean) as string[],
-        "tv",
-        "watchlistTV"
-      )
+      fetchRecs(watchlistTV, "watchlist", "watchlistTV", "tv")
         .then((recs) => {
           setRecWatchlistTV(recs);
           setErrorWatchlistTV(null);
@@ -204,7 +246,7 @@ const RecommendationPage = () => {
         })
         .finally(() => setLoadingWatchlistTV(false));
     }
-  }, [watchlist, watched]); // Added missing dependencies
+  }, [watchlist, watched]);
 
   // Manual refresh handlers
   const handleRefresh = useCallback(
@@ -214,14 +256,15 @@ const RecommendationPage = () => {
         | "watchedTV"
         | "watchlistMovies"
         | "watchlistTV",
-      titles: string[],
-      type: MediaType,
+      items: Movie[],
+      contextType: "watched" | "watchlist",
+      mediaType: "movie" | "tv",
       setter: (data: Movie[]) => void,
       setLoading: (b: boolean) => void
     ) => {
       setRefreshing((r) => ({ ...r, [section]: true }));
       setLoading(true);
-      const data = await fetchRecs(titles, type, section, true);
+      const data = await fetchRecs(items, contextType, section, mediaType, true);
       setter(data);
       setLoading(false);
       setRefreshing((r) => ({ ...r, [section]: false }));
@@ -230,8 +273,19 @@ const RecommendationPage = () => {
   );
 
   const handleMovieClick = useCallback((id: number, media_type: MediaType) => {
-    setSelectedItem({ id, media_type });
-  }, []);
+    const allRecs = [
+      ...recWatchedMovies,
+      ...recWatchedTV,
+      ...recWatchlistMovies,
+      ...recWatchlistTV,
+    ];
+    const movie = allRecs.find((m) => m.id === id);
+    setSelectedItem({
+      id,
+      media_type,
+      ai_explanation: movie?.ai_explanation
+    });
+  }, [recWatchedMovies, recWatchedTV, recWatchlistMovies, recWatchlistTV]);
 
   const handleCloseModal = useCallback(() => {
     setSelectedItem(null);
@@ -326,6 +380,48 @@ const RecommendationPage = () => {
     [watchlist, watching, watched]
   );
 
+
+  /* Quick Actions Logic */
+  const [dismissedIds, setDismissedIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedDismissed = localStorage.getItem("dismissed_recs");
+      if (storedDismissed) {
+        try {
+          setDismissedIds(new Set(JSON.parse(storedDismissed)));
+        } catch (e) {
+          console.error("Failed to parse dismissed recs", e);
+        }
+      }
+    }
+  }, []);
+
+  const handleDismiss = useCallback((id: number) => {
+    setDismissedIds((prev) => {
+      const newSet = new Set(prev);
+      newSet.add(id);
+      localStorage.setItem("dismissed_recs", JSON.stringify(Array.from(newSet)));
+      return newSet;
+    });
+  }, []);
+
+  const handleQuickAdd = useCallback((movie: Movie) => {
+    handleListUpdate(movie, "watchlist");
+  }, [handleListUpdate]);
+
+  const handleQuickWatched = useCallback((movie: Movie) => {
+    handleListUpdate(movie, "watched");
+  }, [handleListUpdate]);
+
+  const checkIsWatchlist = useCallback((id: number) => {
+    return watchlist.some(m => m.id === id);
+  }, [watchlist]);
+
+  const checkIsWatched = useCallback((id: number) => {
+    return watched.some(m => m.id === id);
+  }, [watched]);
+
   return (
     <>
       <Header
@@ -334,26 +430,53 @@ const RecommendationPage = () => {
         setWatched={setWatched}
       />
       <div className="container mx-auto space-y-10 py-8 pt-24 md:pt-28">
-        <h1 className="mb-4 text-3xl font-bold">Recommendations</h1>
-        <p className="mb-8 text-lg text-gray-600">
-          Get personalized movie and TV show recommendations based on your
-          activity.
+        <div className="flex items-center gap-3 mb-2">
+          <Sparkles className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold tracking-tight">For You</h1>
+        </div>
+        <p className="mb-8 text-lg text-muted-foreground">
+          AI-powered recommendations based on your unique taste.
         </p>
-        {/* Filter out movies/shows already in watched or watchlist */}
         {(() => {
           const watchedIds = new Set(watched.map((m) => m.id));
           const watchlistIds = new Set(watchlist.map((m) => m.id));
           const filterRecs = (recs: Movie[]) =>
             recs.filter(
-              (m) => !watchedIds.has(m.id) && !watchlistIds.has(m.id)
+              (m) => !watchedIds.has(m.id) && !watchlistIds.has(m.id) && !dismissedIds.has(m.id)
             );
+
+          const hasWatchedMovies = watched.some(
+            (m) => m.media_type === "movie" || (!m.media_type && m.title)
+          );
+          const hasWatchlistMovies = watchlist.some(
+            (m) => m.media_type === "movie" || (!m.media_type && m.title)
+          );
+          const hasWatchedTV = watched.some((m) => m.media_type === "tv" || m.name);
+          const hasWatchlistTV = watchlist.some((m) => m.media_type === "tv" || m.name);
+
           return (
-            <>
-              {watched.some(
-                (m) => m.media_type === "movie" || (!m.media_type && m.title)
-              ) && (
+            <Tabs defaultValue="movies" className="w-full">
+              <div className="flex justify-center mb-8">
+                <TabsList className="grid w-full grid-cols-2 max-w-[400px] h-12 bg-background/50 border border-white/10 backdrop-blur-md p-1 rounded-full">
+                  <TabsTrigger
+                    value="movies"
+                    className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+                  >
+                    Movies
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="tv"
+                    className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+                  >
+                    TV Shows
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="movies" className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {hasWatchedMovies ? (
                   <MovieRow
-                    title="Recommendations Based on Watched Movies"
+                    title="Based on your Watch History"
                     movies={filterRecs(recWatchedMovies)}
                     onMovieClick={handleMovieClick}
                     isLoading={loadingWatchedMovies}
@@ -364,12 +487,7 @@ const RecommendationPage = () => {
                       );
                       setLoadingWatchedMovies(true);
                       setErrorWatchedMovies(null);
-                      fetchRecs(
-                        watchedMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
-                        "movie",
-                        "watchedMovies",
-                        true
-                      )
+                      fetchRecs(watchedMovies, "watched", "watchedMovies", "movie", true)
                         .then((recs) => {
                           setRecWatchedMovies(recs);
                           setErrorWatchedMovies(null);
@@ -380,74 +498,49 @@ const RecommendationPage = () => {
                         })
                         .finally(() => setLoadingWatchedMovies(false));
                     }}
-                    horizontal={true}
+                    horizontal={false}
                     onRefresh={() =>
                       handleRefresh(
                         "watchedMovies",
-                        watched
-                          .filter(
-                            (m) =>
-                              m.media_type === "movie" ||
-                              (!m.media_type && m.title)
-                          )
-                          .map((m) => m.title || m.name)
-                          .filter(Boolean) as string[],
+                        watched.filter(
+                          (m) =>
+                            m.media_type === "movie" ||
+                            (!m.media_type && m.title)
+                        ),
+                        "watched",
                         "movie",
                         setRecWatchedMovies,
                         setLoadingWatchedMovies
                       )
                     }
                     refreshing={refreshing.watchedMovies}
+                    // Quick Actions
+                    onDismiss={handleDismiss}
+                    onQuickAdd={handleQuickAdd}
+                    onQuickWatched={handleQuickWatched}
+                    checkIsWatchlist={checkIsWatchlist}
+                    checkIsWatched={checkIsWatched}
                   />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 animate-in fade-in zoom-in-50 duration-500">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                      <Film className="h-8 w-8 text-primary" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-semibold">No Movie Context Yet</h3>
+                      <p className="text-muted-foreground max-w-sm mx-auto">
+                        Start watching movies to unlock personalized AI recommendations.
+                      </p>
+                    </div>
+                    <Button asChild variant="outline">
+                      <Link href="/">Browse Movies</Link>
+                    </Button>
+                  </div>
                 )}
-              {watched.some((m) => m.media_type === "tv" || m.name) && (
-                <MovieRow
-                  title="Recommendations Based on Watched TV Shows"
-                  movies={filterRecs(recWatchedTV)}
-                  onMovieClick={handleMovieClick}
-                  isLoading={loadingWatchedTV}
-                  error={errorWatchedTV}
-                  onRetry={() => {
-                    const watchedTV = watched.filter((m) => m.media_type === "tv" || m.name);
-                    setLoadingWatchedTV(true);
-                    setErrorWatchedTV(null);
-                    fetchRecs(
-                      watchedTV.map((m) => m.name || m.title).filter(Boolean) as string[],
-                      "tv",
-                      "watchedTV",
-                      true
-                    )
-                      .then((recs) => {
-                        setRecWatchedTV(recs);
-                        setErrorWatchedTV(null);
-                      })
-                      .catch((error) => {
-                        console.error("Failed to fetch recommendations:", error);
-                        setErrorWatchedTV("Unable to generate recommendations. Please try again later.");
-                      })
-                      .finally(() => setLoadingWatchedTV(false));
-                  }}
-                  horizontal={true}
-                  onRefresh={() =>
-                    handleRefresh(
-                      "watchedTV",
-                      watched
-                        .filter((m) => m.media_type === "tv" || m.name)
-                        .map((m) => m.name || m.title)
-                        .filter(Boolean) as string[],
-                      "tv",
-                      setRecWatchedTV,
-                      setLoadingWatchedTV
-                    )
-                  }
-                  refreshing={refreshing.watchedTV}
-                />
-              )}
-              {watchlist.some(
-                (m) => m.media_type === "movie" || (!m.media_type && m.title)
-              ) && (
+
+                {hasWatchlistMovies && (
                   <MovieRow
-                    title="Recommendations Based on Watchlist Movies"
+                    title="Based on your Watchlist"
                     movies={filterRecs(recWatchlistMovies)}
                     onMovieClick={handleMovieClick}
                     isLoading={loadingWatchlistMovies}
@@ -458,12 +551,7 @@ const RecommendationPage = () => {
                       );
                       setLoadingWatchlistMovies(true);
                       setErrorWatchlistMovies(null);
-                      fetchRecs(
-                        watchlistMovies.map((m) => m.title || m.name).filter(Boolean) as string[],
-                        "movie",
-                        "watchlistMovies",
-                        true
-                      )
+                      fetchRecs(watchlistMovies, "watchlist", "watchlistMovies", "movie", true)
                         .then((recs) => {
                           setRecWatchlistMovies(recs);
                           setErrorWatchlistMovies(null);
@@ -474,72 +562,136 @@ const RecommendationPage = () => {
                         })
                         .finally(() => setLoadingWatchlistMovies(false));
                     }}
-                    horizontal={true}
+                    horizontal={false}
                     onRefresh={() =>
                       handleRefresh(
                         "watchlistMovies",
-                        watchlist
-                          .filter(
-                            (m) =>
-                              m.media_type === "movie" ||
-                              (!m.media_type && m.title)
-                          )
-                          .map((m) => m.title || m.name)
-                          .filter(Boolean) as string[],
+                        watchlist.filter(
+                          (m) =>
+                            m.media_type === "movie" ||
+                            (!m.media_type && m.title)
+                        ),
+                        "watchlist",
                         "movie",
                         setRecWatchlistMovies,
                         setLoadingWatchlistMovies
                       )
                     }
                     refreshing={refreshing.watchlistMovies}
+                    // Quick Actions
+                    onDismiss={handleDismiss}
+                    onQuickAdd={handleQuickAdd}
+                    onQuickWatched={handleQuickWatched}
+                    checkIsWatchlist={checkIsWatchlist}
+                    checkIsWatched={checkIsWatched}
                   />
                 )}
-              {watchlist.some((m) => m.media_type === "tv" || m.name) && (
-                <MovieRow
-                  title="Recommendations Based on Watchlist TV Shows"
-                  movies={filterRecs(recWatchlistTV)}
-                  onMovieClick={handleMovieClick}
-                  isLoading={loadingWatchlistTV}
-                  error={errorWatchlistTV}
-                  onRetry={() => {
-                    const watchlistTV = watchlist.filter(
-                      (m) => m.media_type === "tv" || m.name
-                    );
-                    setLoadingWatchlistTV(true);
-                    setErrorWatchlistTV(null);
-                    fetchRecs(
-                      watchlistTV.map((m) => m.name || m.title).filter(Boolean) as string[],
-                      "tv",
-                      "watchlistTV",
-                      true
-                    )
-                      .then((recs) => {
-                        setRecWatchlistTV(recs);
-                        setErrorWatchlistTV(null);
-                      })
-                      .catch((error) => {
-                        console.error("Failed to fetch recommendations:", error);
-                        setErrorWatchlistTV("Unable to generate recommendations. Please try again later.");
-                      })
-                      .finally(() => setLoadingWatchlistTV(false));
-                  }}
-                  horizontal={true}
-                  onRefresh={() =>
-                    handleRefresh(
-                      "watchlistTV",
-                      watchlist
-                        .filter((m) => m.media_type === "tv" || m.name)
-                        .map((m) => m.name || m.title)
-                        .filter(Boolean) as string[],
-                      "tv",
-                      setRecWatchlistTV,
-                      setLoadingWatchlistTV
-                    )
-                  }
-                  refreshing={refreshing.watchlistTV}
-                />
-              )}
-            </>
+              </TabsContent>
+
+              <TabsContent value="tv" className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {hasWatchedTV ? (
+                  <MovieRow
+                    title="Based on your Watch History"
+                    movies={filterRecs(recWatchedTV)}
+                    onMovieClick={handleMovieClick}
+                    isLoading={loadingWatchedTV}
+                    error={errorWatchedTV}
+                    onRetry={() => {
+                      const watchedTV = watched.filter((m) => m.media_type === "tv" || m.name);
+                      setLoadingWatchedTV(true);
+                      setErrorWatchedTV(null);
+                      fetchRecs(watchedTV, "watched", "watchedTV", "tv", true)
+                        .then((recs) => {
+                          setRecWatchedTV(recs);
+                          setErrorWatchedTV(null);
+                        })
+                        .catch((error) => {
+                          console.error("Failed to fetch recommendations:", error);
+                          setErrorWatchedTV("Unable to generate recommendations. Please try again later.");
+                        })
+                        .finally(() => setLoadingWatchedTV(false));
+                    }}
+                    horizontal={false}
+                    onRefresh={() =>
+                      handleRefresh(
+                        "watchedTV",
+                        watched.filter((m) => m.media_type === "tv" || m.name),
+                        "watched",
+                        "tv",
+                        setRecWatchedTV,
+                        setLoadingWatchedTV
+                      )
+                    }
+                    refreshing={refreshing.watchedTV}
+                    // Quick Actions
+                    onDismiss={handleDismiss}
+                    onQuickAdd={handleQuickAdd}
+                    onQuickWatched={handleQuickWatched}
+                    checkIsWatchlist={checkIsWatchlist}
+                    checkIsWatched={checkIsWatched}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 animate-in fade-in zoom-in-50 duration-500">
+                    <div className="bg-primary/10 p-4 rounded-full">
+                      <Tv className="h-8 w-8 text-primary" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-semibold">No TV Show Context Yet</h3>
+                      <p className="text-muted-foreground max-w-sm mx-auto">
+                        Start watching TV shows to unlock personalized AI recommendations.
+                      </p>
+                    </div>
+                    <Button asChild variant="outline">
+                      <Link href="/?tab=tv">Browse TV Shows</Link>
+                    </Button>
+                  </div>
+                )}
+
+                {hasWatchlistTV && (
+                  <MovieRow
+                    title="Based on your Watchlist"
+                    movies={filterRecs(recWatchlistTV)}
+                    onMovieClick={handleMovieClick}
+                    isLoading={loadingWatchlistTV}
+                    error={errorWatchlistTV}
+                    onRetry={() => {
+                      const watchlistTV = watchlist.filter(
+                        (m) => m.media_type === "tv" || m.name
+                      );
+                      setLoadingWatchlistTV(true);
+                      setErrorWatchlistTV(null);
+                      fetchRecs(watchlistTV, "watchlist", "watchlistTV", "tv", true)
+                        .then((recs) => {
+                          setRecWatchlistTV(recs);
+                          setErrorWatchlistTV(null);
+                        })
+                        .catch((error) => {
+                          console.error("Failed to fetch recommendations:", error);
+                          setErrorWatchlistTV("Unable to generate recommendations. Please try again later.");
+                        })
+                        .finally(() => setLoadingWatchlistTV(false));
+                    }}
+                    horizontal={false}
+                    onRefresh={() =>
+                      handleRefresh(
+                        "watchlistTV",
+                        watchlist.filter((m) => m.media_type === "tv" || m.name),
+                        "watchlist",
+                        "tv",
+                        setRecWatchlistTV,
+                        setLoadingWatchlistTV
+                      )
+                    }
+                    refreshing={refreshing.watchlistTV}
+                    onDismiss={handleDismiss}
+                    onQuickAdd={handleQuickAdd}
+                    onQuickWatched={handleQuickWatched}
+                    checkIsWatchlist={checkIsWatchlist}
+                    checkIsWatched={checkIsWatched}
+                  />
+                )}
+              </TabsContent>
+            </Tabs>
           );
         })()}
         {selectedItem && (
@@ -551,6 +703,7 @@ const RecommendationPage = () => {
             onListUpdate={handleListUpdate}
             isMovieInList={isMovieInList}
             onMovieSelect={handleMovieClick}
+            aiExplanation={selectedItem.ai_explanation}
           />
         )}
       </div>

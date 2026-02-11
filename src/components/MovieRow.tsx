@@ -6,8 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MovieCard } from "./MovieCard";
 import { MovieCardSkeleton } from "./MovieCardSkeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { DataError } from "@/components/DataError";
 
 interface MovieRowProps {
@@ -25,6 +24,11 @@ interface MovieRowProps {
   onToggleSelect?: (id: number) => void;
   error?: string | null;
   onRetry?: () => void;
+  onDismiss?: (id: number) => void;
+  onQuickAdd?: (movie: Movie) => void;
+  onQuickWatched?: (movie: Movie) => void;
+  checkIsWatchlist?: (id: number) => boolean;
+  checkIsWatched?: (id: number) => boolean;
 }
 
 export function MovieRow({
@@ -42,6 +46,11 @@ export function MovieRow({
   onToggleSelect,
   error: externalError,
   onRetry,
+  onDismiss,
+  onQuickAdd,
+  onQuickWatched,
+  checkIsWatchlist,
+  checkIsWatched,
 }: MovieRowProps) {
   const [movies, setMovies] = React.useState<Movie[]>(initialMovies || []);
   const [isLoading, setIsLoading] = React.useState(
@@ -49,8 +58,6 @@ export function MovieRow({
   );
   const [error, setError] = React.useState<string | null>(null);
   const { toast } = useToast();
-  
-  // Use external error if provided, otherwise use internal error
   const displayError = externalError !== undefined ? externalError : error;
 
   React.useEffect(() => {
@@ -142,7 +149,7 @@ export function MovieRow({
     if (horizontal) {
       return (
         <ScrollArea className="w-full whitespace-nowrap rounded-md">
-          <div className="flex space-x-4">
+          <div className="flex w-max space-x-4 p-4">
             {movies.map((movie, index) => (
               <MovieCard
                 key={`${movie.id}-${movie.media_type || ""}-${index}`}
@@ -155,6 +162,11 @@ export function MovieRow({
                 onToggleSelect={() =>
                   onToggleSelect && onToggleSelect(movie.id)
                 }
+                onDismiss={onDismiss ? (e) => onDismiss(movie.id) : undefined}
+                onQuickAdd={onQuickAdd ? (e) => onQuickAdd(movie) : undefined}
+                onQuickWatched={onQuickWatched ? (e) => onQuickWatched(movie) : undefined}
+                isInWatchlist={checkIsWatchlist ? checkIsWatchlist(movie.id) : undefined}
+                isWatched={checkIsWatched ? checkIsWatched(movie.id) : undefined}
               />
             ))}
           </div>
@@ -172,6 +184,11 @@ export function MovieRow({
             isEditing={isEditing}
             isSelected={selectedIds?.includes(movie.id)}
             onToggleSelect={() => onToggleSelect && onToggleSelect(movie.id)}
+            onDismiss={onDismiss ? (e) => onDismiss(movie.id) : undefined}
+            onQuickAdd={onQuickAdd ? (e) => onQuickAdd(movie) : undefined}
+            onQuickWatched={onQuickWatched ? (e) => onQuickWatched(movie) : undefined}
+            isInWatchlist={checkIsWatchlist ? checkIsWatchlist(movie.id) : undefined}
+            isWatched={checkIsWatched ? checkIsWatched(movie.id) : undefined}
           />
         ))}
       </div>
@@ -181,7 +198,7 @@ export function MovieRow({
   return (
     <section className="container max-w-screen-2xl">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold md:text-2xl">{title}</h2>
+        <h2 className="text-xl font-bold md:text-2xl border-l-4 border-primary pl-4">{title}</h2>
         {onRefresh && (
           <button
             onClick={onRefresh}
