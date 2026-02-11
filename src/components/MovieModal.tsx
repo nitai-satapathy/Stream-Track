@@ -640,6 +640,7 @@ export function MovieModal({
                               key={episode.id}
                               onClick={() => handleEpisodeToggle(episode.season_number, episode.episode_number)}
                               title={`${episode.episode_number}. ${episode.name}`}
+                              aria-label={`Mark Season ${episode.season_number} Episode ${episode.episode_number} as ${isWatched ? "unwatched" : "watched"}`}
                               className={`
                                 aspect-square flex items-center justify-center rounded-md text-sm font-medium transition-all
                                 hover:scale-105 active:scale-95 border
@@ -669,6 +670,15 @@ export function MovieModal({
                           key={member.id}
                           className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/80 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-sm ring-1 ring-transparent hover:ring-border/50"
                           onClick={() => setSelectedPersonId(member.id)}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`View details for ${member.name}`}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSelectedPersonId(member.id);
+                            }
+                          }}
                         >
                           <div className="relative h-16 w-12 flex-shrink-0 overflow-hidden rounded-md">
                             {member.profile_path ? (
@@ -741,6 +751,15 @@ export function MovieModal({
                           key={item.id}
                           className="cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 hover:ring-2 hover:ring-primary/20 rounded-md group"
                           onClick={() => handleNavigation(item.id, item.media_type || mediaType || 'movie')}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`View details for ${item.title || item.name}`}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleNavigation(item.id, item.media_type || mediaType || 'movie');
+                            }
+                          }}
                         >
                           <div className="aspect-[2/3] w-full rounded-md overflow-hidden bg-muted">
                             {item.poster_path ? (

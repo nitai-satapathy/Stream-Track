@@ -100,11 +100,16 @@ export function GlobalSearchModal({ isOpen, onClose, onListUpdate, updateMoviePr
     const [mounted, setMounted] = React.useState(false);
     React.useEffect(() => setMounted(true), []);
 
-    // ESC Listener
+    // Keyboard Shortcuts
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape" && isOpen) {
                 closeModal();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+                e.preventDefault();
+                if (!isOpen) {
+                }
             }
         };
         window.addEventListener("keydown", handleKeyDown);

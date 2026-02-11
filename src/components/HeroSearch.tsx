@@ -59,6 +59,43 @@ export function HeroSearch({
 
     const shouldShowResults = focused && (searchResults.length > 0 || isLoading);
 
+    const [selectedIndex, setSelectedIndex] = React.useState(-1);
+
+    // Reset selection when results change or modal closes
+    React.useEffect(() => {
+        setSelectedIndex(-1);
+    }, [searchResults, focused]);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!shouldShowResults) return;
+
+        switch (e.key) {
+            case "ArrowDown":
+                e.preventDefault();
+                setSelectedIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : prev));
+                break;
+            case "ArrowUp":
+                e.preventDefault();
+                setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+                break;
+            case "Enter":
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < searchResults.length) {
+                    const item = searchResults[selectedIndex];
+                    onResultClick?.(item.id, item.media_type || "movie");
+                    setFocused(false);
+                } else {
+                    onSubmit();
+                    inputRef.current?.blur();
+                }
+                break;
+            case "Escape":
+                setFocused(false);
+                inputRef.current?.blur();
+                break;
+        }
+    };
+
     return (
         <div ref={containerRef} className={cn("w-full max-w-xl mx-auto relative", className)}>
             <Flare.Base
@@ -94,8 +131,11 @@ export function HeroSearch({
                         className="flex-1"
                         onSubmit={(e) => {
                             e.preventDefault();
-                            onSubmit();
-                            inputRef.current?.blur();
+                            // If we have a selection, Enter is handled by onKeyDown
+                            if (selectedIndex === -1) {
+                                onSubmit();
+                                inputRef.current?.blur();
+                            }
                         }}
                     >
                         <input
@@ -105,10 +145,14 @@ export function HeroSearch({
                             onChange={(e) => onChange(e.target.value)}
                             onFocus={() => {
                                 setFocused(true);
-                                setFocused(true);
                             }}
+                            onKeyDown={handleKeyDown}
                             className="w-full bg-transparent border-none outline-none text-lg text-white placeholder:text-gray-500 py-4 pr-12"
                             placeholder={placeholder}
+                            role="combobox"
+                            aria-expanded={shouldShowResults}
+                            aria-controls="search-results-listbox"
+                            aria-activedescendant={selectedIndex >= 0 ? `result-${selectedIndex}` : undefined}
                         />
                     </form>
 
@@ -120,6 +164,7 @@ export function HeroSearch({
                                 inputRef.current?.focus();
                             }}
                             className="absolute right-3 p-2 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-all"
+                            aria-label="Clear search"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -129,21 +174,32 @@ export function HeroSearch({
 
             {/* Search Results Dropdown */}
             {shouldShowResults && (
-                <div className="absolute top-full left-0 right-0 mt-4 bg-gray-950/95 border border-white/10 rounded-xl backdrop-blur-md shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+                <div
+                    id="search-results-listbox"
+                    role="listbox"
+                    className="absolute top-full left-0 right-0 mt-4 bg-gray-950/95 border border-white/10 rounded-xl backdrop-blur-md shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2"
+                >
                     {isLoading ? (
                         <div className="flex items-center justify-center p-8">
                             <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
                         </div>
                     ) : (
                         <div className="max-h-[60vh] overflow-y-auto custom-scrollbar p-2 space-y-1">
-                            {searchResults.map((item) => (
+                            {searchResults.map((item, index) => (
                                 <div
                                     key={`${item.id}-${item.media_type}`}
-                                    className="flex items-center gap-4 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer group"
+                                    id={`result-${index}`}
+                                    role="option"
+                                    aria-selected={index === selectedIndex}
+                                    className={cn(
+                                        "flex items-center gap-4 p-2 rounded-lg transition-colors cursor-pointer group",
+                                        index === selectedIndex ? "bg-white/20" : "hover:bg-white/10"
+                                    )}
                                     onClick={() => {
                                         onResultClick?.(item.id, item.media_type || "movie");
                                         setFocused(false);
                                     }}
+                                    onMouseEnter={() => setSelectedIndex(index)}
                                 >
                                     <div className="relative w-12 h-16 shrink-0 rounded-md overflow-hidden bg-gray-800">
                                         <Image

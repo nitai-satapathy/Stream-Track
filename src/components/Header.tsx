@@ -61,6 +61,18 @@ export function Header(props: HeaderProps) {
   const [isThemeOpen, setIsThemeOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
+  // Keyboard shortcut for search
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <>
       <header className="fixed top-4 left-1/2 z-50 w-[95%] max-w-7xl -translate-x-1/2 rounded-full border border-white/10 bg-background/60 shadow-2xl backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
@@ -90,10 +102,23 @@ export function Header(props: HeaderProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Search"
+                aria-label="Search (Ctrl+K)"
                 onClick={() => setIsSearchOpen(true)}
+                className="relative hidden sm:flex"
               >
                 <Search className="h-5 w-5 md:h-6 md:w-6" />
+                <span className="sr-only">Search (Ctrl+K)</span>
+              </Button>
+            )}
+            {pathname !== "/" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Search"
+                onClick={() => setIsSearchOpen(true)}
+                className="sm:hidden"
+              >
+                <Search className="h-5 w-5" />
               </Button>
             )}
             <Button
