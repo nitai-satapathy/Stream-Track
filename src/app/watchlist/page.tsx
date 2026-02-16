@@ -5,9 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
 import type { Movie } from "@/lib/types";
 import { useListManager } from "@/hooks/useListManager";
-import { MovieCard } from "@/components/MovieCard";
+import { MovieRow } from "@/components/MovieRow";
 import { SimpleLoading } from "@/components/SimpleLoading";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Header } from "@/components/Header";
 import { MovieModal } from "@/components/MovieModal";
 import { EmptyState } from "@/components/EmptyState";
@@ -141,42 +140,28 @@ const WatchlistPage = () => {
           <>
             {movies.length > 0 && (
               <div className="mb-8">
-                <h2 className="mb-4 text-2xl font-semibold">Movies</h2>
-                <ScrollArea className="w-full whitespace-nowrap rounded-md">
-                  <div className="flex gap-4">
-                    {movies.map((movie) => (
-                      <MovieCard
-                        key={movie.id}
-                        movie={movie}
-                        onClick={() => handleMovieClick(movie.id, "movie")}
-                        isEditing={isEditing}
-                        isSelected={baseSelectedIds.includes(movie.id)}
-                        onToggleSelect={() => handleToggleSelect(movie.id)}
-                      />
-                    ))}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                <MovieRow
+                  title="Movies"
+                  movies={movies}
+                  onMovieClick={(id) => handleMovieClick(id, "movie")}
+                  horizontal={true}
+                  isEditing={isEditing}
+                  selectedIds={baseSelectedIds}
+                  onToggleSelect={handleToggleSelect}
+                />
               </div>
             )}
             {tvShows.length > 0 && (
               <div>
-                <h2 className="mb-4 text-2xl font-semibold">TV Shows</h2>
-                <ScrollArea className="w-full whitespace-nowrap rounded-md">
-                  <div className="flex gap-4">
-                    {tvShows.map((show) => (
-                      <MovieCard
-                        key={show.id}
-                        movie={show}
-                        onClick={() => handleMovieClick(show.id, "tv")}
-                        isEditing={isEditing}
-                        isSelected={baseSelectedIds.includes(show.id)}
-                        onToggleSelect={() => handleToggleSelect(show.id)}
-                      />
-                    ))}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                <MovieRow
+                  title="TV Shows"
+                  movies={tvShows}
+                  onMovieClick={(id) => handleMovieClick(id, "tv")}
+                  horizontal={true}
+                  isEditing={isEditing}
+                  selectedIds={baseSelectedIds}
+                  onToggleSelect={handleToggleSelect}
+                />
               </div>
             )}
           </>

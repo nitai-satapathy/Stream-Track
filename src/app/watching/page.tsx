@@ -154,6 +154,7 @@ export default function WatchingPage() {
                 isEditing={isEditing}
                 selectedIds={baseSelectedIds}
                 onToggleSelect={handleToggleSelect}
+                horizontal={true}
               />
             )}
             {watchingTvShows.length > 0 && (
@@ -164,6 +165,7 @@ export default function WatchingPage() {
                 isEditing={isEditing}
                 selectedIds={baseSelectedIds}
                 onToggleSelect={handleToggleSelect}
+                horizontal={true}
               />
             )}
           </>

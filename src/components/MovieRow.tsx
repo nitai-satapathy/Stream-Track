@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MovieCard } from "./MovieCard";
 import { MovieCardSkeleton } from "./MovieCardSkeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { DataError } from "@/components/DataError";
 
 interface MovieRowProps {
@@ -102,6 +102,65 @@ export function MovieRow({
     }
   }, [initialIsLoading]);
 
+  const rowRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+  const [canScrollRight, setCanScrollRight] = React.useState(false);
+
+  const checkForScroll = () => {
+    if (rowRef.current) {
+      const viewport = rowRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      ) as HTMLElement;
+      if (viewport) {
+        const { scrollLeft, scrollWidth, clientWidth } = viewport;
+        setCanScrollLeft(scrollLeft > 0);
+        setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1); // -1 for tolerance
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    if (horizontal) {
+      checkForScroll();
+      window.addEventListener("resize", checkForScroll);
+
+      const viewport = rowRef.current?.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      ) as HTMLElement;
+
+      if (viewport) {
+        viewport.addEventListener("scroll", checkForScroll);
+      }
+
+      return () => {
+        window.removeEventListener("resize", checkForScroll);
+        if (viewport) {
+          viewport.removeEventListener("scroll", checkForScroll);
+        }
+      };
+    }
+  }, [horizontal, movies]); // Re-check when movies change
+
+
+  const scroll = (direction: "left" | "right") => {
+    if (rowRef.current) {
+      // Find the viewport element inside the ScrollArea (Radix UI structure)
+      const viewport = rowRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      ) as HTMLElement;
+
+      if (viewport) {
+        const { scrollLeft, clientWidth } = viewport;
+        const scrollTo =
+          direction === "left"
+            ? scrollLeft - clientWidth / 2
+            : scrollLeft + clientWidth / 2;
+
+        viewport.scrollTo({ left: scrollTo, behavior: "smooth" });
+      }
+    }
+  };
+
   const renderContent = () => {
     if (isLoading) {
       return (
@@ -148,30 +207,59 @@ export function MovieRow({
 
     if (horizontal) {
       return (
-        <ScrollArea className="w-full whitespace-nowrap rounded-md">
-          <div className="flex w-max space-x-4 p-4">
-            {movies.map((movie, index) => (
-              <MovieCard
-                key={`${movie.id}-${movie.media_type || ""}-${index}`}
-                movie={movie}
-                onClick={() =>
-                  onMovieClick(movie.id, movie.media_type || "movie")
-                }
-                isEditing={isEditing}
-                isSelected={selectedIds?.includes(movie.id)}
-                onToggleSelect={() =>
-                  onToggleSelect && onToggleSelect(movie.id)
-                }
-                onDismiss={onDismiss ? (e) => onDismiss(movie.id) : undefined}
-                onQuickAdd={onQuickAdd ? (e) => onQuickAdd(movie) : undefined}
-                onQuickWatched={onQuickWatched ? (e) => onQuickWatched(movie) : undefined}
-                isInWatchlist={checkIsWatchlist ? checkIsWatchlist(movie.id) : undefined}
-                isWatched={checkIsWatched ? checkIsWatched(movie.id) : undefined}
-              />
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        <div className="relative group">
+          {canScrollLeft && (
+            <>
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+              <button
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-100 transition-opacity"
+                onClick={() => scroll("left")}
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+            </>
+          )}
+
+          <ScrollArea ref={rowRef} className="w-full whitespace-nowrap rounded-md">
+            <div className="flex w-max space-x-4 p-4 snap-x snap-mandatory">
+              {movies.map((movie, index) => (
+                <div key={`${movie.id}-${movie.media_type || ""}-${index}`} className="snap-center">
+                  <MovieCard
+                    movie={movie}
+                    onClick={() =>
+                      onMovieClick(movie.id, movie.media_type || "movie")
+                    }
+                    isEditing={isEditing}
+                    isSelected={selectedIds?.includes(movie.id)}
+                    onToggleSelect={() =>
+                      onToggleSelect && onToggleSelect(movie.id)
+                    }
+                    onDismiss={onDismiss ? (e) => onDismiss(movie.id) : undefined}
+                    onQuickAdd={onQuickAdd ? (e) => onQuickAdd(movie) : undefined}
+                    onQuickWatched={onQuickWatched ? (e) => onQuickWatched(movie) : undefined}
+                    isInWatchlist={checkIsWatchlist ? checkIsWatchlist(movie.id) : undefined}
+                    isWatched={checkIsWatched ? checkIsWatched(movie.id) : undefined}
+                  />
+                </div>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+
+          {canScrollRight && (
+            <>
+              <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+              <button
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-100 transition-opacity"
+                onClick={() => scroll("right")}
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
+        </div>
       );
     }
     return (
