@@ -70,7 +70,7 @@ function Light(props: FlareProps) {
         <div
             ref={outerRef}
             className={cn(
-                "pointer-events-none absolute inset-0 overflow-hidden opacity-0 transition-opacity duration-[400ms] group-hover:opacity-100",
+                "pointer-events-none absolute inset-0 overflow-hidden opacity-0 transition-opacity duration-500 group-hover:opacity-100",
                 props.className,
                 {
                     "!opacity-100": props.enabled,
