@@ -72,12 +72,18 @@ export function NotificationItem({
 
   const isSolidBg = statusColorClass.includes('bg-') && !statusColorClass.includes('text-');
 
+  const isFullyWatched = isGroup
+    ? notification.episodes.every(e => e.isWatched)
+    : notification.isWatched;
+
   return (
     <Card
       className={cn(
         "group relative overflow-hidden transition-all duration-200 hover:shadow-md border-l-4",
         !notification.read
-          ? "border-l-primary bg-primary/5 border-y-border border-r-border"
+          ? isFullyWatched
+            ? "border-l-green-500 bg-green-500/5 border-y-green-500/20 border-r-green-500/20"
+            : "border-l-primary bg-primary/5 border-y-border border-r-border"
           : "border-l-transparent opacity-85 hover:opacity-100",
       )}
       role="article"
@@ -111,35 +117,40 @@ export function NotificationItem({
         <div className="flex-1 min-w-0 py-0.5 flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between gap-2">
-              <h4 className="font-bold text-sm sm:text-base truncate pr-28 text-foreground/90 leading-tight">
+              <h4 className="font-bold text-sm sm:text-base truncate pr-28 text-foreground/90 leading-tight flex items-center gap-2">
                 {notification.tvShowTitle}
+                {!notification.read && isFullyWatched && (
+                  <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-green-500/30 text-green-500 hidden sm:inline-flex">
+                    Watched
+                  </Badge>
+                )}
               </h4>
 
               <div className="absolute top-2 right-2 flex items-center gap-1">
-                {!notification.read && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onMarkAsWatched && onMarkAsWatched(notification.id)}
-                      className="h-8 w-8 text-muted-foreground hover:text-green-600 transition-colors hover:bg-green-500/10"
-                      title={isGroup ? "Mark all as watched" : "Mark episode as watched"}
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">Mark as watched</span>
-                    </Button>
+                {!isFullyWatched && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onMarkAsWatched && onMarkAsWatched(notification.id)}
+                    className="h-8 w-8 text-muted-foreground hover:text-green-600 transition-colors hover:bg-green-500/10"
+                    title={isGroup ? "Mark all as watched" : "Mark episode as watched"}
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span className="sr-only">Mark as watched</span>
+                  </Button>
+                )}
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onMarkAsRead(notification.id)}
-                      className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10"
-                      title={isGroup ? "Mark all as read" : "Mark as read"}
-                    >
-                      <Check className="h-4 w-4" />
-                      <span className="sr-only">Mark as read</span>
-                    </Button>
-                  </>
+                {!notification.read && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onMarkAsRead(notification.id)}
+                    className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10"
+                    title={isGroup ? "Mark all as read" : "Mark as read"}
+                  >
+                    <Check className="h-4 w-4" />
+                    <span className="sr-only">Mark as read</span>
+                  </Button>
                 )}
                 <Button
                   variant="ghost"

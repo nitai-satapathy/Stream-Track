@@ -1,9 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Bell, BellRing, Settings, Trash2, RefreshCw, CheckCircle, BellOff, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Bell, BellRing, Settings, Trash2, RefreshCw, BellOff, X, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -49,6 +51,10 @@ function useDebounce<T extends (...args: any[]) => any>(callback: T, delay: numb
 
   return debouncedCallback;
 }
+
+const formatTime = (date: Date) => {
+  return format(date, "h:mm a");
+};
 
 export function EpisodeNotificationsPanel() {
   const {
@@ -141,10 +147,6 @@ export function EpisodeNotificationsPanel() {
                       Preferences
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => markAllAsRead()}>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Mark all as read
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => clearAll()}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete all messages
@@ -181,8 +183,8 @@ export function EpisodeNotificationsPanel() {
             </div>
           ) : (
             <div className="flex flex-col min-h-0 flex-1">
-              {/* Filter Tabs */}
-              <div className="flex flex-col sm:flex-row gap-2 mb-4 flex-shrink-0">
+              {/* Filter Tabs & Actions */}
+              <div className="flex flex-col sm:flex-row gap-2 mb-4 flex-shrink-0 items-center justify-between">
                 <div className="flex gap-1 flex-wrap">
                   <Button
                     variant={filter === "all" ? "secondary" : "ghost"}
@@ -201,6 +203,18 @@ export function EpisodeNotificationsPanel() {
                     Unread
                   </Button>
                 </div>
+
+                {stats.unread > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => markAllAsRead()}
+                    className="h-8 text-xs text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10"
+                  >
+                    <CheckCheck className="h-4 w-4 mr-1.5" />
+                    Mark all read
+                  </Button>
+                )}
               </div>
 
               <Separator className="flex-shrink-0 mb-4" />
@@ -208,30 +222,49 @@ export function EpisodeNotificationsPanel() {
               {/* Notifications List */}
               <div className="flex-1 min-h-0 overflow-y-auto -mr-4 pr-4 custom-scrollbar">
                 {filteredNotifications.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center px-4 h-full">
-                    <Bell className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="font-semibold mb-2">No notifications</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {filter === "unread" && "No unread notifications"}
-                      {filter === "all" && "New episode notifications will appear here"}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center py-12 text-center px-4 h-full"
+                  >
+                    <div className="bg-primary/10 p-4 rounded-full mb-4">
+                      <Bell className="h-10 w-10 text-primary/80" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-1">All caught up!</h3>
+                    <p className="text-sm text-muted-foreground max-w-[200px]">
+                      {filter === "unread" ? "You have no unread notifications right now." : "New episode notifications will appear here."}
                     </p>
                     {lastCheck && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Last checked: {lastCheck.toLocaleString()}
+                      <p className="text-xs text-muted-foreground/60 mt-4 font-mono bg-secondary/50 px-2 py-1 rounded-md">
+                        Checked: {formatTime(lastCheck)}
                       </p>
                     )}
-                  </div>
+                  </motion.div>
                 ) : (
                   <div className="space-y-3 pb-2">
-                    {filteredNotifications.map((notification) => (
-                      <NotificationItem
-                        key={notification.id}
-                        notification={notification}
-                        onMarkAsRead={markAsRead}
-                        onMarkAsWatched={markEpisodeWatched}
-                        onDelete={deleteNotification}
-                      />
-                    ))}
+                    <AnimatePresence initial={false}>
+                      {filteredNotifications.map((notification) => (
+                        <motion.div
+                          key={notification.id}
+                          layout
+                          initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 350,
+                            damping: 25
+                          }}
+                        >
+                          <NotificationItem
+                            notification={notification}
+                            onMarkAsRead={markAsRead}
+                            onMarkAsWatched={markEpisodeWatched}
+                            onDelete={deleteNotification}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
                 )}
               </div>

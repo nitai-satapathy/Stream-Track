@@ -74,51 +74,53 @@ export function NotificationPreferencesModal({
 
           {/* Notification Sources */}
           <div className="space-y-4">
-            <Label className="text-base flex items-center gap-2">
+            <Label className="text-base flex items-center gap-2 mb-2">
               <List className="h-4 w-4" />
               Notify for shows in:
             </Label>
-            
-            <div className="flex items-center justify-between">
-              <Label htmlFor="watching-notifications" className="text-sm">
-                Currently Watching
-              </Label>
-              <Switch
-                id="watching-notifications"
-                checked={localPreferences.notifyForWatching}
-                onCheckedChange={(checked: boolean) =>
-                  setLocalPreferences(prev => ({ ...prev, notifyForWatching: checked }))
-                }
-                disabled={!localPreferences.enabled}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="watchlist-notifications" className="text-sm">
-                Watchlist
-              </Label>
-              <Switch
-                id="watchlist-notifications"
-                checked={localPreferences.notifyForWatchlist}
-                onCheckedChange={(checked: boolean) =>
-                  setLocalPreferences(prev => ({ ...prev, notifyForWatchlist: checked }))
-                }
-                disabled={!localPreferences.enabled}
-              />
-            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between bg-secondary/30 border border-border/50 rounded-lg p-3 sm:p-4 transition-colors hover:bg-secondary/50">
+                <Label htmlFor="watching-notifications" className="text-sm font-medium cursor-pointer flex-1">
+                  Currently Watching
+                </Label>
+                <Switch
+                  id="watching-notifications"
+                  checked={localPreferences.notifyForWatching}
+                  onCheckedChange={(checked: boolean) =>
+                    setLocalPreferences(prev => ({ ...prev, notifyForWatching: checked }))
+                  }
+                  disabled={!localPreferences.enabled}
+                />
+              </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="watched-notifications" className="text-sm">
-                Watched TV Shows
-              </Label>
-              <Switch
-                id="watched-notifications"
-                checked={localPreferences.notifyForWatched}
-                onCheckedChange={(checked: boolean) =>
-                  setLocalPreferences(prev => ({ ...prev, notifyForWatched: checked }))
-                }
-                disabled={!localPreferences.enabled}
-              />
+              <div className="flex items-center justify-between bg-secondary/30 border border-border/50 rounded-lg p-3 sm:p-4 transition-colors hover:bg-secondary/50">
+                <Label htmlFor="watchlist-notifications" className="text-sm font-medium cursor-pointer flex-1">
+                  Watchlist
+                </Label>
+                <Switch
+                  id="watchlist-notifications"
+                  checked={localPreferences.notifyForWatchlist}
+                  onCheckedChange={(checked: boolean) =>
+                    setLocalPreferences(prev => ({ ...prev, notifyForWatchlist: checked }))
+                  }
+                  disabled={!localPreferences.enabled}
+                />
+              </div>
+
+              <div className="flex items-center justify-between bg-secondary/30 border border-border/50 rounded-lg p-3 sm:p-4 transition-colors hover:bg-secondary/50">
+                <Label htmlFor="watched-notifications" className="text-sm font-medium cursor-pointer flex-1">
+                  Watched TV Shows
+                </Label>
+                <Switch
+                  id="watched-notifications"
+                  checked={localPreferences.notifyForWatched}
+                  onCheckedChange={(checked: boolean) =>
+                    setLocalPreferences(prev => ({ ...prev, notifyForWatched: checked }))
+                  }
+                  disabled={!localPreferences.enabled}
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -201,6 +201,17 @@ export function useEpisodeNotifications() {
     const notification = notifications.find(n => n.id === notificationId);
     if (!notification) return;
 
+    // Optimistically update the local state to mark as watched
+    setNotifications(prev => prev.map(n => {
+      if (n.id === notificationId) {
+        if ('episodes' in n) {
+          return { ...n, episodes: n.episodes.map(e => ({ ...e, isWatched: true })) };
+        }
+        return { ...n, isWatched: true };
+      }
+      return n;
+    }));
+
     if ('episodes' in notification) {
       const episodesByShow = new Map<number, typeof notification.episodes>();
 
