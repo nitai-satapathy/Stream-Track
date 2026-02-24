@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useTheme, allThemes, Theme } from "@/components/theme-context";
+import { useTheme, allThemes, Theme } from "@/components/layout/theme-context";
 import { Check } from "lucide-react";
 
 interface ThemeModalProps {

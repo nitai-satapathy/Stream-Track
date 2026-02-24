@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { Header } from "@/components/Header";
-import { MovieRow } from "@/components/MovieRow";
-import { MovieModal } from "@/components/MovieModal";
+import { Header } from "@/components/layout/Header";
+import { MovieRow } from "@/components/media/MovieRow";
+import { MovieModal } from "@/components/modals/MovieModal";
 import { useAuth } from "@/hooks/useAuth";
 import { getLists } from "@/actions/user";
 import { useRecommendations } from "@/hooks/useRecommendations";
@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Film, Tv } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SimpleLoading } from "@/components/SimpleLoading";
+import { SimpleLoading } from "@/components/shared/SimpleLoading";
 
 
 

@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Header } from "@/components/Header";
-import { MovieRow } from "@/components/MovieRow";
-import { MovieModal } from "@/components/MovieModal";
-import { BrowseSection } from "@/components/BrowseSection";
+import { Header } from "@/components/layout/Header";
+import { MovieRow } from "@/components/media/MovieRow";
+import { MovieModal } from "@/components/modals/MovieModal";
+import { BrowseSection } from "@/components/media/BrowseSection";
 import {
   fetchTrendingMovies,
   fetchTrendingTv,
@@ -20,11 +20,11 @@ import type { Movie, MediaType } from "@/lib/types";
 
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
-import LightRays from "@/components/LightRays";
-import { HeroSearch } from "@/components/HeroSearch";
+import LightRays from "@/components/layout/LightRays";
+import { HeroSearch } from "@/components/media/HeroSearch";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/theme-context";
+import { useTheme } from "@/components/layout/theme-context";
 import { getHeroContent, getRandomPlaceholder } from "@/lib/hero-content";
 import { useListManager } from "@/hooks/useListManager";
 

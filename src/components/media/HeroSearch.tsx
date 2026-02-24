@@ -38,7 +38,6 @@ export function HeroSearch({
 
     React.useEffect(() => {
         if (autoFocus && inputRef.current) {
-            // Small timeout to ensure modal animation/render doesn't steal focus
             setTimeout(() => {
                 inputRef.current?.focus();
                 setFocused(true);
@@ -131,7 +130,6 @@ export function HeroSearch({
                         className="flex-1"
                         onSubmit={(e) => {
                             e.preventDefault();
-                            // If we have a selection, Enter is handled by onKeyDown
                             if (selectedIndex === -1) {
                                 onSubmit();
                                 inputRef.current?.blur();

@@ -3,11 +3,11 @@
 import * as React from "react";
 import { Movie, MediaType } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { MovieCard } from "./MovieCard";
-import { MovieCardSkeleton } from "./MovieCardSkeleton";
+import { MovieCard } from "@/components/media/MovieCard";
+import { MovieCardSkeleton } from "@/components/media/MovieCardSkeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
-import { DataError } from "@/components/DataError";
+import { DataError } from "@/components/shared/DataError";
 
 interface MovieRowProps {
   title: string;
@@ -114,7 +114,7 @@ export function MovieRow({
       if (viewport) {
         const { scrollLeft, scrollWidth, clientWidth } = viewport;
         setCanScrollLeft(scrollLeft > 0);
-        setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1); // -1 for tolerance
+        setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
       }
     }
   };
@@ -139,12 +139,11 @@ export function MovieRow({
         }
       };
     }
-  }, [horizontal, movies]); // Re-check when movies change
+  }, [horizontal, movies]);
 
 
   const scroll = (direction: "left" | "right") => {
     if (rowRef.current) {
-      // Find the viewport element inside the ScrollArea (Radix UI structure)
       const viewport = rowRef.current.querySelector(
         "[data-radix-scroll-area-viewport]"
       ) as HTMLElement;

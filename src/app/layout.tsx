@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { Providers } from "@/components/Providers";
+import { Providers } from "@/components/layout/Providers";
 import { Analytics } from "@vercel/analytics/next";
 
-import Footer from "@/components/Footer";
+import Footer from "@/components/layout/Footer";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -51,6 +52,7 @@ export default function RootLayout({
           <Toaster />
         </Providers>
         <Footer />
+        <ScrollToTop />
         <Analytics />
       </body>
     </html>

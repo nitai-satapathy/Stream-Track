@@ -3,10 +3,10 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
-import { HeroSearch } from "@/components/HeroSearch";
+import { HeroSearch } from "@/components/media/HeroSearch";
 import { searchMulti } from "@/lib/tmdb";
 import { getHeroContent, getRandomPlaceholder } from "@/lib/hero-content";
-import { MovieModal } from "@/components/MovieModal";
+import { MovieModal } from "@/components/modals/MovieModal";
 import { useRouter } from "next/navigation";
 import type { Movie, MediaType } from "@/lib/types";
 

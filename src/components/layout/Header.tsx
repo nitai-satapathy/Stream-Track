@@ -7,16 +7,16 @@ import { Search, BadgePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Movie } from "@/lib/types";
 import Image from "next/image";
-import { ChangelogModal } from "./ChangelogModal";
-import { SettingsModal } from "./SettingsModal";
-import { ThemeModal } from "./ThemeModal";
-import { EpisodeNotificationsPanel } from "./notifications/EpisodeNotificationsPanel";
-import { ProfileMenu } from "./ProfileMenu";
+import { ChangelogModal } from "@/components/modals/ChangelogModal";
+import { SettingsModal } from "@/components/modals/SettingsModal";
+import { ThemeModal } from "@/components/modals/ThemeModal";
+import { EpisodeNotificationsPanel } from "@/components/notifications/EpisodeNotificationsPanel";
+import { ProfileMenu } from "@/components/header/ProfileMenu";
 import { useAuth } from "@/hooks/useAuth";
-import { GlobalSearchModal } from "./GlobalSearchModal";
-import { Navigation } from "./header/Navigation";
-import { MobileMenu } from "./header/MobileMenu";
-import { BulkAddModal } from "./header/BulkAddModal";
+import { GlobalSearchModal } from "@/components/modals/GlobalSearchModal";
+import { Navigation } from "@/components/header/Navigation";
+import { MobileMenu } from "@/components/header/MobileMenu";
+import { BulkAddModal } from "@/components/header/BulkAddModal";
 
 type ListType = "watchlist" | "watching" | "watched";
 interface UserLists {

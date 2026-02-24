@@ -3,9 +3,9 @@ import * as React from "react";
 import type { Movie } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, Check, X, Plus, Eye } from "lucide-react";
-import { Badge } from "./ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { TMDB_IMAGE_BASE_URL_W500 } from "@/lib/constants";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MovieCardProps {

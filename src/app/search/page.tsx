@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import { Header } from "@/components/Header";
-import { MovieRow } from "@/components/MovieRow";
-import { MovieModal } from "@/components/MovieModal";
+import { Header } from "@/components/layout/Header";
+import { MovieRow } from "@/components/media/MovieRow";
+import { MovieModal } from "@/components/modals/MovieModal";
 import { searchMulti } from "@/lib/tmdb";
 import type { Movie } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";

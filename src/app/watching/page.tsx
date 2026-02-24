@@ -3,14 +3,14 @@
 import * as React from "react";
 
 
-import { Header } from "@/components/Header";
-import { MovieRow } from "@/components/MovieRow";
-import { MovieModal } from "@/components/MovieModal";
-import { SimpleLoading } from "@/components/SimpleLoading";
+import { Header } from "@/components/layout/Header";
+import { MovieRow } from "@/components/media/MovieRow";
+import { MovieModal } from "@/components/modals/MovieModal";
+import { SimpleLoading } from "@/components/shared/SimpleLoading";
 import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { useListManager } from "@/hooks/useListManager";
 import { useToast } from "@/hooks/use-toast";
 

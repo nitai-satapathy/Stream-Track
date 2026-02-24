@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { Movie, Genre, MediaType } from "@/lib/types";
-import { MovieRow } from "@/components/MovieRow";
-import { GenreFilter } from "@/components/GenreFilter";
+import { MovieRow } from "@/components/media/MovieRow";
+import { GenreFilter } from "@/components/media/GenreFilter";
 import { fetchGenres, discoverByGenre } from "@/lib/tmdb";
 
 interface BrowseSectionProps {

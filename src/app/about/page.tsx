@@ -20,7 +20,7 @@ import { CheckCircle2, Clapperboard, History, Sparkles } from "lucide-react";
 import Atropos from "atropos/react";
 import "atropos/css";
 
-import { Header } from "@/components/Header";
+import { Header } from "@/components/layout/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
 import type { Movie } from "@/lib/types";

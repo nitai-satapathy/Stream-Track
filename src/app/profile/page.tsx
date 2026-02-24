@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Clapperboard, TvMinimalPlay, ListPlus, Edit } from "lucide-react";
-import { ProfileModal } from "@/components/ProfileModal";
+import { ProfileModal } from "@/components/modals/ProfileModal";
 import { GenreChart } from "@/components/profile/GenreChart";
 import { TimeStats } from "@/components/profile/TimeStats";
 import { BadgeSection } from "@/components/profile/BadgeSection";
 import type { Movie } from "@/lib/types";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/layout/Header";
 
 export default function ProfilePage() {
     const { user, loading } = useAuth();

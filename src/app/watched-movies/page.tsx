@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/layout/Header";
 import { Plus, Funnel } from "lucide-react";
 import {
   DropdownMenu,
@@ -12,14 +12,14 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
-import { MovieRow } from "@/components/MovieRow";
-import { MovieModal } from "@/components/MovieModal";
-import { SimpleLoading } from "@/components/SimpleLoading";
-import { FilterSortModal } from "@/components/FilterSortModal";
+import { MovieRow } from "@/components/media/MovieRow";
+import { MovieModal } from "@/components/modals/MovieModal";
+import { SimpleLoading } from "@/components/shared/SimpleLoading";
+import { FilterSortModal } from "@/components/modals/FilterSortModal";
 import type { Movie, MediaType } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { useListManager } from "@/hooks/useListManager";
 
 type ListType = "watchlist" | "watching" | "watched";

@@ -44,6 +44,21 @@ export function FilterSortModal({
   sortBy,
   setSortBy,
 }: FilterSortModalProps) {
+  const [localGenres, setLocalGenres] = React.useState<string[]>([]);
+  const [localSortBy, setLocalSortBy] = React.useState<string>("");
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setLocalGenres(selectedGenres);
+      setLocalSortBy(sortBy);
+    }
+  }, [isOpen, selectedGenres, sortBy]);
+
+  const handleApply = () => {
+    setSelectedGenres(localGenres);
+    setSortBy(localSortBy);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4 sm:max-h-[90vh] sm:max-w-4xl sm:p-6">
@@ -58,19 +73,19 @@ export function FilterSortModal({
           <div className="w-full">
             <h3 className="mb-2 font-semibold">Sort By</h3>
             <RadioGroup
-              value={sortBy}
-              onValueChange={setSortBy}
+              value={localSortBy}
+              onValueChange={setLocalSortBy}
               className="space-y-2"
             >
               {SORT_OPTIONS.map((opt) => (
                 <div
                   key={opt.value}
-                  className={`flex items-center space-x-2 rounded px-2 py-1 transition-colors ${sortBy === opt.value ? "bg-primary/10" : "hover:bg-muted/50"}`}
+                  className={`flex items-center space-x-2 rounded px-2 py-1 transition-colors ${localSortBy === opt.value ? "bg-primary/10" : "hover:bg-muted/50"}`}
                 >
                   <RadioGroupItem value={opt.value} id={opt.value} />
                   <Label
                     htmlFor={opt.value}
-                    className={`w-full cursor-pointer ${sortBy === opt.value ? "font-bold text-primary" : "text-foreground"}`}
+                    className={`w-full cursor-pointer ${localSortBy === opt.value ? "font-bold text-primary" : "text-foreground"}`}
                   >
                     {opt.label}
                   </Label>
@@ -86,11 +101,11 @@ export function FilterSortModal({
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant={
-                    selectedGenres.length === 0 ? "default" : "secondary"
+                    localGenres.length === 0 ? "default" : "secondary"
                   }
                   size="sm"
                   className="h-8 rounded-full"
-                  onClick={() => setSelectedGenres([])}
+                  onClick={() => setLocalGenres([])}
                 >
                   All Genres
                 </Button>
@@ -98,15 +113,15 @@ export function FilterSortModal({
                   <Button
                     key={g}
                     variant={
-                      selectedGenres.includes(g) ? "default" : "secondary"
+                      localGenres.includes(g) ? "default" : "secondary"
                     }
                     size="sm"
                     className="h-8 rounded-full"
                     onClick={() =>
-                      setSelectedGenres(
-                        selectedGenres.includes(g)
-                          ? selectedGenres.filter((genre) => genre !== g)
-                          : [...selectedGenres, g]
+                      setLocalGenres(
+                        localGenres.includes(g)
+                          ? localGenres.filter((genre) => genre !== g)
+                          : [...localGenres, g]
                       )
                     }
                   >
@@ -119,7 +134,7 @@ export function FilterSortModal({
         </div>
         <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row">
           <DialogClose asChild>
-            <Button className="w-full sm:w-1/2" variant="default">
+            <Button className="w-full sm:w-1/2" variant="default" onClick={handleApply}>
               Apply
             </Button>
           </DialogClose>
@@ -128,6 +143,8 @@ export function FilterSortModal({
             variant="outline"
             type="button"
             onClick={() => {
+              setLocalGenres([]);
+              setLocalSortBy("");
               setSelectedGenres([]);
               setSortBy("");
               onClose();

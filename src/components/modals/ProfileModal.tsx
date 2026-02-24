@@ -48,7 +48,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     setIsLoading(true);
     setError(null);
 
-    const result = await updateUserProfile((session.user as any).id, {
+    const result = await updateUserProfile(session.user.id, {
       name,
       image: selectedImage,
     });

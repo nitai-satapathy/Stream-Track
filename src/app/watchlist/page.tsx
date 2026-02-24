@@ -5,11 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { getLists, updateUserLists } from "@/actions/user";
 import type { Movie } from "@/lib/types";
 import { useListManager } from "@/hooks/useListManager";
-import { MovieRow } from "@/components/MovieRow";
-import { SimpleLoading } from "@/components/SimpleLoading";
-import { Header } from "@/components/Header";
-import { MovieModal } from "@/components/MovieModal";
-import { EmptyState } from "@/components/EmptyState";
+import { MovieRow } from "@/components/media/MovieRow";
+import { SimpleLoading } from "@/components/shared/SimpleLoading";
+import { Header } from "@/components/layout/Header";
+import { MovieModal } from "@/components/modals/MovieModal";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 const WatchlistPage = () => {
   const { user } = useAuth();

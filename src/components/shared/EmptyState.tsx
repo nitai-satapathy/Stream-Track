@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
@@ -14,6 +13,10 @@ export function EmptyState() {
     useEffect(() => {
         setRandomMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
     }, []);
+
+    const handleSearchClick = () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+    };
 
     return (
         <div className="flex min-h-[400px] flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in duration-500">
@@ -32,11 +35,9 @@ export function EmptyState() {
             <p className="mb-6 text-muted-foreground max-w-sm">
                 It looks like you haven&apos;t added anything to this list yet. Start exploring to fill it up!
             </p>
-            <Link href="/">
-                <Button size="lg" className="rounded-full px-8">
-                    Start Browsing
-                </Button>
-            </Link>
+            <Button size="lg" className="rounded-full px-8" onClick={handleSearchClick}>
+                Search to Add
+            </Button>
         </div>
     );
 }
