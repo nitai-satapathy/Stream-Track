@@ -523,7 +523,7 @@ export function MovieModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[85vh] md:max-h-[90vh] max-w-4xl overflow-y-auto bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:p-8">
+      <DialogContent className="max-h-[85vh] md:max-h-[90vh] max-w-4xl overflow-y-auto p-4 md:p-8 glass-panel border-white/5 shadow-2xl">
         {renderContent()}
       </DialogContent>
     </Dialog>

@@ -34,7 +34,7 @@ type TabType = "movies" | "tv";
 export default function Home() {
   const router = useRouter();
   const { currentTheme } = useTheme();
-  const [activeTab, setActiveTab] = React.useState<TabType>("movies");
+  const [activeTab, setActiveTab] = React.useState<TabType>("tv");
   const [searchQuery, setSearchQuery] = React.useState("");
 
   // Hero Content State
@@ -258,17 +258,6 @@ export default function Home() {
           {/* Tabs */}
           <div className="flex items-center gap-2 mt-4 md:mt-8 flex-wrap justify-center">
             <button
-              onClick={() => setActiveTab("movies")}
-              className={cn(
-                "px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-lg font-medium transition-all duration-300",
-                activeTab === "movies"
-                  ? "bg-primary/20 text-primary shadow-[0_0_20px_rgba(var(--primary),0.2)]"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-              )}
-            >
-              Movies
-            </button>
-            <button
               onClick={() => setActiveTab("tv")}
               className={cn(
                 "px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-lg font-medium transition-all duration-300",
@@ -278,6 +267,17 @@ export default function Home() {
               )}
             >
               TV Shows
+            </button>
+            <button
+              onClick={() => setActiveTab("movies")}
+              className={cn(
+                "px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-lg font-medium transition-all duration-300",
+                activeTab === "movies"
+                  ? "bg-primary/20 text-primary shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+              )}
+            >
+              Movies
             </button>
           </div>
         </div>

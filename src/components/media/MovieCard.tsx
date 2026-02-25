@@ -49,14 +49,16 @@ export function MovieCard({
   const hasQuickActions = onDismiss || onQuickAdd || onQuickWatched;
 
   return (
-    <div className="relative group">
+    <div className="relative group perspective-1000">
       <Card
-        className={`w-[150px] shrink-0 cursor-pointer overflow-hidden transition-all duration-300 md:w-[200px] ${isEditing ? "animate-shake hover:none" : "hover:scale-105 hover:shadow-lg hover:shadow-primary/20"
+        className={`w-[150px] shrink-0 cursor-pointer overflow-hidden transition-all duration-500 ease-out border-white/5 bg-background/50 backdrop-blur-sm md:w-[200px] ${isEditing
+            ? "animate-shake hover:none"
+            : "hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_20px_40px_-15px_rgba(var(--primary),0.3)] hover:border-primary/20 group-hover:z-10"
           }`}
         onClick={handleClick}
       >
-        <CardContent className="p-0">
-          <div className="relative h-[210px] w-full md:h-[300px]">
+        <CardContent className="p-0 relative">
+          <div className="relative h-[210px] w-full md:h-[300px] overflow-hidden">
             <Image
               src={
                 movie.poster_path

@@ -13,7 +13,7 @@ const Footer = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="w-full border-t border-border/40 bg-background/95 pb-8 pt-14 backdrop-blur-sm">
+    <footer className="w-full glass-panel border-t-white/10 mt-auto pb-8 pt-14">
       <div className="container mx-auto px-4 md:px-6">
         <div className="mb-8 grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-32">
           {/* Left Column: Brand & Tagline */}

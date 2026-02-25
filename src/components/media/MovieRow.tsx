@@ -8,6 +8,7 @@ import { MovieCardSkeleton } from "@/components/media/MovieCardSkeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { DataError } from "@/components/shared/DataError";
+import { motion } from "framer-motion";
 
 interface MovieRowProps {
   title: string;
@@ -283,22 +284,28 @@ export function MovieRow({
   };
 
   return (
-    <section className="container max-w-screen-2xl">
-      <div className="mb-4 flex items-center justify-between">
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="container max-w-screen-2xl"
+    >
+      <div className="mb-4 flex items-center gap-2">
         <h2 className="text-xl font-bold md:text-2xl border-l-4 border-primary pl-4">{title}</h2>
         {onRefresh && (
           <button
             onClick={onRefresh}
-            className="ml-2 rounded p-2 hover:bg-muted"
+            className="rounded p-2 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
             title="Refresh recommendations"
             disabled={!!refreshing}
           >
-            <RefreshCw className={refreshing ? "animate-spin" : ""} />
+            <RefreshCw className={refreshing ? "animate-spin" : ""} size={18} />
           </button>
         )}
         {headerActions && <div className="ml-auto">{headerActions}</div>}
       </div>
       <div className="w-full rounded-md">{renderContent()}</div>
-    </section>
+    </motion.section>
   );
 }

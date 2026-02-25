@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/layout/Providers";
@@ -9,6 +9,7 @@ import Footer from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://stream-track.vercel.app"),
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
   verification: {
     google: "zDxLKnLUiTry_Rq6eGq00tQcZQqu8Co-ffMzJk56B_U",
   },
-  keywords: ["movies", "tv shows", "tracker", "stream track", "watchlist", "entertainment", "tmdb", "nextjs"],
+  keywords: ["movies", "tv shows", "web series", "web series tracker", "tv tracker","movie tracker","tracker", "best movie or tv tracker", "stream track", "watchlist", "entertainment", "tmdb", "nextjs"],
   authors: [{ name: "Nitai Satapathy", url: "https://github.com/nitai-satapathy" }],
   manifest: "/manifest.json",
 };
@@ -60,7 +61,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-body antialiased`}
+        className={`${inter.variable} ${outfit.variable} font-body antialiased selection:bg-primary/20 hover:selection:bg-primary/30`}
         suppressHydrationWarning
       >
         <Providers>

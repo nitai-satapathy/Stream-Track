@@ -75,7 +75,7 @@ export function Header(props: HeaderProps) {
 
   return (
     <>
-      <header className="fixed top-4 left-1/2 z-50 w-[95%] max-w-7xl -translate-x-1/2 rounded-full border border-white/10 bg-background/60 shadow-2xl backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
+      <header className="fixed top-4 left-1/2 z-50 w-[95%] max-w-7xl -translate-x-1/2 rounded-full glass-panel transition-all duration-300">
         <div className="container flex h-14 items-center justify-between px-4 sm:px-8">
           <div className="flex items-center gap-6">
             <Link
