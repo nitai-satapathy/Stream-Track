@@ -34,6 +34,9 @@ export const metadata: Metadata = {
   verification: {
     google: "zDxLKnLUiTry_Rq6eGq00tQcZQqu8Co-ffMzJk56B_U",
   },
+  keywords: ["movies", "tv shows", "tracker", "stream track", "watchlist", "entertainment", "tmdb", "nextjs"],
+  authors: [{ name: "Nitai Satapathy", url: "https://github.com/nitai-satapathy" }],
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -41,6 +44,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Stream Track",
+    "url": "https://stream-track.vercel.app",
+    "description": "Track movies and TV shows effortlessly.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://stream-track.vercel.app/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
@@ -54,6 +70,10 @@ export default function RootLayout({
         <Footer />
         <ScrollToTop />
         <Analytics />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </body>
     </html>
   );
