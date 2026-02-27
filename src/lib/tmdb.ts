@@ -7,6 +7,8 @@ const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 if (!apiKey) {
   throw new Error("TMDB API key is not defined in environment variables.");
 }
+const httpAgent = new (require('http')).Agent({ keepAlive: true });
+const httpsAgent = new (require('https')).Agent({ keepAlive: true });
 
 export const tmdbApi = axios.create({
   baseURL: "https://api.themoviedb.org/3",
@@ -14,7 +16,9 @@ export const tmdbApi = axios.create({
     api_key: apiKey,
     language: "en-US",
   },
-  timeout: 10000,
+  timeout: 15000,
+  httpAgent,
+  httpsAgent,
 });
 
 // retry Logic
@@ -232,13 +236,32 @@ export const fetchTrendingMovies = async (
   return response.data.results;
 };
 
+export const fetchTrendingAll = async (
+  timeWindow: "day" | "week" = "day"
+): Promise<Movie[]> => {
+  try {
+    const response = await tmdbApi.get<TmdbApiResponse>(
+      `/trending/all/${timeWindow}`
+    );
+    return response.data.results;
+  } catch (error) {
+    console.error("fetchTrendingAll Error:", error);
+    return [];
+  }
+};
+
 export const fetchTrendingTv = async (
   timeWindow: "day" | "week" = "day"
 ): Promise<Movie[]> => {
-  const response = await tmdbApi.get<TmdbApiResponse>(
-    `/trending/tv/${timeWindow}`
-  );
-  return response.data.results;
+  try {
+    const response = await tmdbApi.get<TmdbApiResponse>(
+      `/trending/tv/${timeWindow}`
+    );
+    return response.data.results;
+  } catch (error) {
+    console.error("fetchTrendingTv Error:", error);
+    return [];
+  }
 };
 
 export const fetchPopularTvShows = async (): Promise<Movie[]> => {

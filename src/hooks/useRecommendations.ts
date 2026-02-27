@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { getRecommendations } from "@/ai/flows/recommendation-flow";
+import { getRecommendations } from "@/actions/recommendations";
 import { searchMulti } from "@/lib/tmdb";
 import type { Movie } from "@/lib/types";
 

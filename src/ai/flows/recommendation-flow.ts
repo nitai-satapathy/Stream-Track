@@ -1,4 +1,3 @@
-"use server";
 /**
  * @fileOverview A movie and TV show recommendation AI agent.
  *

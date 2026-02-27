@@ -46,7 +46,7 @@ export default function Home() {
     const { title } = getHeroContent();
     setHeroTitle(title);
     setHeroPlaceholder(getRandomPlaceholder());
-  }, []);
+  }, [router]);
 
   // Instant Search State
   const [searchResults, setSearchResults] = React.useState<Movie[]>([]);

@@ -23,6 +23,7 @@ export default {
       fontFamily: {
         body: ["var(--font-inter)", "sans-serif"],
         headline: ["var(--font-outfit)", "var(--font-inter)", "sans-serif"],
+        playfair: ["var(--font-playfair)", "serif"],
         code: ["monospace"],
       },
       colors: {
