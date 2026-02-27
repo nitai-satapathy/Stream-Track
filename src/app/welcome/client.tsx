@@ -638,7 +638,11 @@ export default function ClientWelcomePage({
         if (!isRedirecting) return;
 
         redirectTimeoutRef.current = setTimeout(() => {
-            router.push("/");
+            if (typeof window !== "undefined") {
+                window.location.assign("/");
+            } else {
+                router.push("/");
+            }
         }, 4000);
 
         return () => clearRedirectTimeout();
@@ -646,7 +650,11 @@ export default function ClientWelcomePage({
 
     const handleRedirectComplete = () => {
         clearRedirectTimeout();
-        router.push("/");
+        if (typeof window !== "undefined") {
+            window.location.assign("/");
+        } else {
+            router.push("/");
+        }
     };
 
     return (
