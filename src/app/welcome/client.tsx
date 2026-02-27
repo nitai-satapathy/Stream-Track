@@ -609,16 +609,43 @@ export default function ClientWelcomePage({
     const router = useRouter();
     const [isRedirecting, setIsRedirecting] = useState(false);
 
+    const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const clearRedirectTimeout = () => {
+        if (redirectTimeoutRef.current) {
+            clearTimeout(redirectTimeoutRef.current);
+            redirectTimeoutRef.current = null;
+        }
+    };
+
     const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
+
+        if (isRedirecting) return;
+
         if (typeof window !== "undefined") {
             // Set a cookie that expires in 10 years (3650 days) so the server middleware can read it
-            document.cookie = "has_visited_welcome=true; path=/; max-age=315360000; SameSite=Lax";
+            const secure = window.location.protocol === "https:" ? "; Secure" : "";
+            document.cookie = `has_visited_welcome=true; path=/; max-age=315360000; SameSite=Lax${secure}`;
         }
+
+        clearRedirectTimeout();
         setIsRedirecting(true);
     };
 
+    // Fallback: if the preloader completion callback never fires, still navigate.
+    useEffect(() => {
+        if (!isRedirecting) return;
+
+        redirectTimeoutRef.current = setTimeout(() => {
+            router.push("/");
+        }, 4000);
+
+        return () => clearRedirectTimeout();
+    }, [isRedirecting, router]);
+
     const handleRedirectComplete = () => {
+        clearRedirectTimeout();
         router.push("/");
     };
 
