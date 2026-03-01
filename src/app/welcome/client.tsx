@@ -608,6 +608,7 @@ export default function ClientWelcomePage({
 }: WelcomeClientProps) {
     const router = useRouter();
     const [isRedirecting, setIsRedirecting] = useState(false);
+    const [preloaderKey, setPreloaderKey] = useState(0);
 
     const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -617,6 +618,18 @@ export default function ClientWelcomePage({
             redirectTimeoutRef.current = null;
         }
     };
+
+    useEffect(() => {
+        const onPageShow = (event: PageTransitionEvent) => {
+            if (!event.persisted) return;
+            clearRedirectTimeout();
+            setIsRedirecting(false);
+            setPreloaderKey((k) => k + 1);
+        };
+
+        window.addEventListener("pageshow", onPageShow);
+        return () => window.removeEventListener("pageshow", onPageShow);
+    }, []);
 
     const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
@@ -659,7 +672,11 @@ export default function ClientWelcomePage({
 
     return (
         <PageTransition>
-            <Preloader isRedirecting={isRedirecting} onComplete={isRedirecting ? handleRedirectComplete : undefined} />
+            <Preloader
+                key={preloaderKey}
+                isRedirecting={isRedirecting}
+                onComplete={isRedirecting ? handleRedirectComplete : undefined}
+            />
             <div className="min-h-screen bg-[#070710] text-[#FAFAFA] selection:bg-purple-500/30 overflow-x-clip">
                 <main className="relative w-full pt-12 sm:pt-24 pb-0">
                     <div id="journey" className="flex-none flex flex-col items-center justify-center text-center relative z-20 px-4 md:px-8 mt-4 sm:mt-0">
