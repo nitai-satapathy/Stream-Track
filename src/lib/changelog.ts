@@ -22,6 +22,24 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
   {
+    id: "list-sync-fix",
+    title: "Global List Sync & Bug Fixes",
+    category: "Bug Fix",
+    description:
+      "Fixed an issue where marking episodes as watched from notifications wouldn't immediately update the episode list in the movie modal. We've implemented a global state sync mechanism that keeps all your views perfectly in sync without needing a page refresh.",
+    timestamp: "01/03/2026, 17:48:00",
+    source: "System",
+  },
+  {
+    id: "welcome-experience-overhaul",
+    title: "Premium Welcome Experience & Performance Polish",
+    category: "Update",
+    description:
+      "We've launched a new landing page! Experience our new premium preloader. We also implemented instant server-side redirection, optimized all animations with cinematic cubic-bezier curves, and enhanced SEO.",
+    timestamp: "01/03/2026, 17:50:00",
+    source: "System",
+  },
+  {
     id: "ai-recommendation-upgrade",
     title: "AI Recommendations & Quick Actions",
     category: "Update",

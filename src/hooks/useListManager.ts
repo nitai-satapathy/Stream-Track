@@ -19,6 +19,7 @@ export interface ListManager {
     updateMovieProgress: (movie: Movie) => Promise<void>;
     isLoading: boolean;
 }
+const syncBus = typeof window !== 'undefined' ? new EventTarget() : null;
 
 export function useListManager(): ListManager {
     const { user } = useAuth();
@@ -50,6 +51,31 @@ export function useListManager(): ListManager {
             setIsLoading(false);
         }
     }, [user, isSyncing]);
+
+    useEffect(() => {
+        const handleSync = (e: any) => {
+            const { watchlist: newWatchlist, watching: newWatching, watched: newWatched, sourceUserId } = e.detail;
+            if (sourceUserId === user?.uid) {
+                setWatchlist(newWatchlist);
+                setWatching(newWatching);
+                setWatched(newWatched);
+            }
+        };
+
+        syncBus?.addEventListener('sync', handleSync);
+        return () => syncBus?.removeEventListener('sync', handleSync);
+    }, [user?.uid]);
+
+    const broadcastUpdate = useCallback((newWatchlist: Movie[], newWatching: Movie[], newWatched: Movie[]) => {
+        syncBus?.dispatchEvent(new CustomEvent('sync', {
+            detail: {
+                watchlist: newWatchlist,
+                watching: newWatching,
+                watched: newWatched,
+                sourceUserId: user?.uid
+            }
+        }));
+    }, [user?.uid]);
 
     // Sync Guest Data on Login
     useEffect(() => {
@@ -92,6 +118,7 @@ export function useListManager(): ListManager {
                 setWatchlist(newWatchlist);
                 setWatching(newWatching);
                 setWatched(newWatched);
+                broadcastUpdate(newWatchlist, newWatching, newWatched);
 
                 // Clear LocalStorage
                 localStorage.removeItem("watchlist");
@@ -116,7 +143,7 @@ export function useListManager(): ListManager {
         };
 
         syncGuestData();
-    }, [user, toast]);
+    }, [user, toast, broadcastUpdate]);
 
     useEffect(() => {
         fetchLists();
@@ -137,7 +164,6 @@ export function useListManager(): ListManager {
             let movieToSave = { ...movie };
             if (list === "watched" && (movie.media_type === "tv" || movie.name)) {
                 try {
-                    // Import dynamically to avoid circular deps if possible, or just use the imported function
                     const { enrichTVShowWithEpisodes } = await import("@/lib/tmdb");
                     movieToSave = await enrichTVShowWithEpisodes(movie.id, movie);
 
@@ -179,6 +205,7 @@ export function useListManager(): ListManager {
             setWatchlist(newWatchlist);
             setWatching(newWatching);
             setWatched(newWatched);
+            broadcastUpdate(newWatchlist, newWatching, newWatched);
 
             if (user) {
                 await updateUserLists(user.uid, {
@@ -192,7 +219,7 @@ export function useListManager(): ListManager {
                 updateLocalStorage("watched", newWatched);
             }
         },
-        [watchlist, watching, watched, user, updateLocalStorage, toast]
+        [watchlist, watching, watched, user, updateLocalStorage, toast, broadcastUpdate]
     );
 
     const isMovieInList = useCallback(
@@ -220,6 +247,7 @@ export function useListManager(): ListManager {
             setWatchlist(newWatchlist);
             setWatching(newWatching);
             setWatched(newWatched);
+            broadcastUpdate(newWatchlist, newWatching, newWatched);
 
             if (user) {
                 await updateUserLists(user.uid, {
@@ -233,7 +261,7 @@ export function useListManager(): ListManager {
                 updateLocalStorage("watched", newWatched);
             }
         },
-        [watchlist, watching, watched, user, updateLocalStorage]
+        [watchlist, watching, watched, user, updateLocalStorage, broadcastUpdate]
     );
 
     return {
