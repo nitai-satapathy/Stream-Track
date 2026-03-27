@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import User from "@/models/User";
 import connectDB from "@/lib/db";
-import type { EpisodeNotification } from "@/types/notifications";
+import type { EpisodeNotification, NotificationPreferences } from "@/types/notifications";
 
 export async function syncNotifications(notifications: EpisodeNotification[]) {
     try {
@@ -21,7 +21,7 @@ export async function syncNotifications(notifications: EpisodeNotification[]) {
             return { success: false, error: "User not found" };
         }
 
-        const existingIds = new Set(user.notifications.map((n: any) => n.id));
+        const existingIds = new Set(user.notifications.map((n: EpisodeNotification) => n.id));
         const newNotifications = notifications.filter(n => !existingIds.has(n.id));
 
         if (newNotifications.length > 0) {
@@ -29,9 +29,9 @@ export async function syncNotifications(notifications: EpisodeNotification[]) {
             await user.save();
         }
 
-        const plainNotifications = user.notifications.map((n: any) => {
+        const plainNotifications = user.notifications.map((n: EpisodeNotification & { toObject?: () => EpisodeNotification }) => {
             const obj = n.toObject ? n.toObject() : n;
-            delete obj._id;
+            delete (obj as any)._id;
             return obj;
         });
 
@@ -60,7 +60,7 @@ export async function getNotifications() {
             return { success: false, notifications: [] };
         }
 
-        const sortedNotifications = (user.notifications || []).sort((a: any, b: any) =>
+        const sortedNotifications = (user.notifications || []).sort((a: EpisodeNotification, b: EpisodeNotification) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
 
@@ -191,7 +191,7 @@ export async function getNotificationPreferences() {
     }
 }
 
-export async function updateNotificationPreferences(preferences: any) {
+export async function updateNotificationPreferences(preferences: NotificationPreferences) {
     try {
         await connectDB();
         const session = await getServerSession(authOptions);

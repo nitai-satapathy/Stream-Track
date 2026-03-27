@@ -600,6 +600,36 @@ function CTASection({ onNavigate }: { onNavigate?: (e: React.MouseEvent<HTMLAnch
     );
 }
 
+function GridBackground() {
+    return (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            {/* The primary grid */}
+            <div 
+                className="absolute inset-0 z-0 opacity-[0.15]" 
+                style={{
+                    backgroundImage: `
+                        linear-gradient(to right, rgba(168, 85, 247, 0.5) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(168, 85, 247, 0.5) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '40px 40px',
+                    maskImage: 'radial-gradient(ellipse at 50% 10%, black 10%, transparent 60%)',
+                    WebkitMaskImage: 'radial-gradient(ellipse at 50% 10%, black 10%, transparent 60%)'
+                }}
+            />
+            {/* Ambient center purple glow */}
+            <div className="absolute left-1/2 top-[-20%] -translate-x-1/2 h-[500px] w-[800px] rounded-[100%] bg-purple-600/10 blur-[120px] z-0" />
+            
+            {/* Animated sweeping radar ray */}
+            <motion.div 
+                className="absolute left-1/2 top-0 h-full w-[300px] bg-gradient-to-r from-transparent via-purple-500/10 to-transparent pointer-events-none blur-3xl z-0"
+                style={{ rotate: 15 }}
+                animate={{ x: ["-100vw", "100vw"] }}
+                transition={{ duration: 12, ease: "linear", repeat: Infinity }}
+            />
+        </div>
+    );
+}
+
 export default function ClientWelcomePage({
     carouselMovies,
     trendingDay,
@@ -677,8 +707,9 @@ export default function ClientWelcomePage({
                 isRedirecting={isRedirecting}
                 onComplete={isRedirecting ? handleRedirectComplete : undefined}
             />
-            <div className="min-h-screen bg-[#070710] text-[#FAFAFA] selection:bg-purple-500/30 overflow-x-clip">
-                <main className="relative w-full pt-12 sm:pt-24 pb-0">
+            <div className="relative min-h-screen bg-[#070710] text-[#FAFAFA] selection:bg-purple-500/30 overflow-x-clip">
+                <GridBackground />
+                <main className="relative z-10 w-full pt-12 sm:pt-24 pb-0">
                     <div id="journey" className="flex-none flex flex-col items-center justify-center text-center relative z-20 px-4 md:px-8 mt-4 sm:mt-0">
                         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="flex flex-col items-center relative mb-4 sm:mb-8 md:mb-10">
                             <h1 className="font-playfair text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl tracking-tight leading-[1.05] mb-2 sm:mb-4 py-1">

@@ -5,7 +5,7 @@ import type { Movie, TmdbApiResponse, Genre } from "./types";
 const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
 if (!apiKey) {
-  throw new Error("TMDB API key is not defined in environment variables.");
+  console.warn("TMDB API key is not defined in environment variables. API calls will fail.");
 }
 const httpAgent = new (require('http')).Agent({ keepAlive: true });
 const httpsAgent = new (require('https')).Agent({ keepAlive: true });
@@ -64,7 +64,7 @@ export const fetchMovieDetails = async (
   movieId: number,
   mediaType: "movie" | "tv"
 ): Promise<Movie> => {
-  const response = await tmdbApi.get<any>(`/${mediaType}/${movieId}`, {
+  const response = await tmdbApi.get<Movie>(`/${mediaType}/${movieId}`, {
     params: {
       append_to_response: "videos,recommendations",
     },
@@ -168,12 +168,12 @@ export const enrichTVShowWithEpisodes = async (
       const today = new Date().toISOString().split('T')[0];
 
       const seasonPromises = fullDetails.seasons
-        .filter((season: any) => season.season_number > 0)
-        .map((season: any) => fetchSeasonDetails(showId, season.season_number));
+        .filter((season: { season_number: number }) => season.season_number > 0)
+        .map((season: { season_number: number }) => fetchSeasonDetails(showId, season.season_number));
 
       const seasonsDetails = await Promise.all(seasonPromises);
 
-      seasonsDetails.forEach((seasonDetail: any) => {
+      seasonsDetails.forEach((seasonDetail) => {
         if (seasonDetail.episodes) {
           seasonDetail.episodes.forEach((episode: any) => {
             if (episode.air_date && episode.air_date <= today) {

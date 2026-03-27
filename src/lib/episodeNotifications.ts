@@ -108,9 +108,10 @@ export const checkForNewEpisodes = async (
   watchingShows: Movie[],
   watchlistShows: Movie[] = [],
   watchedShows: Movie[] = [],
-  lastChecked: Date | null = null
+  lastChecked: Date | null = null,
+  customPreferences?: NotificationPreferences
 ): Promise<EpisodeNotification[]> => {
-  const preferences = getNotificationPreferences();
+  const preferences = customPreferences || getNotificationPreferences();
   if (!preferences.enabled) return [];
 
   const allShows = [

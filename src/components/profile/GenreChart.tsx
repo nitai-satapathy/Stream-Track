@@ -94,8 +94,9 @@ export function GenreChart({ watchedMovies, watchedShows }: GenreChartProps) {
             }
 
             // Strategy 3: Legacy 'Genre' string (if present in some data sources)
-            if (!found && (item as any).Genre && typeof (item as any).Genre === 'string') {
-                const genres = ((item as any).Genre as string).split(',').map(s => s.trim());
+            const legacyItem = item as Movie & { Genre?: string };
+            if (!found && legacyItem.Genre && typeof legacyItem.Genre === 'string') {
+                const genres = legacyItem.Genre.split(',').map(s => s.trim());
                 genres.forEach(name => {
                     if (name) {
                         genreCounts[name] = (genreCounts[name] || 0) + 1;

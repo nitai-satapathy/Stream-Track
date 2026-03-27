@@ -22,6 +22,15 @@ export const categoryColors: Record<NotificationCategory, string> = {
 
 export const staticNotifications: Notification[] = [
   {
+    id: "welcome-and-stability-update",
+    title: "Dynamic Welcome Hub & Core Stability",
+    category: "Update",
+    description:
+      "We've refreshed the Welcome Page! We also eliminated strict typing errors, fixed a bug with the Episode Notification preferences syncing, and fortified the TMDB API handling to make our platform significantly more stable.",
+    timestamp: "27/03/2026, 13:22:16",
+    source: "System",
+  },
+  {
     id: "list-sync-fix",
     title: "Global List Sync & Bug Fixes",
     category: "Bug Fix",

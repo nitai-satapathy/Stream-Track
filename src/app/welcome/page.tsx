@@ -6,6 +6,7 @@ export const metadata: Metadata = {
     title: "Welcome",
     description: "Track What You Watch. Love What You Watch. A beautifully designed personal movie and TV show tracker with AI recommendations.",
 };
+export const revalidate = 86400;
 
 export default async function WelcomePage() {
     const results = await Promise.allSettled([

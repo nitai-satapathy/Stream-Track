@@ -77,7 +77,7 @@ export function useEpisodeNotifications() {
 
     setIsLoading(true);
     try {
-      const newNotifications = await checkForNewEpisodes(watching, watchlist, watched, lastCheck);
+      const newNotifications = await checkForNewEpisodes(watching, watchlist, watched, lastCheck, preferences);
 
       if (newNotifications.length > 0) {
         const { success, notifications: serverNotifications } = await getNotifications();
