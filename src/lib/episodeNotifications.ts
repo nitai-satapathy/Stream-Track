@@ -76,7 +76,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   notifyForWatching: true,
   notifyForWatchlist: false,
   notifyForWatched: true,
-  notifyDaysAhead: 7,
+  notifyDaysAhead: 6,
   onlyNotifyUnwatched: false,
 };
 

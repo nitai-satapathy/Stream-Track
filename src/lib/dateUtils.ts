@@ -23,7 +23,7 @@ export function getAirDateStatus(airDate: string | Date): string {
   if (daysUntil < 0) return "Already Aired";
   if (daysUntil === 0) return "Airing Today";
   if (daysUntil === 1) return "Airing Tomorrow";
-  if (daysUntil <= 7) return `Airing in ${daysUntil} days`;
+  if (daysUntil <= 6) return `Airing in ${daysUntil} days`;
   if (daysUntil <= 30) return `Airing in ${Math.ceil(daysUntil / 7)} weeks`;
   return "Coming Soon";
 }
@@ -35,7 +35,7 @@ export function getAirDateColor(airDate: string | Date): string {
   if (daysUntil < 0) return "bg-gray-500";
   if (daysUntil <= 1) return "bg-red-500";
   if (daysUntil <= 3) return "bg-orange-500";
-  if (daysUntil <= 7) return "bg-blue-500";
+  if (daysUntil <= 6) return "bg-blue-500";
   if (daysUntil <= 30) return "bg-purple-500";
   return "bg-gray-500";
 }

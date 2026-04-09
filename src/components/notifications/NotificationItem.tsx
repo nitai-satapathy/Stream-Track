@@ -182,7 +182,7 @@ export function NotificationItem({
                 <Calendar className="h-3 w-3" />
                 {formattedDate}
               </div>
-              {daysUntilAiring > 0 && daysUntilAiring <= 7 && (
+              {daysUntilAiring > 0 && daysUntilAiring <= 6 && (
                 <div className="hidden sm:flex items-center gap-1.5 text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2 py-1 rounded-md">
                   <Clock className="h-3 w-3" />
                   {daysUntilAiring === 1 ? 'Tomorrow' : `In ${daysUntilAiring} days`}
