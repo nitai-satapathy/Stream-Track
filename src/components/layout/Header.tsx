@@ -133,7 +133,11 @@ export function Header(props: HeaderProps) {
 
             {/* episode notifications */}
             {user && (
-              <EpisodeNotificationsPanel />
+              <EpisodeNotificationsPanel
+                lists={lists}
+                onListUpdate={safeOnListUpdate}
+                updateMovieProgress={updateMovieProgress}
+              />
             )}
 
             <BulkAddModal

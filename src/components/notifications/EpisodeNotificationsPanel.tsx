@@ -26,6 +26,15 @@ import { NotificationItem } from "./NotificationItem";
 import { NotificationPreferencesModal } from "./NotificationPreferencesModal";
 import { NotificationErrorBoundary } from "./NotificationErrorBoundary";
 import { useEpisodeNotifications } from "@/hooks/useEpisodeNotifications";
+import { MovieModal } from "@/components/modals/MovieModal";
+import type { Movie } from "@/lib/types";
+
+type ListType = "watchlist" | "watching" | "watched";
+interface UserLists {
+  watchlist: Movie[];
+  watching: Movie[];
+  watched: Movie[];
+}
 
 // Debounce hook for preventing rapid API calls
 function useDebounce<T extends (...args: any[]) => any>(callback: T, delay: number): T {
@@ -56,7 +65,17 @@ const formatTime = (date: Date) => {
   return format(date, "h:mm a");
 };
 
-export function EpisodeNotificationsPanel() {
+interface EpisodeNotificationsPanelProps {
+  lists?: UserLists;
+  onListUpdate?: (movie: Movie, list: ListType) => Promise<void>;
+  updateMovieProgress?: (movie: Movie) => Promise<void>;
+}
+
+export function EpisodeNotificationsPanel({
+  lists,
+  onListUpdate,
+  updateMovieProgress
+}: EpisodeNotificationsPanelProps = {}) {
   const {
     notifications,
     unreadNotifications,
@@ -76,6 +95,22 @@ export function EpisodeNotificationsPanel() {
   const [preferencesOpen, setPreferencesOpen] = React.useState(false);
   const [filter, setFilter] = React.useState<"all" | "unread">("all");
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [selectedMovieId, setSelectedMovieId] = React.useState<number | null>(null);
+
+  const isMovieInList = React.useCallback(
+    (movieId: number, list: ListType) => {
+      if (!lists) return false;
+      return lists[list].some((m) => m.id === movieId);
+    },
+    [lists]
+  );
+
+  const userMovie = React.useMemo(() => {
+    if (!selectedMovieId || !lists) return undefined;
+    return lists.watching.find(m => m.id === selectedMovieId) ||
+      lists.watched.find(m => m.id === selectedMovieId) ||
+      lists.watchlist.find(m => m.id === selectedMovieId);
+  }, [selectedMovieId, lists]);
 
   // Debounce the refresh function to prevent rapid API calls
   const debouncedCheckForNewEpisodes = useDebounce(checkForNewEpisodes, 1000);
@@ -261,6 +296,7 @@ export function EpisodeNotificationsPanel() {
                             onMarkAsRead={markAsRead}
                             onMarkAsWatched={markEpisodeWatched}
                             onDelete={deleteNotification}
+                            onClick={() => setSelectedMovieId(notification.tvShowId)}
                           />
                         </motion.div>
                       ))}
@@ -280,6 +316,17 @@ export function EpisodeNotificationsPanel() {
           />
         </DialogContent>
       </Dialog>
+
+      <MovieModal
+        movieId={selectedMovieId}
+        mediaType="tv"
+        isOpen={selectedMovieId !== null}
+        onClose={() => setSelectedMovieId(null)}
+        onListUpdate={onListUpdate || (() => {})}
+        isMovieInList={isMovieInList}
+        userMovie={userMovie}
+        updateMovieProgress={updateMovieProgress}
+      />
     </NotificationErrorBoundary>
   );
 }

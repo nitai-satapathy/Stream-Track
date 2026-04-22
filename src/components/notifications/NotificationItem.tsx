@@ -16,6 +16,7 @@ type NotificationItemProps = {
   onMarkAsRead: (id: string) => void;
   onMarkAsWatched?: (id: string) => void;
   onDelete: (id: string) => void;
+  onClick?: () => void;
 };
 
 export function NotificationItem({
@@ -23,6 +24,7 @@ export function NotificationItem({
   onMarkAsRead,
   onMarkAsWatched,
   onDelete,
+  onClick,
 }: NotificationItemProps) {
   const isGroup = 'episodes' in notification;
   const mainEpisode = isGroup ? notification.episodes[0] : notification;
@@ -78,8 +80,10 @@ export function NotificationItem({
 
   return (
     <Card
+      onClick={onClick}
       className={cn(
         "group relative overflow-hidden transition-all duration-200 hover:shadow-md border-l-4",
+        onClick ? "cursor-pointer" : "",
         !notification.read
           ? isFullyWatched
             ? "border-l-green-500 bg-green-500/5 border-y-green-500/20 border-r-green-500/20"
@@ -131,7 +135,10 @@ export function NotificationItem({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => onMarkAsWatched && onMarkAsWatched(notification.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMarkAsWatched && onMarkAsWatched(notification.id);
+                    }}
                     className="h-8 w-8 text-muted-foreground hover:text-green-600 transition-colors hover:bg-green-500/10"
                     title={isGroup ? "Mark all as watched" : "Mark episode as watched"}
                   >
@@ -144,7 +151,10 @@ export function NotificationItem({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => onMarkAsRead(notification.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMarkAsRead(notification.id);
+                    }}
                     className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10"
                     title={isGroup ? "Mark all as read" : "Mark as read"}
                   >
@@ -155,7 +165,10 @@ export function NotificationItem({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onDelete(notification.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(notification.id);
+                  }}
                   className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors hover:bg-destructive/10"
                   title="Delete notification"
                 >
